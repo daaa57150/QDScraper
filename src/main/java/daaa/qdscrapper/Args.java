@@ -34,7 +34,6 @@ public class Args
 	 * Parses the arguments of the program
 	 * @param commands
 	 */
-	// TODO: use args like -key=value
 	public Args(String[] commands)
 	{
 		for(String arg: commands)
@@ -45,13 +44,12 @@ public class Args
 			
 			switch(key) {
 				case "-platform": {
-					platform = arg;
+					platform = val;
 					setRomsDir();
 					if(!Platform.isSupported(platform))
 					{
-						System.out.println("platform '" + platform + "' not supported, will make queries without specifying it");
-						System.out.println("supported platforms: " + StringUtils.join(Platform.getSupportedPlatforms(), ", "));
-						System.out.println("");
+						System.out.println("Platform '" + platform + "' not supported, will make queries without specifying it");
+						System.out.println("Supported platforms: " + StringUtils.join(Platform.getSupportedPlatforms(), ", "));
 					}
 					break;
 				}
@@ -100,7 +98,7 @@ public class Args
 					System.exit(0);
 				}
 				default: {
-					System.out.println("unknown parameter: " + arg+", use -help to get help");
+					System.out.println("unknown parameter: " + key+", use -help to get help");
 					System.exit(1);
 				}
 			}
