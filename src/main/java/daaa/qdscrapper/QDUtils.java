@@ -1,5 +1,8 @@
 package daaa.qdscrapper;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * All-purposes utils that had no place anywhere else
  * 
@@ -36,6 +39,67 @@ public class QDUtils
 		}
 		
 		return sb.toString();
+	}
+	
+	/* ---------------------------------------------------- */
+	/*							XML							*/
+	/* ---------------------------------------------------- */
+	
+	/**
+	 * Builds an open xml tag
+	 * @param tag the name of the tag to open
+	 * @return the open xml tag
+	 */
+	public static String makeTagOpen(String tag) 
+	{
+		return makeTagOpen(tag, null);
+	}
+	/** 
+	 * Builds an open xml tag with an attribute
+	 * @param tag tag the name of the tag to open 
+	 * @param attrName the name of the attribute to add
+	 * @param attrValue the value of the attribute to add
+	 * @return the open xml tag
+	 */
+	public static String makeTagOpen(String tag, String attrName, String attrValue)
+	{
+		Map<String, String> attrs = new HashMap<String, String>();
+		if(attrValue != null)
+		{
+			attrs.put(attrName, attrValue);
+		}
+		return makeTagOpen(tag, attrs);
+	}
+	/**
+	 * Builds an open xml tag with many attributes
+	 * @param tag tag the name of the tag to open 
+	 * @param attrs the attributes to add
+	 * @return the open xml tag
+	 */
+	public static String makeTagOpen(String tag, Map<String, String> attrs) 
+	{
+		String ret =  "<" + tag;
+		
+		if(attrs != null)
+		{
+			for(Map.Entry<String, String> entry: attrs.entrySet())
+			{
+				ret = ret + " " + entry.getKey() + "=\"" + entry.getValue() + "\"";
+			}
+		}
+		
+		ret += ">";
+		
+		return ret;
+	}
+	/**
+	 * Builds a closed xml tag
+	 * @param tag the name of the tag to close
+	 * @return the closed xml tag
+	 */
+	public static String makeTagclosed(String tag) 
+	{
+		return "</" + tag + ">";
 	}
 	
 	

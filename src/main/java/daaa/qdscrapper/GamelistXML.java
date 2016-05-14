@@ -72,45 +72,6 @@ public class GamelistXML
 		games.add(game);
 	};
 	
-	// TODO: move to an xml utils class
-	// Builds an open xml tag
-	private String makeTagOpen(String tag) 
-	{
-		return makeTagOpen(tag, null);
-	}
-	// Builds an open xml tag with an attribute
-	@SuppressWarnings("unused")
-	private String makeTagOpen(String tag, String attrName, String attrValue)
-	{
-		Map<String, String> attrs = new HashMap<String, String>();
-		if(attrValue != null)
-		{
-			attrs.put(attrName, attrValue);
-		}
-		return makeTagOpen(tag, attrs);
-	}
-	// Builds an open xml tag with many attributes
-	private String makeTagOpen(String tag, Map<String, String> attrs) 
-	{
-		String ret =  "<" + tag;
-		
-		if(attrs != null)
-		{
-			for(Map.Entry<String, String> entry: attrs.entrySet())
-			{
-				ret = ret + " " + entry.getKey() + "=\"" + entry.getValue() + "\"";
-			}
-		}
-		
-		ret += ">";
-		
-		return ret;
-	}
-	// Builds a closed xml tag
-	private String makeTagclosed(String tag) 
-	{
-		return "</" + tag + ">";
-	}
 	
 	/**
 	 * Opens a &lt;game> tag with an id and the source set as thegamesdb
@@ -121,13 +82,13 @@ public class GamelistXML
 	{
 		if(StringUtils.isEmpty(gameId))
 		{
-			return makeTagOpen(GAMELIST_GAME_TAGNAME);
+			return QDUtils.makeTagOpen(GAMELIST_GAME_TAGNAME);
 		}
 		// else
 		Map<String, String> attrs = new HashMap<String, String>();
 		attrs.put("id", gameId);
 		attrs.put("source", "TheGamesDB");
-		return makeTagOpen(GAMELIST_GAME_TAGNAME, attrs);
+		return QDUtils.makeTagOpen(GAMELIST_GAME_TAGNAME, attrs);
 	}
 	
 	/**
@@ -168,7 +129,7 @@ public class GamelistXML
 		BufferedWriter out = Files.newBufferedWriter(Paths.get(path), Charset.forName("UTF-8"));
 	
 		// start
-		out.write(makeTagOpen(GAMELIST_ROOT_TAGNAME) + "\n");
+		out.write(QDUtils.makeTagOpen(GAMELIST_ROOT_TAGNAME) + "\n");
 		
 		for(Game game: games)
 		{
@@ -204,11 +165,11 @@ public class GamelistXML
 			out.write(str + "\n");
 			
 			// end game
-			out.write(QDUtils.tabulate(makeTagclosed(GAMELIST_GAME_TAGNAME), 1) + "\n");
+			out.write(QDUtils.tabulate(QDUtils.makeTagclosed(GAMELIST_GAME_TAGNAME), 1) + "\n");
 		}
 		
 		// end
-		out.write(makeTagclosed(GAMELIST_ROOT_TAGNAME) + "\n");
+		out.write(QDUtils.makeTagclosed(GAMELIST_ROOT_TAGNAME) + "\n");
 		out.close();
 		
 		return path;
