@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * Program arguments parsed and usable throughout the app
  * 
- * @author kerndav
+ * @author daaa
  *
  */
 public class Args

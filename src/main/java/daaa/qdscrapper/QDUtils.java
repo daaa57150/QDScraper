@@ -1,7 +1,13 @@
 package daaa.qdscrapper;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * All-purposes utils that had no place anywhere else
@@ -102,5 +108,58 @@ public class QDUtils
 		return "</" + tag + ">";
 	}
 	
+	/**
+	 * Loads a text file from the classpath, in particular the files embedded in the released jar
+	 * @param name the name of the file to load, which should be at the top of the resources folder
+	 * @return the content of the read file
+	 */
+	public static String loadClasspathFile(String name)
+	{
+		URL url = QDUtils.class.getClassLoader().getResource(name);
+		try {
+			return IOUtils.toString(url);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(8);
+		}
+		return null;
+	}
+	
+	/**
+	 * Loads a text properties file from the classpath, in particular the files embedded in the released jar
+	 * @param name the name of the file to load, which should be at the top of the resources folder
+	 * @return the content of the read file in Properties format
+	 */
+	public static Properties loadClasspathProperties(String name)
+	{
+		String content = loadClasspathFile(name);
+		if(content != null)
+		{
+			try
+			{
+				Properties props = new Properties();
+				props.load(new StringReader(content));
+				return props;
+			}
+			catch(IOException e)
+			{
+				e.printStackTrace();
+				System.exit(9);
+			}
+		}
+		
+		return null;
+	}
 	
 }
+
+
+
+
+
+
+
+
+
+
+

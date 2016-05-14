@@ -1,49 +1,38 @@
 package daaa.qdscrapper;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Converts ES platform names to thegamesdb platform names
+ * Loads its content from the platform.properties file
  * 
- * @author kerndav
+ * @author daaa
  *
  */
 public class Platform
 {
+	private static final Properties PLATFORMS = QDUtils.loadClasspathProperties("platform.properties");
 	private static List<String> SUPPORTED_PLATFORMS;
 	static {
-		String [] all = {"snes", "nes", "ngpc"};
-		SUPPORTED_PLATFORMS = new ArrayList<String>(all.length);
-		SUPPORTED_PLATFORMS.addAll(Arrays.asList(all));
+		SUPPORTED_PLATFORMS = new ArrayList<String>();
+		for(Object key: Collections.list(PLATFORMS.keys()))
+		{
+			SUPPORTED_PLATFORMS.add(key.toString());
+		}
 	}
 	
 	/**
-	 * input the ES name, get the GamesDB name
+	 * Input the ES name, get the GamesDB name
 	 * @param esName name of the ES platform (snes, nes, ngpc...)
 	 * @return
 	 */
 	public static String get(String esName)
 	{
 		if(esName == null) return null;
-		switch(esName) 
-		{
-			case "snes":
-			{
-				return "Super Nintendo (SNES)";
-			}
-			case "nes":
-			{
-				return "Nintendo Entertainment System (NES)";
-			}
-			case "ngpc":
-			{
-				return "Neo Geo Pocket Color";
-			}
-		}
-		
-		return null;
+		return PLATFORMS.getProperty(esName);
 	}
 	
 	/**

@@ -1,0 +1,15 @@
+## scrapper.properties ##
+General constant properties for the project
+
+## bios.txt ##
+The list of known bios files
+Sources used: 
+	- Recalbox bios pack
+	- https://github.com/OpenEmu/OpenEmu/wiki/User-guide:-BIOS-files
+	- http://www.mamedb.com/category/BIOS
+	
+## platform.properties ##
+Converts recalbox platforms (folder names) to TheGamesDb platforms
+Sources used:
+	- http://thegamesdb.net/api/GetPlatformsList.php
+	- The recalbox share/roms folder over the network

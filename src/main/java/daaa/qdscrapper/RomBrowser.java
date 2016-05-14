@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
@@ -91,90 +92,9 @@ public class RomBrowser {
 	 */
 	private static List<String> BIOS_FILES = null;
 	static {
-		for(String bios: getBiosFiles())
-		{
-			BIOS_FILES.add(bios.toLowerCase());
-		}
-	}
-	
-	/**
-	 * List of all bios files I know of, should be externalized in a file
-	 * @return
-	 */
-	private static String[] getBiosFiles()
-	{
-		String[] files = {
-				"32X_G_BIOS.BIN",
-				"32X_M_BIOS.BIN",
-				"32X_S_BIOS.BIN",
-				"5200.rom",
-				"7800 BIOS (U).rom",
-				"acpsx.zip",
-				"ar_bios.zip",
-				"atluspsx.zip",
-				"atpsx.zip",
-				"BIOS_CD_E.bin",
-				"BIOS_CD_J.bin",
-				"BIOS_CD_U.bin",
-				"bios.rom",
-				"BS-X.bin",
-				"CARTS.SHA",
-				"coleco.rom",
-				"crysbios.zip",
-				"CYRILLIC.FNT",
-				"decocass.zip",
-				"DISK.ROM",
-				"disksys.rom",
-				"Dtlh3000.bin",
-				"Dtlh3002.bin",
-				"ecs.bin",
-				"eu_mcd2_9306.bin",
-				"exec.bin",
-				"FMPAC.ROM",
-				"FMPAC16.ROM",
-				"gba_bios.bin",
-				"grom.bin",
-				"hng64.zip",
-				"ITALIC.FNT",
-				"ivoice.bin",
-				"jp_mcd1_9112.bin",
-				"KANJI.ROM",
-				"konamigv.zip",
-				"konamigx.zip",
-				"lynxboot.img",
-				"macsbios.zip",
-				"maxaflex.zip",
-				"megaplay.zip",
-				"megatech.zip",
-				"MSX.ROM",
-				"MSX2.ROM",
-				"MSX2EXT.ROM",
-				"MSX2P.ROM",
-				"MSX2PEXT.ROM",
-				"MSXDOS2.ROM",
-				"neogeo.zip",
-				"nss.zip",
-				"o2rom.bin",
-				"PAINTER.ROM",
-				"panafz10.bin",
-				"pcfx.rom",
-				"pgm.zip",
-				"playch10.zip",
-				"psarc95.zip",
-				"RS232.ROM",
-				"SCPH1001.BIN",
-				"scph5500.bin",
-				"scph5501.bin",
-				"scph5502.bin",
-				"scph5552.bin",
-				"scph7003.bin",
-				"skns.zip",
-				"stvbios.zip",
-				"syscard3.pce",
-				"tos.img",
-				"us_scd2_9306.bin"
-			};
-		return files;
+		String content = QDUtils.loadClasspathFile("bios.txt");
+		String[] biosFiles = content.split("\\n");
+		BIOS_FILES = Arrays.asList(biosFiles);
 	}
 	
 }
