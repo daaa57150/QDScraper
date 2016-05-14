@@ -13,3 +13,12 @@ Converts recalbox platforms (folder names) to TheGamesDb platforms
 Sources used:
 	- http://thegamesdb.net/api/GetPlatformsList.php
 	- The recalbox share/roms folder over the network
+
+## Arcade game names ##
+Source: http://hyperlist.hyperspin-fe.com/
+Files:
+	- MAME.xml				v.160 Ongoing	02/08/2016
+	- Final Burn Alpha.xml 	v1.0			05/15/2015
+
+	
+	
