@@ -312,6 +312,7 @@ public class GamesDB
 	 * @return the list of games
 	 * @throws Exception
 	 */
+	//TODO: put all DUPE files in a single folder
 	private static List<Game> toGames(String rom, String xml, Args args) 
 	throws Exception
 	{

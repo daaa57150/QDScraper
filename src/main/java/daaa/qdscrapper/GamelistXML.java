@@ -55,7 +55,7 @@ public class GamelistXML
 	 * @param fileName the gamelist.xml file's name (used for DUPES too)
 	 * @param args the app's arguments
 	 */
-	public GamelistXML(String fileName, Args args)
+	public GamelistXML(String fileName, Args args) //TODO: put all DUPE files in a single folder
 	{
 		super();
 		this.path = args.romsDir + fileName;
@@ -79,11 +79,14 @@ public class GamelistXML
 		return makeTagOpen(tag, null);
 	}
 	// Builds an open xml tag with an attribute
+	@SuppressWarnings("unused")
 	private String makeTagOpen(String tag, String attrName, String attrValue)
 	{
 		Map<String, String> attrs = new HashMap<String, String>();
-		attrs.put(attrName, attrValue);
-		attrs.put("source", "TheGamesDB");
+		if(attrValue != null)
+		{
+			attrs.put(attrName, attrValue);
+		}
 		return makeTagOpen(tag, attrs);
 	}
 	// Builds an open xml tag with many attributes
@@ -107,6 +110,24 @@ public class GamelistXML
 	private String makeTagclosed(String tag) 
 	{
 		return "</" + tag + ">";
+	}
+	
+	/**
+	 * Opens a &lt;game> tag with an id and the source set as thegamesdb
+	 * @param gameId id of the game on thegamesdb
+	 * @return the open &lt;game> tag
+	 */
+	private String makeGameTagOpen(String gameId)
+	{
+		if(StringUtils.isEmpty(gameId))
+		{
+			return makeTagOpen(GAMELIST_GAME_TAGNAME);
+		}
+		// else
+		Map<String, String> attrs = new HashMap<String, String>();
+		attrs.put("id", gameId);
+		attrs.put("source", "TheGamesDB");
+		return makeTagOpen(GAMELIST_GAME_TAGNAME, attrs);
 	}
 	
 	/**
@@ -152,7 +173,7 @@ public class GamelistXML
 		for(Game game: games)
 		{
 			// start game
-			out.write(QDUtils.tabulate(makeTagOpen(GAMELIST_GAME_TAGNAME, "id", game.getId()), 1) + "\n");
+			out.write(QDUtils.tabulate(makeGameTagOpen(game.getId()), 1) + "\n");
 			
 			String str = QDUtils.tabulate(TEMPLATE_GAME, 2); 
 			
