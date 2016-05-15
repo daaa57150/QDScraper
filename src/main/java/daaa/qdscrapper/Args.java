@@ -53,7 +53,7 @@ public class Args
 					}
 					break;
 				}
-				case "-dir": {
+				case "-dir": { //TODO: use this as romdir, don't force platform, drop romDir alltogether
 					baseDir = val;
 					if(!baseDir.endsWith("" + File.separatorChar)) {
 						baseDir += File.separatorChar;
