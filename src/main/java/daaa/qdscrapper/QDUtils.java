@@ -12,6 +12,15 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -80,8 +89,12 @@ public class QDUtils
 	 * Loads an xml file from the classpath, in particular the files embedded in the released jar
 	 * @param name the name of the file to load, which should be at the top of the resources folder
 	 * @return the content of the read file in XML Document format
+	 * @throws IOException 
+	 * @throws SAXException 
+	 * @throws ParserConfigurationException 
 	 */
-	public static Document loadClasspathXML(String name)
+	public static Document loadClasspathXML(String name) 
+	throws ParserConfigurationException, SAXException, IOException
 	{
 		String xml = loadClasspathFile(name);
 		return parseXML(xml);
@@ -121,21 +134,25 @@ public class QDUtils
 	 * Parses an xml String
 	 * @param xml the xml to parse
 	 * @return the XML Document, ready for xpath queries
+	 * @throws ParserConfigurationException 
+	 * @throws IOException 
+	 * @throws SAXException 
 	 */
-	public static Document parseXML(String xml)
+	public static Document parseXML(String xml) 
+	throws ParserConfigurationException, SAXException, IOException
 	{
 		InputSource source = new InputSource(new StringReader(xml));
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db;
-		try {
+		//try {
 			db = dbf.newDocumentBuilder();
 			Document document = db.parse(source);
 			return document;
-		} catch (ParserConfigurationException | SAXException | IOException e) {
+		/*} catch (ParserConfigurationException | SAXException | IOException e) {
 			e.printStackTrace();
 			System.exit(10);
-		}
-		return null;
+		}*/
+		//return null;
 	}
 	
 	
@@ -197,6 +214,46 @@ public class QDUtils
 	}
 	
 	
+	/* ---------------------------------------------------- */
+	/*							HTTP						*/
+	/* ---------------------------------------------------- */
+	
+	// TODO: move it to a network or utils class
+	private static HttpClient httpClient = null;
+	public static HttpClient getHttpClient(Args args)
+	{		
+		if(httpClient == null)
+		{
+			HttpClientBuilder builder = HttpClientBuilder.create();
+			if(!StringUtils.isEmpty(args.proxyHost))
+			{
+				HttpHost proxy = new HttpHost(args.proxyHost, args.proxyPort);
+				builder.setProxy(proxy);
+			}
+			
+			if(!StringUtils.isEmpty(args.user))
+			{
+				Credentials credentials = new UsernamePasswordCredentials(args.user,args.password);
+				AuthScope authScope = new AuthScope(args.proxyHost, args.proxyPort);
+				CredentialsProvider credsProvider = new BasicCredentialsProvider();
+				credsProvider.setCredentials(authScope, credentials);
+				builder.setDefaultCredentialsProvider(credsProvider);
+			}
+			
+			/*RequestConfig config = RequestConfig.custom()
+				    .setSocketTimeout(10 * 1000)
+				    .setConnectTimeout(10 * 1000)
+				    .build();
+			builder.setDefaultRequestConfig(config);*/
+			
+			//TODO: add a configurable timeout
+			
+			httpClient = builder.build();
+			
+			
+		}
+		return httpClient;
+	}
 	
 }
 

@@ -45,22 +45,19 @@ public class GamelistXML
 			+ "<players>{players}</players>\n";
 	private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyyMMdd'T000000'");
 	
-	@SuppressWarnings("unused")
-	private String platform;
 	private String addToName;
 	private List<Game> games = new ArrayList<>();
-	
+
 	/**
 	 * Constructor
-	 * @param fileName the gamelist.xml file's name (used for DUPES too)
-	 * @param args the app's arguments
+	 * @param path path to the file to create
+	 * @param addToName if something needs to be appended to the name of the game
 	 */
-	public GamelistXML(String fileName, Args args) //TODO: put all DUPE files in a single folder
+	public GamelistXML(String path, String addToName)
 	{
 		super();
-		this.path = args.romsDir + fileName;
-		this.platform = args.platform;
-		addToName = args.appendToName == null ? "" : (" " + args.appendToName);
+		this.path = path;
+		addToName = addToName == null ? "" : (" " + addToName);
 	}
 
 	/**
@@ -78,7 +75,7 @@ public class GamelistXML
 	 * @param gameId id of the game on thegamesdb
 	 * @return the open &lt;game> tag
 	 */
-	private String makeGameTagOpen(String gameId)
+	private String makeGameTagOpen(String gameId) //TODO: output thegamesdb title in dupes somewhere (opening tag?) 
 	{
 		if(StringUtils.isEmpty(gameId))
 		{
@@ -133,11 +130,6 @@ public class GamelistXML
 		
 		for(Game game: games)
 		{
-			// start game
-			out.write(QDUtils.tabulate(makeGameTagOpen(game.getId()), 1) + "\n");
-			
-			String str = QDUtils.tabulate(TEMPLATE_GAME, 2); 
-			
 			// format and escape everything first
 			String path = ROM_PATH + StringEscapeUtils.escapeXml(game.getRom());
 			String name = StringEscapeUtils.escapeXml(game.getName() + addToName);
@@ -149,6 +141,12 @@ public class GamelistXML
 			String publisher = StringUtils.isEmpty(game.getPublisher()) ? "" : StringEscapeUtils.escapeXml(game.getPublisher());
 			String genre = CollectionUtils.isEmpty(game.getGenres()) ? "" : StringUtils.join(game.getGenres(), "/"); // TODO: shorten the genres, remove "Action" if many
 			String players = game.getPlayers();
+			
+			// start game
+			out.write(QDUtils.tabulate(makeGameTagOpen(game.getId()), 1) + "\n"); //TODO: add the original thegamesdb title
+			
+			// template
+			String str = QDUtils.tabulate(TEMPLATE_GAME, 2);
 			
 			// add to the template
 			str = replaceAllowNull(str, "{path}", path);

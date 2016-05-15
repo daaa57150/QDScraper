@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -22,18 +23,11 @@ import javax.xml.xpath.XPathFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Method;
@@ -50,45 +44,12 @@ public class GamesDB
 {
 	private GamesDB(){} // do not instanciate
 	
-	private static final String URL_GAMESDB_API = "http://thegamesdb.net/api/";
+	private static final String URL_GAMESDB_API = "http://thegamesdb.net/api/"; //TODO: externalize
 	private static final String GET_GAME = "GetGame.php";
 	private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyy");
-	private static int MAX_WIDTH = 400;
+	private static int MAX_WIDTH = 400; // TODO: externalize
 	
-	// TODO: move it to a network or utils class
-	private static HttpClient httpClient = null;
-	private static HttpClient getClient(Args args)
-	{		
-		if(httpClient == null)
-		{
-			HttpClientBuilder builder = HttpClientBuilder.create();
-			if(!StringUtils.isEmpty(args.proxyHost))
-			{
-				HttpHost proxy = new HttpHost(args.proxyHost, args.proxyPort);
-				builder.setProxy(proxy);
-			}
-			
-			if(!StringUtils.isEmpty(args.user))
-			{
-				Credentials credentials = new UsernamePasswordCredentials(args.user,args.password);
-				AuthScope authScope = new AuthScope(args.proxyHost, args.proxyPort);
-				CredentialsProvider credsProvider = new BasicCredentialsProvider();
-				credsProvider.setCredentials(authScope, credentials);
-				builder.setDefaultCredentialsProvider(credsProvider);
-			}
-			
-			/*RequestConfig config = RequestConfig.custom()
-				    .setSocketTimeout(10 * 1000)
-				    .setConnectTimeout(10 * 1000)
-				    .build();
-			builder.setDefaultRequestConfig(config);*/
-			
-			httpClient = builder.build();
-			
-			
-		}
-		return httpClient;
-	}
+	
 	
 	/**
 	 * Builds the 'getGame' api url
@@ -124,7 +85,7 @@ public class GamesDB
 	{
 		String answer = null;
 		
-		HttpClient httpclient = getClient(args);
+		HttpClient httpclient = QDUtils.getHttpClient(args);
 		String uri = buildGetGame(name, args.platform);
 		HttpGet httpGet = new HttpGet(uri);
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -132,9 +93,11 @@ public class GamesDB
 		try {
 		    //System.out.println(response1.getStatusLine());
 		    entity1 = response1.getEntity();
-		    answer = IOUtils.toString(entity1.getContent());
+		    answer = IOUtils.toString(entity1.getContent(), Charset.forName("UTF-8"));
 		} finally {
-		    if(entity1 != null)  EntityUtils.consume(entity1);
+		    if(entity1 != null) {
+		    	EntityUtils.consume(entity1);
+		    }
 		}
 		
 		return answer;
@@ -192,7 +155,7 @@ public class GamesDB
 	private static String downloadImage(String name, String imageUrl, String imageBaseUrl, int matchIndex, Args args) 
 	throws Exception
 	{
-		HttpClient httpclient = getClient(args);
+		HttpClient httpclient = QDUtils.getHttpClient(args);
 		String uri = imageBaseUrl + imageUrl;
 		HttpGet httpGet = new HttpGet(uri);
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -222,7 +185,7 @@ public class GamesDB
 		    image = resizeImage(in);
 		    
 		    String filename = buildFileName(name, matchIndex, imageType);
-			String path = args.romsDir + (matchIndex > 1 ? "DUPE_images"+File.separatorChar : "downloaded_images"+File.separatorChar) + filename;
+			String path = (matchIndex > 1 ? args.dupesDir + "DUPE_images"+File.separatorChar : args.romsDir + "downloaded_images"+File.separatorChar) + filename;
 		    File f = new File(path);
 			Files.deleteIfExists(f.toPath());
 		    Files.createDirectories(Paths.get(f.getParent()));
@@ -308,7 +271,6 @@ public class GamesDB
 	 * @return the list of games
 	 * @throws Exception
 	 */
-	//TODO: put all DUPE files in a single folder
 	private static List<Game> toGames(String rom, String xml, Args args) 
 	throws Exception
 	{
@@ -393,8 +355,8 @@ public class GamesDB
 				
 				// move the image from dupes to first if not first
 				if(i > 1) {
-					moveImage(args.romsDir + "DUPE_images" + File.separatorChar, args.romsDir + "downloaded_images" + File.separatorChar, buildFileName(name, i, null));
-					moveImage(args.romsDir + "downloaded_images" + File.separatorChar, args.romsDir + "DUPE_images" + File.separatorChar, buildFileName(name, 1, null));
+					moveImage(args.dupesDir + "DUPE_images" + File.separatorChar, args.romsDir + "downloaded_images" + File.separatorChar, buildFileName(name, i, null));
+					moveImage(args.romsDir + "downloaded_images" + File.separatorChar, args.dupesDir + "DUPE_images" + File.separatorChar, buildFileName(name, 1, null));
 				}
 				
 				if(sure.size() >= 2) //because some ... were output
@@ -452,14 +414,36 @@ public class GamesDB
 	 * @throws Exception
 	 */
 	public static List<Game> search(String rom, Args args) 
-	throws Exception 
 	{
 		String cleanRom = RomCleaner.cleanRomName(rom, false);
 		
-		String xml = searchXml(cleanRom, args);
+		String xml = null;
+		try
+		{
+			xml = searchXml(cleanRom, args);
+		}
+		catch(IOException | URISyntaxException e)
+		{
+			System.out.println("This error should not happen...");
+			e.printStackTrace();
+			System.exit(11);
+		}
 		// TODO: try to search and if nothing comes out, retry the search by cleaning more chars (-,!) etc..
 		//String xml = StringUtils.join(Files.readAllLines(Paths.get("D:/JavaBundle/workspaces/Developpement/QDScrapper/files/example.xml"), Charset.forName("UTF-8")), "\n");
-		return toGames(rom, xml, args);
+		 try
+		 {
+			 return toGames(rom, xml, args);
+		 }
+		 catch(Exception e)
+		 {
+			 System.err.println("Error parsing xml from TheGamesDB!");
+			 e.printStackTrace();
+			 System.err.println("XML content:");
+			 System.err.println(xml);
+			 System.exit(12);
+		 };
+		 
+		 return null;
 	}
 }
 

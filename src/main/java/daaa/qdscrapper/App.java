@@ -9,6 +9,7 @@ import java.util.List;
  * @author kerndav
  *
  */
+//TODO: externalize properties, allow the user to inject his properties instead
 public class App
 {
 //	private static String platform = "ngpc";
@@ -95,8 +96,8 @@ public class App
 	{
 		Args args = new Args(commands);
 		
-		GamelistXML gameList = new GamelistXML("gamelist.xml", args);
-		GamelistXML notFound = new GamelistXML("NOT_FOUND.xml", args);
+		GamelistXML gameList = new GamelistXML(args.romsDir + "gamelist.xml", args.appendToName);
+		GamelistXML notFound = new GamelistXML(args.romsDir + "NOT_FOUND.xml", args.appendToName);
 		
 		// TODO: give the option to input a list of file names instead of browsing the filesystem
 		List<String> roms = findRoms(args);
@@ -120,7 +121,7 @@ public class App
 				gameList.addGame(games.get(0));
 				
 				//dupes
-				GamelistXML gameListDupes = new GamelistXML("DUPE-" + rom + ".xml", args);
+				GamelistXML gameListDupes = new GamelistXML(args.dupesDir + "DUPE-" + rom + ".xml", args.appendToName);
 				for(int i=1; i<games.size(); i++)
 				{
 					Game dupe = games.get(i);

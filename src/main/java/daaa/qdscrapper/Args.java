@@ -13,22 +13,17 @@ import org.apache.commons.lang3.StringUtils;
 public class Args
 {
 	public String platform;
-	public String baseDir;
+	//public String baseDir;
 	public String appendToName = null;
 	public boolean useFilename = false;
 	public String cleanFilename;
 	public String romsDir = null;
+	public String dupesDir = null;
 	public String proxyHost;
 	public int proxyPort = -1;
 	public String user;
 	public String password;
 	
-	private void setRomsDir()
-	{
-		if(baseDir != null && platform != null) {
-			romsDir = baseDir + platform + File.separatorChar;
-		}
-	}
 	
 	/**
 	 * Parses the arguments of the program
@@ -45,7 +40,6 @@ public class Args
 			switch(key) {
 				case "-platform": {
 					platform = val;
-					setRomsDir();
 					if(!Platform.isSupported(platform))
 					{
 						System.out.println("Platform '" + platform + "' not supported, will make queries without specifying it");
@@ -53,12 +47,12 @@ public class Args
 					}
 					break;
 				}
-				case "-dir": { //TODO: use this as romdir, don't force platform, drop romDir alltogether
-					baseDir = val;
-					if(!baseDir.endsWith("" + File.separatorChar)) {
-						baseDir += File.separatorChar;
+				case "-dir": { 
+					romsDir = val;
+					if(!romsDir.endsWith("" + File.separatorChar)) {
+						romsDir += File.separatorChar;
 					}
-					setRomsDir();
+					dupesDir = romsDir + "DUPES" + File.separatorChar;
 					break;
 				}
 				case "-appendToName": {
@@ -105,10 +99,6 @@ public class Args
 		}
 		
 		// TODO: list of error numbers?
-		if(StringUtils.isEmpty(baseDir)) {
-			System.out.println("The working directory is mandatory, use -dir");
-			System.exit(2);
-		}
 		if(StringUtils.isNotEmpty(proxyHost) && proxyPort < 0) {
 			System.out.println("A proxy host needs a proxy port");
 			System.exit(3);
@@ -124,6 +114,12 @@ public class Args
 			System.exit(5);
 		}
 		
+		
+		// messages 
 		System.out.println("Working in rom directory " + this.romsDir);
+		if(StringUtils.isEmpty(platform)) {
+			System.out.println("No platform specified, will make queries without specifying it");
+		}
+		System.out.println("");
 	}
 }
