@@ -4,6 +4,8 @@ import java.io.File;
 
 import org.apache.commons.lang3.StringUtils;
 
+import daaa.qdscrapper.services.Platform;
+
 /**
  * Program arguments parsed and usable throughout the app
  * 

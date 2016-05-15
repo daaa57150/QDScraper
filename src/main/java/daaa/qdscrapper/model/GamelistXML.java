@@ -1,4 +1,4 @@
-package daaa.qdscrapper;
+package daaa.qdscrapper.model;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -18,12 +18,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import daaa.qdscrapper.utils.QDUtils;
+
 
 /**
  * This class will write the gamelist.xml file based on a list of games
  * 
- * @author kerndav
- *
+ * @author daaa
  */
 public class GamelistXML
 {

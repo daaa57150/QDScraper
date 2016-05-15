@@ -1,4 +1,4 @@
-package daaa.qdscrapper;
+package daaa.qdscrapper.utils;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -24,6 +24,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import daaa.qdscrapper.Args;
 
 /**
  * All-purposes utils that had no place anywhere else

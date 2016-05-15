@@ -1,4 +1,4 @@
-package daaa.qdscrapper;
+package daaa.qdscrapper.utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

@@ -3,10 +3,14 @@ package daaa.qdscrapper;
 import java.util.Arrays;
 import java.util.List;
 
+import daaa.qdscrapper.model.Game;
+import daaa.qdscrapper.model.GamelistXML;
+import daaa.qdscrapper.services.TheGamesDB;
+
 /**
  * The scrapper's main entry
  * 
- * @author kerndav
+ * @author daaa
  *
  */
 //TODO: externalize properties, allow the user to inject his properties instead
@@ -104,7 +108,7 @@ public class App
 		for(String rom: roms)
 		{
 			System.out.println("# Processing " + rom + " ...");
-			List<Game> games = GamesDB.search(rom, args);
+			List<Game> games = TheGamesDB.search(rom, args);
 			if(games.size() > 0)
 			{
 				Game first = games.get(0);
@@ -134,7 +138,7 @@ public class App
 			{
 				Game empty = new Game();
 				empty.setRom(rom);
-				empty.setName(GamesDB.getUserDesiredFilename(rom, "", args));
+				empty.setName(TheGamesDB.getUserDesiredFilename(rom, "", args));
 				notFound.addGame(empty);
 			}
 			

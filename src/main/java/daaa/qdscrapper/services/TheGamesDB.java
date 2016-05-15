@@ -1,4 +1,4 @@
-package daaa.qdscrapper;
+package daaa.qdscrapper.services;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -34,15 +34,20 @@ import org.imgscalr.Scalr.Method;
 import org.imgscalr.Scalr.Mode;
 import org.w3c.dom.Document;
 
+import daaa.qdscrapper.Args;
+import daaa.qdscrapper.model.Game;
+import daaa.qdscrapper.utils.QDUtils;
+import daaa.qdscrapper.utils.RomCleaner;
+
 /**
  * Utilities to query http://thegamesdb.net/ using its API
  * 
- * @author kerndav
+ * @author daaa
  *
  */
-public class GamesDB
+public class TheGamesDB
 {
-	private GamesDB(){} // do not instanciate
+	private TheGamesDB(){} // do not instanciate
 	
 	private static final String URL_GAMESDB_API = "http://thegamesdb.net/api/"; //TODO: externalize
 	private static final String GET_GAME = "GetGame.php";

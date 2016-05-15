@@ -1,9 +1,11 @@
-package daaa.qdscrapper;
+package daaa.qdscrapper.services;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+
+import daaa.qdscrapper.utils.QDUtils;
 
 /**
  * Converts ES platform names to thegamesdb platform names
@@ -56,10 +58,6 @@ public class Platform
 
 
 /*
-
-
-This XML file does not appear to have any style information associated
-with it. The document tree is shown below.
 <Data>
 	<basePlatformUrl>http://thegamesdb.net/platform/</basePlatformUrl>
 	<Platforms>

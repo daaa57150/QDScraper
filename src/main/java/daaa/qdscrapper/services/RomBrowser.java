@@ -1,4 +1,4 @@
-package daaa.qdscrapper;
+package daaa.qdscrapper.services;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
+
+import daaa.qdscrapper.utils.QDUtils;
 
 
 /**
