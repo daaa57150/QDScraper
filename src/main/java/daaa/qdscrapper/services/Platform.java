@@ -1,9 +1,9 @@
 package daaa.qdscrapper.services;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 import daaa.qdscrapper.utils.QDUtils;
 
@@ -17,14 +17,19 @@ import daaa.qdscrapper.utils.QDUtils;
 public class Platform
 {
 	private static final Properties PLATFORMS = QDUtils.loadClasspathProperties("platform.properties");
-	private static List<String> SUPPORTED_PLATFORMS;
+	private static Set<String> SUPPORTED_PLATFORMS;
 	static {
-		SUPPORTED_PLATFORMS = new ArrayList<String>();
+		SUPPORTED_PLATFORMS = new HashSet<>();
 		for(Object key: Collections.list(PLATFORMS.keys()))
 		{
-			SUPPORTED_PLATFORMS.add(key.toString());
+			SUPPORTED_PLATFORMS.add(key.toString().split("[.]")[0]);
 		}
 	}
+	
+	/**
+	 * Special platform te process arcade games.
+	 */
+	public static final String ARCADE = "arcade";
 	
 	/**
 	 * Input the ES name, get the GamesDB name
@@ -34,7 +39,7 @@ public class Platform
 	public static String get(String esName)
 	{
 		if(esName == null) return null;
-		return PLATFORMS.getProperty(esName);
+		return PLATFORMS.getProperty(esName + ".thegamesdb");
 	}
 	
 	/**
@@ -44,14 +49,14 @@ public class Platform
 	 * @return
 	 */
 	public static boolean isSupported(String platform) {
-		return SUPPORTED_PLATFORMS.contains(platform);
+		return SUPPORTED_PLATFORMS.contains(platform + ".thegamesdb");
 	}
 	
 	/**
 	 * Get the list of all platforms this app knows about, in ES format
 	 * @return the list of all platforms this app knows about, in ES format
 	 */
-	public static List<String> getSupportedPlatforms() {
+	public static Set<String> getSupportedPlatforms() {
 		return SUPPORTED_PLATFORMS;
 	}
 }

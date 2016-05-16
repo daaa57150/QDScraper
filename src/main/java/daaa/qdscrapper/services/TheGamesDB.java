@@ -35,6 +35,7 @@ import org.imgscalr.Scalr.Mode;
 import org.w3c.dom.Document;
 
 import daaa.qdscrapper.Args;
+import daaa.qdscrapper.Props;
 import daaa.qdscrapper.model.Game;
 import daaa.qdscrapper.utils.QDUtils;
 import daaa.qdscrapper.utils.RomCleaner;
@@ -49,10 +50,11 @@ public class TheGamesDB
 {
 	private TheGamesDB(){} // do not instanciate
 	
-	private static final String URL_GAMESDB_API = "http://thegamesdb.net/api/"; //TODO: externalize
+	private static final String URL_GAMESDB_API = Props.get("thegamesdb.url");//"http://thegamesdb.net/api/"; 
 	private static final String GET_GAME = "GetGame.php";
 	private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyy");
-	private static int MAX_WIDTH = 400; // TODO: externalize
+	private static int MAX_WIDTH = Integer.valueOf(Props.get("images.maxWidth"));//400; 
+	private static final String DUPE_IMAGES_FOLDER = Props.get("dupe.images.folder");
 	
 	
 	
@@ -96,7 +98,6 @@ public class TheGamesDB
 		HttpResponse response1 = httpclient.execute(httpGet);
 		HttpEntity entity1 = null;
 		try {
-		    //System.out.println(response1.getStatusLine());
 		    entity1 = response1.getEntity();
 		    answer = IOUtils.toString(entity1.getContent(), Charset.forName("UTF-8"));
 		} finally {
@@ -190,7 +191,7 @@ public class TheGamesDB
 		    image = resizeImage(in);
 		    
 		    String filename = buildFileName(name, matchIndex, imageType);
-			String path = (matchIndex > 1 ? args.dupesDir + "DUPE_images"+File.separatorChar : args.romsDir + "downloaded_images"+File.separatorChar) + filename;
+			String path = (matchIndex > 1 ? args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar : args.romsDir + "downloaded_images"+File.separatorChar) + filename;
 		    File f = new File(path);
 			Files.deleteIfExists(f.toPath());
 		    Files.createDirectories(Paths.get(f.getParent()));
@@ -360,8 +361,8 @@ public class TheGamesDB
 				
 				// move the image from dupes to first if not first
 				if(i > 1) {
-					moveImage(args.dupesDir + "DUPE_images" + File.separatorChar, args.romsDir + "downloaded_images" + File.separatorChar, buildFileName(name, i, null));
-					moveImage(args.romsDir + "downloaded_images" + File.separatorChar, args.dupesDir + "DUPE_images" + File.separatorChar, buildFileName(name, 1, null));
+					moveImage(args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar, args.romsDir + "downloaded_images" + File.separatorChar, buildFileName(name, i, null));
+					moveImage(args.romsDir + "downloaded_images" + File.separatorChar, args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar, buildFileName(name, 1, null));
 				}
 				
 				if(sure.size() >= 2) //because some ... were output

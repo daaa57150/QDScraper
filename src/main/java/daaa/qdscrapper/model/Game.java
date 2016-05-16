@@ -25,6 +25,25 @@ public class Game
 	private String publisher;
 	private List<String> genres = new ArrayList<>();
 	private String players;
+	private boolean bios = false;
+	
+	/**
+	 * is bios?
+	 * @return true if it is a bios
+	 */
+	public boolean isBios() 
+	{
+		return bios;
+	}
+	
+	/**
+	 * set is bios
+	 * @param bios the bios to set
+	 */
+	public void setBios(boolean bios) 
+	{
+		this.bios = bios;
+	}
 	/**
 	 * @return the rom
 	 */

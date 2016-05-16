@@ -44,6 +44,11 @@ public class GamelistXML
 			+ "<publisher>{publisher}</publisher>\n"
 			+ "<genre>{genre}</genre>\n"
 			+ "<players>{players}</players>\n";
+	private static final String TEMPLATE_BIOS =
+			  "<path>{path}</path>\n"
+			+ "<name>{name}</name>\n"
+			+ "<desc>This is a bios file</desc>\n"
+			+ "<hidden/>";
 	private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyyMMdd'T000000'");
 	
 	private String addToName;
@@ -58,7 +63,7 @@ public class GamelistXML
 	{
 		super();
 		this.path = path;
-		addToName = addToName == null ? "" : (" " + addToName);
+		this.addToName = addToName == null ? "" : (" " + addToName);
 	}
 
 	/**
@@ -131,37 +136,56 @@ public class GamelistXML
 		
 		for(Game game: games)
 		{
-			// format and escape everything first
+			// path to the rom in the recalbox
 			String path = ROM_PATH + StringEscapeUtils.escapeXml(game.getRom());
-			String name = StringEscapeUtils.escapeXml(game.getName() + addToName);
-			String desc = StringEscapeUtils.escapeXml(game.getDesc());
-			String image = StringUtils.isEmpty(game.getImage()) ? "" : StringEscapeUtils.escapeXml(IMAGE_PATH + game.getImage());
-			String rating = game.getRating() == 0 ? "" : "" + (game.getRating() / 10.0f);
-			String releasedate = game.getReleasedate() == null ? "" : SDF.format(game.getReleasedate());
-			String developer = StringUtils.isEmpty(game.getDeveloper()) ? "" : StringEscapeUtils.escapeXml(game.getDeveloper());
-			String publisher = StringUtils.isEmpty(game.getPublisher()) ? "" : StringEscapeUtils.escapeXml(game.getPublisher());
-			String genre = CollectionUtils.isEmpty(game.getGenres()) ? "" : StringUtils.join(game.getGenres(), "/"); // TODO: shorten the genres, remove "Action" if many
-			String players = game.getPlayers();
-			
+
 			// start game
 			out.write(QDUtils.tabulate(makeGameTagOpen(game.getId()), 1) + "\n"); //TODO: add the original thegamesdb title
 			
-			// template
-			String str = QDUtils.tabulate(TEMPLATE_GAME, 2);
 			
-			// add to the template
-			str = replaceAllowNull(str, "{path}", path);
-			str = replaceAllowNull(str, "{name}", name);
-			str = replaceAllowNull(str, "{desc}", desc);
-			str = replaceAllowNull(str, "{image}", image);
-			str = replaceAllowNull(str, "{rating}", rating);
-			str = replaceAllowNull(str, "{releasedate}", releasedate);
-			str = replaceAllowNull(str, "{developer}", developer);
-			str = replaceAllowNull(str, "{publisher}", publisher);
-			str = replaceAllowNull(str, "{genre}", genre);
-			str = replaceAllowNull(str, "{players}", players);
-			
-			out.write(str + "\n");
+			// is it a bios file?
+			if(game.isBios())
+			{
+				// template 
+				String str = QDUtils.tabulate(TEMPLATE_BIOS, 2);
+				
+				// add to the template
+				str = replaceAllowNull(str, "{path}", path);
+				str = replaceAllowNull(str, "{name}", game.getRom() + " (BIOS)");
+				
+				out.write(str + "\n");
+			}
+			else // a game
+			{
+				// format and escape everything, bis
+				String name = StringEscapeUtils.escapeXml(game.getName() + addToName);
+				String desc = StringEscapeUtils.escapeXml(game.getDesc());
+				String image = StringUtils.isEmpty(game.getImage()) ? "" : StringEscapeUtils.escapeXml(IMAGE_PATH + game.getImage()); //TODO: image should not contain slashes
+				String rating = game.getRating() == 0 ? "" : "" + (game.getRating() / 10.0f);
+				String releasedate = game.getReleasedate() == null ? "" : SDF.format(game.getReleasedate());
+				String developer = StringUtils.isEmpty(game.getDeveloper()) ? "" : StringEscapeUtils.escapeXml(game.getDeveloper());
+				String publisher = StringUtils.isEmpty(game.getPublisher()) ? "" : StringEscapeUtils.escapeXml(game.getPublisher());
+				String genre = CollectionUtils.isEmpty(game.getGenres()) ? "" : StringUtils.join(game.getGenres(), "/"); // TODO: shorten the genres, remove "Action" if many
+				String players = game.getPlayers();
+				
+				
+				// template
+				String str = QDUtils.tabulate(TEMPLATE_GAME, 2);
+				
+				// add to the template
+				str = replaceAllowNull(str, "{path}", path);
+				str = replaceAllowNull(str, "{name}", name);
+				str = replaceAllowNull(str, "{desc}", desc);
+				str = replaceAllowNull(str, "{image}", image);
+				str = replaceAllowNull(str, "{rating}", rating);
+				str = replaceAllowNull(str, "{releasedate}", releasedate);
+				str = replaceAllowNull(str, "{developer}", developer);
+				str = replaceAllowNull(str, "{publisher}", publisher);
+				str = replaceAllowNull(str, "{genre}", genre);
+				str = replaceAllowNull(str, "{players}", players);
+				
+				out.write(str + "\n");
+			}
 			
 			// end game
 			out.write(QDUtils.tabulate(QDUtils.makeTagclosed(GAMELIST_GAME_TAGNAME), 1) + "\n");

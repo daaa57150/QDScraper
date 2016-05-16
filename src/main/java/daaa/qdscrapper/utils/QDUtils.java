@@ -1,8 +1,10 @@
 package daaa.qdscrapper.utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -11,6 +13,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
@@ -128,6 +131,18 @@ public class QDUtils
 		return null;
 	}
 	
+	/**
+	 * Reads a file into a String
+	 * @param file the path to the file to open
+	 * @return the content of the text file
+	 * @throws IOException
+	 */
+	public static String readFile(String file)
+	throws IOException
+	{
+		return FileUtils.readFileToString(new File(file), Charset.forName("UTF-8"));
+	}
+	
 	/* ---------------------------------------------------- */
 	/*							XML							*/
 	/* ---------------------------------------------------- */
@@ -220,8 +235,16 @@ public class QDUtils
 	/*							HTTP						*/
 	/* ---------------------------------------------------- */
 	
-	// TODO: move it to a network or utils class
+	/**
+	 * The lazy loaded http client
+	 */
 	private static HttpClient httpClient = null;
+	
+	/**
+	 * Builds the shared  http client
+	 * @param args the app args
+	 * @return the http client
+	 */
 	public static HttpClient getHttpClient(Args args)
 	{		
 		if(httpClient == null)

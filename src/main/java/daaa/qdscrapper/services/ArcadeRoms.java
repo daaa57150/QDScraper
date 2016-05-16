@@ -14,6 +14,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import daaa.qdscrapper.Props;
 import daaa.qdscrapper.utils.QDUtils;
 import daaa.qdscrapper.utils.RomCleaner;
 
@@ -29,37 +30,25 @@ import daaa.qdscrapper.utils.RomCleaner;
 public class ArcadeRoms {
 	private ArcadeRoms(){} // do not instanciate
 	
-	/* *
-	 * List of roms
-	 * /
-	private static Map<String, String> ROMS = null; */
 	/**
 	 * List of files to load
 	 */
-	private static String[] FILES = {"MAME.xml", "Final Burn Alpha.xml"}; //TODO: externalize
-	
-	
-	
-	/* *
-	 * Lazy init of rom loading
-	 * @return the roms
-	 * /
-	private static Map<String, String> getRoms() 
-	{
-		if(ROMS == null)
-		{
-			try {
-				loadRoms();
-			} catch (XPathExpressionException | ParserConfigurationException | SAXException | IOException e) {
-				e.printStackTrace();
-				System.exit(12);
-			}
-		}
-		return ROMS;
-	}*/
-	
+	private static String[] FILES = Props.get("arcade.files").split(",");//{"MAME.xml", "Final Burn Alpha.xml"};
+
+	/**
+	 * The xml documents
+	 */
 	private static List<Document> DOCUMENTS = null;
-	public static List<Document> getRomFiles() throws ParserConfigurationException, SAXException, IOException
+	
+	/**
+	 * Parses the xml files do documents ready for xpath
+	 * @return
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	public static List<Document> getRomFiles() 
+	throws ParserConfigurationException, SAXException, IOException
 	{
 		if(DOCUMENTS == null)
 		{
@@ -73,65 +62,7 @@ public class ArcadeRoms {
 		return DOCUMENTS;
 	}
 	
-	/* *
-	 * Loads the files with the arcade roms
-	 * @throws IOException 
-	 * @throws SAXException 
-	 * @throws ParserConfigurationException 
-	 * @throws XPathExpressionException 
-	 * /
-	// TODO: this is way too slow, try parsing on demand instead
-	private static void loadRoms() 
-	throws ParserConfigurationException, SAXException, IOException, XPathExpressionException
-	{
-		System.out.println("Loading arcade games...");
-		
-		ROMS = new HashMap<>();
-		List<Document> docs = readRomFiles();
-		for(Document document: docs)
-		{
-			XPathFactory xpathFactory = XPathFactory.newInstance();
-			XPath xpath = xpathFactory.newXPath();
-			
-			// header
-			String listName = xpath.evaluate("menu/header/listname", document);
-			String lastlistupdate = xpath.evaluate("menu/header/lastlistupdate", document);
-			String listversion = xpath.evaluate("menu/header/listversion", document);
-			String exporterversion = xpath.evaluate("menu/header/exporterversion", document);
-			
-			System.out.println("Processing :");
-			System.out.println("\tlist name: " + listName);
-			System.out.println("\tlast list update: " + lastlistupdate);
-			System.out.println("\tlist version: " + listversion);
-			System.out.println("\texported version: " + exporterversion);
-			
-			// games
-			int i=1;
-			for(i=1; ; i++)
-			{
-				String rom = xpath.evaluate("menu/game["+i+"]/@name", document);
-				if(rom == null) break; // nothing more to process
-				rom += ".zip";
-				
-				if(i!=1 && (i-1)%80==0)
-				{
-					System.out.println();
-				}
-				System.out.print(".");
-				
-				if(!ROMS.containsKey(rom))
-				{
-					// TODO: could also store manufacturer, year, genre in the case theGamesDb doesn't know anything
-					String title = xpath.evaluate("menu/header/game["+i+"]/description", document);
-					ROMS.put(rom,  title);
-				}
-			}
-			
-			System.out.println();
-			System.out.println("processed " + (i-1) + "games");
-			System.out.println();
-		}
-	} */
+	
 	
 	// static xpath to go a bit faster
 	private static XPathFactory XPATHFACTORY = XPathFactory.newInstance();

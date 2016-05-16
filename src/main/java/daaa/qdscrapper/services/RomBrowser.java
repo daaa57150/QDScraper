@@ -11,7 +11,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import daaa.qdscrapper.Props;
 import daaa.qdscrapper.utils.QDUtils;
 
 
@@ -32,7 +34,7 @@ public class RomBrowser {
 	 * @return the list of found roms
 	 * @throws IOException
 	 */
-	public List<String> listRoms(String inFolder) 
+	public static List<String> listRomsInFolder(String inFolder) 
 	throws IOException 
 	{
 		List<String> fileNames = new ArrayList<>();
@@ -49,7 +51,7 @@ public class RomBrowser {
 	        	 if(file.isDirectory()) return false;
 	        	 
 	        	 // no dupe that may have been created vy a previous run
-	        	 if(filename.startsWith("DUPE")) return false;
+	        	 if(filename.startsWith(Props.get("dupes.prefix"))) return false;
 	        	 
 	        	 // OS or working files 
 	        	 if(filename.startsWith(".")) return false;
@@ -59,6 +61,7 @@ public class RomBrowser {
 	        	 
 	        	 // remove extensions we know are not roms and may be there
 	        	 if(ext.toLowerCase().matches("xml|txt|jpg|png|htm|html|doc|docx|ini|xls")) return false;
+	        	 
 	        	 
 	        	 return true;
 	         }
@@ -76,11 +79,38 @@ public class RomBrowser {
 	}
 	
 	/**
+	 * Reads rom names from a file, each line should be a rom.
+	 * Lines starting with # are ignored as are blank lines
+	 * @param file the file to read the roms from
+	 * @return the list of roms
+	 * @throws IOException
+	 */
+	public static List<String> listRomsFromFile(String file) 
+	throws IOException
+	{
+		String content = QDUtils.readFile(file);
+		String[] roms = content.split("[\n\r]");
+		List<String> res = new ArrayList<String>(roms.length);
+		
+		for(String rom:roms)
+		{
+			// remove # so we can have comments
+			// remove blanks so we can have empty lines
+			if(!rom.startsWith("#") && !StringUtils.isBlank(rom))
+			{
+				res.add(rom.trim());
+			}
+		}
+		
+		return res;
+	}
+	
+	/**
 	 * Is this file a known bios?
 	 * @param filename
 	 * @return true if we know it's a bios file
 	 */
-	public boolean isBios(String filename)
+	public static boolean isBios(String filename)
 	{
 		// no intro romsets mark their bios files with [BIOS]
 		if(filename.contains("[BIOS]")) return true;

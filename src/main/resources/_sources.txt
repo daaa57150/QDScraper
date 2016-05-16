@@ -21,4 +21,8 @@ Files:
 	- Final Burn Alpha.xml 	v1.0			05/15/2015
 
 	
-	
+
+## Possible other sources ##
+http://api.gamesdbase.com/
+https://www.igdb.com/api
+http://www.giantbomb.com/api/documentation#toc-0-15

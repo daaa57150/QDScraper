@@ -14,18 +14,18 @@ import daaa.qdscrapper.services.Platform;
  */
 public class Args
 {
-	public String platform;
-	//public String baseDir;
-	public String appendToName = null;
-	public boolean useFilename = false;
-	public String cleanFilename;
-	public String romsDir = null;
-	public String dupesDir = null;
-	public String proxyHost;
-	public int proxyPort = -1;
-	public String user;
-	public String password;
-	
+	public String platform;				// ES platform name
+	public String appendToName = null;	// something to append to each game name
+	public boolean useFilename = false;	// use the filename / arcade rom name instead of TheGamesDB game title
+	public String cleanFilename;		// clean the name of the rom: if it contains ( remove everything between (), same for [
+	public String romsDir = null;		// where do we locate the roms? were do we output our files?
+	public String dupesDir = null;		// folder inside romsDir where all duplicated are put, uses the properties for its name
+	public String proxyHost;			// proxy
+	public int proxyPort = -1;			// proxy port
+	public String user;					// proxy user
+	public String password;				// proxy password
+	public String romFile = null;		// instead of listing the romsDir, use the rom names in this file
+	public boolean arcade = false;		// we are processing arcade roms, they don't have pretty names
 	
 	/**
 	 * Parses the arguments of the program
@@ -42,11 +42,6 @@ public class Args
 			switch(key) {
 				case "-platform": {
 					platform = val;
-					if(!Platform.isSupported(platform))
-					{
-						System.out.println("Platform '" + platform + "' not supported, will make queries without specifying it");
-						System.out.println("Supported platforms: " + StringUtils.join(Platform.getSupportedPlatforms(), ", "));
-					}
 					break;
 				}
 				case "-dir": { 
@@ -54,7 +49,8 @@ public class Args
 					if(!romsDir.endsWith("" + File.separatorChar)) {
 						romsDir += File.separatorChar;
 					}
-					dupesDir = romsDir + "DUPES" + File.separatorChar;
+					//dupesDir = romsDir + "DUPES" + File.separatorChar;
+					// set at the end because we need to know if the user wants a custom properties file first
 					break;
 				}
 				case "-appendToName": {
@@ -67,6 +63,14 @@ public class Args
 				}
 				case "-cleanFilename": {
 					cleanFilename = val;
+					break;
+				}
+				case "-romFile": {
+					romFile = val;
+					break;
+				}
+				case "-arcade": {
+					arcade=true;
 					break;
 				}
 				
@@ -88,6 +92,12 @@ public class Args
 					break;
 				}
 				
+				// properties
+				case "-properties": {
+					Props.setFile(val);
+					break;
+				}
+				
 				
 				case "-help": {
 					System.out.println("TODO: print help");
@@ -97,6 +107,27 @@ public class Args
 					System.out.println("unknown parameter: " + key+", use -help to get help");
 					System.exit(1);
 				}
+			}
+		}
+		
+		if(StringUtils.isEmpty(romsDir)) {
+			System.out.println("Where are the roms and where do we output everything? use -romsDir");
+			System.exit(15);
+		}
+		
+		// now if the user has a custom properties file, it's set
+		dupesDir = romsDir + Props.get("dupes.folder") + File.separatorChar;
+		
+		if(arcade)
+		{
+			platform = Platform.ARCADE;
+		}
+		else
+		{
+			if(!Platform.isSupported(platform))
+			{
+				System.out.println("Platform '" + platform + "' not supported, will make queries without specifying it");
+				System.out.println("Supported platforms: " + StringUtils.join(Platform.getSupportedPlatforms(), ", "));
 			}
 		}
 		
@@ -112,7 +143,7 @@ public class Args
 		}
 		
 		if(StringUtils.isEmpty(platform)) {
-			System.out.println("Set a platform with -platform, it's the folder with the roms");
+			System.out.println("Set a platform with -platform, it's the folder with the roms in recalbox");
 			System.exit(5);
 		}
 		
