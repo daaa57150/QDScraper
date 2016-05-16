@@ -140,7 +140,7 @@ public class RomCleaner
 	/**
 	 * Removes the type attribute in the form (Beta 1)
 	 * Currently knows about Rev x, Beta, *Proto, 19xx-xx-xx, Unl, Demo, Sample (Should Unl &amp;Sample be stripped?)
-	 * 
+	 * TODO: rev 4321
 	 * @param filename the file name to clean 
 	 * @return the cleaned filename
 	 */
