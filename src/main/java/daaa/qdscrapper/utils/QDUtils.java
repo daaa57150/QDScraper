@@ -228,7 +228,12 @@ public class QDUtils
 		{
 			for(Map.Entry<String, String> entry: attrs.entrySet())
 			{
-				ret = ret + " " + entry.getKey() + "=\"" + entry.getValue() + "\"";
+				String key = entry.getKey();
+				String val = entry.getValue();
+				if(!StringUtils.isEmpty(val))
+				{
+					ret = ret + " " + key + "=\"" + val + "\"";
+				}
 			}
 		}
 		

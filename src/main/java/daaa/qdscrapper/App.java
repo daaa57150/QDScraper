@@ -26,6 +26,10 @@ public class App
 	 * Files containing duplicate entries are prefixed with this
 	 */
 	private static final String DUPE_PREFIX = Props.get("dupes.prefix");
+	/**
+	 * Empty and bios games are marked with this api flag
+	 */
+	private static final String NO_API_ID = "QDScrapper";
 	
 	/**
 	 * Get the list of roms from the filesystem 
@@ -69,7 +73,7 @@ public class App
 			// is it a bios?
 			if(RomBrowser.isBios(rom))
 			{
-				Game game = new Game();
+				Game game = new Game(NO_API_ID);
 				game.setRom(rom);
 				game.setBios(true);
 				gameList.addGame(game);
@@ -84,7 +88,7 @@ public class App
 					name = ArcadeRoms.getRomTitle(rom);
 					if(StringUtils.isEmpty(name))
 					{
-						Game empty = new Game();
+						Game empty = new Game(NO_API_ID);
 						empty.setRom(rom);
 						empty.setName(name);
 						notFound.addGame(empty);
@@ -126,7 +130,7 @@ public class App
 				}
 				else // not found
 				{
-					Game empty = new Game();
+					Game empty = new Game(NO_API_ID);
 					empty.setRom(rom);
 					empty.setName(name);
 					notFound.addGame(empty);

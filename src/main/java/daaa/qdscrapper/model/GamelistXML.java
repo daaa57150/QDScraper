@@ -78,19 +78,24 @@ public class GamelistXML
 	
 	/**
 	 * Opens a &lt;game> tag with an id and the source set as thegamesdb
+	 * @param api the api that retrieved the game
 	 * @param gameId id of the game on thegamesdb
+	 * @param apiGameTitle the title of the game exactly as retrieved from the api (useful for dupes)
 	 * @return the open &lt;game> tag
 	 */
-	private String makeGameTagOpen(String gameId) //TODO: output thegamesdb title in dupes somewhere (opening tag?) 
+	private String makeGameTagOpen(String api, String gameId, String apiGameTitle) 
 	{
-		if(StringUtils.isEmpty(gameId))
+		/*if(StringUtils.isEmpty(gameId))
 		{
 			return QDUtils.makeTagOpen(GAMELIST_GAME_TAGNAME);
 		}
-		// else
+		// else 
+		*/
+		 
 		Map<String, String> attrs = new HashMap<String, String>();
 		attrs.put("id", gameId);
-		attrs.put("source", "TheGamesDB");
+		attrs.put("source", api);
+		attrs.put("api-title", apiGameTitle);
 		return QDUtils.makeTagOpen(GAMELIST_GAME_TAGNAME, attrs);
 	}
 	
@@ -140,7 +145,8 @@ public class GamelistXML
 			String path = ROM_PATH + StringEscapeUtils.escapeXml(game.getRom());
 
 			// start game
-			out.write(QDUtils.tabulate(makeGameTagOpen(game.getId()), 1) + "\n"); //TODO: add the original thegamesdb title
+			String title = StringEscapeUtils.escapeXml(game.getTitle());
+			out.write(QDUtils.tabulate(makeGameTagOpen(game.getApi(), game.getId(), title), 1) + "\n");
 			
 			
 			// is it a bios file?
@@ -167,7 +173,6 @@ public class GamelistXML
 				String publisher = StringUtils.isEmpty(game.getPublisher()) ? "" : StringEscapeUtils.escapeXml(game.getPublisher());
 				String genre = CollectionUtils.isEmpty(game.getGenres()) ? "" : StringUtils.join(game.getGenres(), "/"); // TODO: shorten the genres, remove "Action" if many
 				String players = game.getPlayers();
-				
 				
 				// template
 				String str = QDUtils.tabulate(TEMPLATE_GAME, 2);

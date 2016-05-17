@@ -56,6 +56,7 @@ public class TheGamesDB
 	private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyy");
 	private static int MAX_WIDTH = Integer.valueOf(Props.get("images.maxWidth"));//400; 
 	private static final String DUPE_IMAGES_FOLDER = Props.get("dupe.images.folder");
+	private static final String THEGAMESDB_API_ID = "TheGamesDB";
 	
 	
 	
@@ -244,22 +245,23 @@ public class TheGamesDB
 	 * - the raw rom name without the extension
 	 * - a cleaned rom name
 	 * @param rom name of the rom
+	 * @param translatedName the name of the rom file, or a converted name for arcade games
 	 * @param title title from thegamesdb
 	 * @param args app args
 	 * @return the desired name
 	 */
-	public static String getUserDesiredFilename(String rom, String title, Args args) 
+	public static String getUserDesiredFilename(String rom, String translatedName, String title, Args args)  // TODO: move somewhere else, it should be shared
 	{
 		String name = null;
 		if(args.useFilename || StringUtils.isEmpty(title))
 		{
 			if(!StringUtils.isEmpty(args.cleanFilename))
 			{
-				name = RomCleaner.cleanWithArgs(rom, args.cleanFilename);
+				name = RomCleaner.cleanWithArgs(translatedName, args.cleanFilename);
 			}
 			else
 			{
-				name = RomCleaner.removeExtension(rom);
+				name = RomCleaner.removeExtension(translatedName);
 			}
 		}
 		else
@@ -274,12 +276,13 @@ public class TheGamesDB
 	 * If a 100% match on the name is found, stops the process and returns the games processed.
 	 * 
 	 * @param rom name of the rom
+	 * @param translatedName the name to use for searches, might be == rom or something else (arcade games)
 	 * @param xml answer from thegamesdb in xml format
 	 * @param args app's arguments
 	 * @return the list of games
 	 * @throws Exception
 	 */
-	private static List<Game> toGames(String rom, String xml, Args args) 
+	private static List<Game> toGames(String rom, String translatedName, String xml, Args args) 
 	throws Exception
 	{
 		// xml parsing stuff
@@ -306,7 +309,7 @@ public class TheGamesDB
 			}
 			
 			// the game
-			Game game = new Game();
+			Game game = new Game(THEGAMESDB_API_ID);
 			String desc = xpath.evaluate("/Data/Game["+i+"]/Overview", document);
 			String rating = xpath.evaluate("/Data/Game["+i+"]/Rating", document);
 			String releasedate = xpath.evaluate("/Data/Game["+i+"]/ReleaseDate", document);
@@ -315,7 +318,7 @@ public class TheGamesDB
 			String title = xpath.evaluate("/Data/Game["+i+"]/GameTitle", document);
 			
 			// the user desired name
-			String name = getUserDesiredFilename(rom, title, args);
+			String name = getUserDesiredFilename(rom, translatedName, title, args);
 			
 			// genre
 			String genre = "";
@@ -416,9 +419,7 @@ public class TheGamesDB
 	/**
 	 * 
 	 * @param rom name of the rom to look for (file name)
-	 * @param platform the ES platform (folder in recalbox)
-	 * @param base dir where images and dupes will be saved
-	 * @param the name to use for searches, might be == rom or something else (arcade games)
+	 * @param translatedName the name to use for searches, might be == rom or something else (arcade games)
 	 * @return the list of games found, first match should be the one
 	 * @throws Exception
 	 */
@@ -455,7 +456,7 @@ public class TheGamesDB
 			// TODO: try to search and if nothing comes out, retry the search by cleaning more chars (-,!) etc..
 			try
 			{
-				List<Game> games = toGames(rom, xml, args);
+				List<Game> games = toGames(rom, translatedName, xml, args);
 				if(!CollectionUtils.isEmpty(games))
 				{
 					return games;

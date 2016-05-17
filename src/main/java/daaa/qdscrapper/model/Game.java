@@ -16,7 +16,7 @@ public class Game
 	private String rom; //name of the rom (file)
 	private String name; //name we want in the gamelist.xml
 	private String title; //name from theGamesDB
-	private String id; //id from theGamesDB
+	private String id; //id from theGamesDB or other api
 	private String desc;
 	private String image;
 	private float rating;
@@ -27,6 +27,23 @@ public class Game
 	private String players;
 	private boolean bios = false;
 	
+	// the api that retrieved this result
+	private String api;
+	
+	/* *
+	 * Default constructor
+	 * / 
+	public Game(){}
+	*/
+	
+	/**
+	 * Constructor with api, use this!
+	 * @param api
+	 */
+	public Game(String api){
+		this.api = api;
+	}
+	
 	/**
 	 * is bios?
 	 * @return true if it is a bios
@@ -35,7 +52,6 @@ public class Game
 	{
 		return bios;
 	}
-	
 	/**
 	 * set is bios
 	 * @param bios the bios to set
@@ -43,6 +59,18 @@ public class Game
 	public void setBios(boolean bios) 
 	{
 		this.bios = bios;
+	}
+	/**
+	 * @return the api
+	 */
+	public String getApi() {
+		return api;
+	}
+	/**
+	 * @param api the api to set
+	 */
+	public void setApi(String api) {
+		this.api = api;
 	}
 	/**
 	 * @return the rom
