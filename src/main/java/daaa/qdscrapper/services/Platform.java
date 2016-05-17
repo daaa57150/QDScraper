@@ -27,9 +27,13 @@ public class Platform
 	}
 	
 	/**
-	 * Special platform te process arcade games.
+	 * Special platform to process arcade games.
 	 */
 	public static final String ARCADE = "arcade";
+	/**
+	 * Special platform to process neogeo games.
+	 */
+	public static final String NEOGEO = "neogeo";
 	
 	/**
 	 * Input the ES name, get the GamesDB name

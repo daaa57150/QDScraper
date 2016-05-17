@@ -20,6 +20,7 @@ import javax.imageio.ImageIO;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -81,19 +82,20 @@ public class TheGamesDB
 	/**
 	 * Searches a game on thegamesdb, return its xml answer
 	 * @param name the name of the game to search
+	 * @param platform the platform filter
 	 * @param args the app's arguments (uses the platform)
 	 * @return the xml answer from thegamesdb
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 */
-	private static String searchXml(String name, Args args)
+	private static String searchXml(String name, String platform, Args args)
 	throws ClientProtocolException, IOException, URISyntaxException
 	{
 		String answer = null;
 		
 		HttpClient httpclient = QDUtils.getHttpClient(args);
-		String uri = buildGetGame(name, args.platform);
+		String uri = buildGetGame(name, platform);
 		HttpGet httpGet = new HttpGet(uri);
 		HttpResponse response1 = httpclient.execute(httpGet);
 		HttpEntity entity1 = null;
@@ -145,7 +147,7 @@ public class TheGamesDB
 	 */
 	private static String buildFileName(String name, int matchIndex, String imageType)
 	{
-		return name + "-daaa-" + matchIndex + "-img" + (imageType == null ? "" : ("." + imageType));
+		return QDUtils.sanitizeFilename(name) + "-daaa-" + matchIndex + "-img" + (imageType == null ? "" : ("." + imageType));
 	}
 	
 	/**
@@ -416,40 +418,61 @@ public class TheGamesDB
 	 * @param rom name of the rom to look for (file name)
 	 * @param platform the ES platform (folder in recalbox)
 	 * @param base dir where images and dupes will be saved
+	 * @param the name to use for searches, might be == rom or something else (arcade games)
 	 * @return the list of games found, first match should be the one
 	 * @throws Exception
 	 */
-	public static List<Game> search(String rom, Args args) 
+	public static List<Game> search(String rom, String translatedName, Args args) 
 	{
-		String cleanRom = RomCleaner.cleanRomName(rom, false);
-		
+		String cleanName = RomCleaner.cleanRomName(translatedName, false);
+			
 		String xml = null;
-		try
+		
+		// we'll search for these platforms
+		String[] platforms = null; 	
+		if(args.arcade)
 		{
-			xml = searchXml(cleanRom, args);
+			platforms = new String[]{Platform.NEOGEO, Platform.ARCADE};
 		}
-		catch(IOException | URISyntaxException e)
+		else
 		{
-			System.out.println("This error should not happen...");
-			e.printStackTrace();
-			System.exit(11);
+			platforms = new String[]{args.platform};
 		}
-		// TODO: try to search and if nothing comes out, retry the search by cleaning more chars (-,!) etc..
-		//String xml = StringUtils.join(Files.readAllLines(Paths.get("D:/JavaBundle/workspaces/Developpement/QDScrapper/files/example.xml"), Charset.forName("UTF-8")), "\n");
-		 try
-		 {
-			 return toGames(rom, xml, args);
-		 }
-		 catch(Exception e)
-		 {
-			 System.err.println("Error parsing xml from TheGamesDB!");
-			 e.printStackTrace();
-			 System.err.println("XML content:");
-			 System.err.println(xml);
-			 System.exit(12);
-		 };
+		
+		// search
+		for(String platform: platforms)
+		{
+			try
+			{
+				xml = searchXml(cleanName, platform, args);
+			}
+			catch(IOException | URISyntaxException e)
+			{
+				System.out.println("This error should not happen...");
+				e.printStackTrace();
+				System.exit(11);
+			}
+			// TODO: try to search and if nothing comes out, retry the search by cleaning more chars (-,!) etc..
+			try
+			{
+				List<Game> games = toGames(rom, xml, args);
+				if(!CollectionUtils.isEmpty(games))
+				{
+					return games;
+				}
+				// else continue searching
+			}
+			catch(Exception e)
+			{
+				System.err.println("Error parsing xml from TheGamesDB!");
+				e.printStackTrace();
+				System.err.println("XML content:");
+				System.err.println(xml);
+				System.exit(12);
+			};
+		}
 		 
-		 return null;
+		return null;
 	}
 }
 

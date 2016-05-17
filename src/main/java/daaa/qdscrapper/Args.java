@@ -120,7 +120,7 @@ public class Args
 		
 		if(arcade)
 		{
-			platform = Platform.ARCADE;
+			platform = Platform.ARCADE; //TODO: also neogeo
 		}
 		else
 		{

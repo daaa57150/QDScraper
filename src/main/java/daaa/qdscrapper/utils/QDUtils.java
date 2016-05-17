@@ -68,6 +68,22 @@ public class QDUtils
 		return sb.toString();
 	}
 	
+	/**
+	 * Removes illegal chars from filenames, in a greedy way (ie: removes windows illegal chars even on unix)
+	 * @param name the filename to sanitize, not a path!
+	 * @return the sanitized file name
+	 */
+	public static String sanitizeFilename(String name) {
+	    if( null == name ) {
+	        return "";
+	    }
+
+	    /*if( SystemUtils.IS_OS_LINUX ) {
+	        return name.replaceAll( "/+", "" ).trim();
+	    }*/
+
+	    return name.replaceAll( "[\u0001-\u001f<>:\"/\\\\|?*\u007f]+", " " ).trim();
+	}
 	
 	
 	/* ---------------------------------------------------- */

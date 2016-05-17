@@ -3,6 +3,7 @@ package daaa.qdscrapper;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import daaa.qdscrapper.model.Game;
@@ -10,6 +11,7 @@ import daaa.qdscrapper.model.GamelistXML;
 import daaa.qdscrapper.services.ArcadeRoms;
 import daaa.qdscrapper.services.RomBrowser;
 import daaa.qdscrapper.services.TheGamesDB;
+import daaa.qdscrapper.utils.QDUtils;
 import daaa.qdscrapper.utils.RomCleaner;
 
 /**
@@ -76,26 +78,28 @@ public class App
 			else
 			{
 				//if it's an arcade game, look in the arcade roms "DB"
-				String arcadeTitle = null;
+				String name = rom; // for arcade, the name is our match in the DB, for the rest it's the rom
 				if(args.arcade)
 				{
-					arcadeTitle = ArcadeRoms.getRomTitle(rom);
-					if(StringUtils.isEmpty(arcadeTitle))
+					name = ArcadeRoms.getRomTitle(rom);
+					if(StringUtils.isEmpty(name))
 					{
 						Game empty = new Game();
 						empty.setRom(rom);
-						empty.setName(rom);
+						empty.setName(name);
 						notFound.addGame(empty);
 
 						System.out.println("Nothing found for " + rom + " in the arcade roms files");
 						
 						continue;
 					}
+					//else
+					System.out.println(rom + " is the rom name of " + name);
 				}
 				
 				// find matches
-				List<Game> games = TheGamesDB.search(rom, args); //TODO: arcade platform should be arcade + neogeo
-				if(games.size() > 0)
+				List<Game> games = TheGamesDB.search(rom, name, args);
+				if(CollectionUtils.isNotEmpty(games))
 				{
 					Game first = games.get(0);
 					if(games.size() == 1)
@@ -111,7 +115,7 @@ public class App
 					gameList.addGame(games.get(0));
 					
 					//dupes
-					GamelistXML gameListDupes = new GamelistXML(args.dupesDir + DUPE_PREFIX + rom + ".xml", args.appendToName);
+					GamelistXML gameListDupes = new GamelistXML(args.dupesDir + DUPE_PREFIX + QDUtils.sanitizeFilename(rom) + ".xml", args.appendToName);
 					for(int i=1; i<games.size(); i++)
 					{
 						Game dupe = games.get(i);
@@ -124,9 +128,9 @@ public class App
 				{
 					Game empty = new Game();
 					empty.setRom(rom);
-					empty.setName(TheGamesDB.getUserDesiredFilename(rom, "", args));
+					empty.setName(name);
 					notFound.addGame(empty);
-					System.out.println("Nothing found for " + rom + (arcadeTitle == null ? "" : (" (" + RomCleaner.cleanRomName(arcadeTitle, false) + ")")));
+					System.out.println("Nothing found for " + rom + (args.arcade ? (" (" + RomCleaner.cleanRomName(name, false) + ")" ): ""));
 				}
 			}
 			
