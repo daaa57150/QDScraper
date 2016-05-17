@@ -26,6 +26,7 @@ public class Args
 	public String password;				// proxy password
 	public String romFile = null;		// instead of listing the romsDir, use the rom names in this file
 	public boolean arcade = false;		// we are processing arcade roms, they don't have pretty names
+	public String giantBombApiKey=null; // key for giantBomb's api, used as a last resort if nothing is found on theGamesDB
 	
 	/**
 	 * Parses the arguments of the program
@@ -73,7 +74,11 @@ public class Args
 					arcade=true;
 					break;
 				}
-				
+				case "-giantBombApiKey": {
+					giantBombApiKey = val;
+					break;
+				}
+					
 				// network
 				case "-proxyHost": {
 					proxyHost = val;

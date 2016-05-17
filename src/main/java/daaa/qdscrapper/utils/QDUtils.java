@@ -1,7 +1,9 @@
 package daaa.qdscrapper.utils;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -9,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -16,19 +19,28 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
+import org.imgscalr.Scalr;
+import org.imgscalr.Scalr.Method;
+import org.imgscalr.Scalr.Mode;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import daaa.qdscrapper.Args;
+import daaa.qdscrapper.Props;
 
 /**
  * All-purposes utils that had no place anywhere else
@@ -36,6 +48,7 @@ import daaa.qdscrapper.Args;
  * @author kerndav
  *
  */
+// TODO: this could be split
 public class QDUtils
 {
 	private QDUtils() {} //do not instanciate
@@ -83,6 +96,38 @@ public class QDUtils
 	    }*/
 
 	    return name.replaceAll( "[\u0001-\u001f<>:\"/\\\\|?*\u007f]+", " " ).trim();
+	}
+	
+	
+	/**
+	 * Max width of the boxart
+	 */
+	private static int MAX_WIDTH = Integer.valueOf(Props.get("images.maxWidth"));//400; 
+	/**
+	 * Resizes an image to a max witdh of 400px
+	 * @param in the input image
+	 * @return the resized image data
+	 * @throws IOException
+	 */
+	public static BufferedImage resizeImage(InputStream in) 
+	throws IOException
+	{
+		BufferedImage srcImage = null;
+		try
+		{
+			srcImage = ImageIO.read(in);
+			if(srcImage.getWidth() < MAX_WIDTH)
+			{
+				return srcImage;
+			}
+			
+			BufferedImage scaledImage = Scalr.resize(srcImage, Method.QUALITY, Mode.FIT_TO_WIDTH, MAX_WIDTH); // Scale image
+			return scaledImage;
+		}
+		finally
+		{
+			//if(srcImage != null) srcImage.flush();
+		}
 	}
 	
 	
@@ -299,6 +344,58 @@ public class QDUtils
 			
 		}
 		return httpClient;
+	}
+	
+	
+	/**
+	 * Represents an http answer with http code and response content
+	 * @author daaa
+	 *
+	 */
+	public static class HttpAnswer
+	{
+		private int code;
+		private String content;
+		/** Constructor */
+		public HttpAnswer(int code, String response){
+			this.code = code;
+			this.content = response;
+		}
+		/** @return the code */
+		public int getCode() { return code; }
+		/** @param code the code to set */
+		public void setCode(int code) { this.code = code; }
+		/** @return the content */
+		public String getContent() { return content; }
+		/** @param content the content to set */
+		public void setContent(String content) { this.content = content; }
+	}
+	
+	/**
+	 * Performs an http get query and returns the code and content as String
+	 * @param args app args
+	 * @param url the url to get
+	 * @return the content of the url with the status code
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 */
+	public static HttpAnswer httpGet(Args args, String url) 
+	throws ClientProtocolException, IOException
+	{
+		HttpClient httpclient = QDUtils.getHttpClient(args);
+		HttpGet httpGet = new HttpGet(url);
+		HttpResponse response1 = httpclient.execute(httpGet);
+		HttpEntity entity1 = null;
+		try {
+		    entity1 = response1.getEntity();
+		    String content = IOUtils.toString(entity1.getContent(), Charset.forName("UTF-8"));
+		    int code = response1.getStatusLine().getStatusCode();
+		    return new HttpAnswer(code, content);
+		} finally {
+		    if(entity1 != null) {
+		    	EntityUtils.consume(entity1);
+		    }
+		}
 	}
 	
 }

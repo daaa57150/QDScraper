@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -21,24 +20,22 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.util.EntityUtils;
-import org.imgscalr.Scalr;
-import org.imgscalr.Scalr.Method;
-import org.imgscalr.Scalr.Mode;
 import org.w3c.dom.Document;
 
 import daaa.qdscrapper.Args;
 import daaa.qdscrapper.Props;
 import daaa.qdscrapper.model.Game;
 import daaa.qdscrapper.utils.QDUtils;
+import daaa.qdscrapper.utils.QDUtils.HttpAnswer;
 import daaa.qdscrapper.utils.RomCleaner;
 
 /**
@@ -54,7 +51,6 @@ public class TheGamesDB
 	private static final String URL_GAMESDB_API = Props.get("thegamesdb.url");//"http://thegamesdb.net/api/"; 
 	private static final String GET_GAME = "GetGame.php";
 	private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyy");
-	private static int MAX_WIDTH = Integer.valueOf(Props.get("images.maxWidth"));//400; 
 	private static final String DUPE_IMAGES_FOLDER = Props.get("dupe.images.folder");
 	private static final String THEGAMESDB_API_ID = "TheGamesDB";
 	
@@ -71,7 +67,7 @@ public class TheGamesDB
 	{
 		URIBuilder uri = new URIBuilder(URL_GAMESDB_API + GET_GAME);
 		uri.addParameter("name", name);
-		String p = Platform.get(platform);
+		String p = Platform.asTheGamesDB(platform);
 		if(StringUtils.isNotEmpty(p))
 		{
 			uri.addParameter("platform", p);
@@ -93,51 +89,17 @@ public class TheGamesDB
 	private static String searchXml(String name, String platform, Args args)
 	throws ClientProtocolException, IOException, URISyntaxException
 	{
-		String answer = null;
-		
-		HttpClient httpclient = QDUtils.getHttpClient(args);
-		String uri = buildGetGame(name, platform);
-		HttpGet httpGet = new HttpGet(uri);
-		HttpResponse response1 = httpclient.execute(httpGet);
-		HttpEntity entity1 = null;
-		try {
-		    entity1 = response1.getEntity();
-		    answer = IOUtils.toString(entity1.getContent(), Charset.forName("UTF-8"));
-		} finally {
-		    if(entity1 != null) {
-		    	EntityUtils.consume(entity1);
-		    }
+		String url = buildGetGame(name, platform);
+		HttpAnswer answer = QDUtils.httpGet(args, url);
+		if(answer.getCode() != HttpStatus.SC_OK)
+		{
+			System.err.println("Error querying TheGamesDB (code "+answer.getCode()+") with url " + url);
+			return null;
 		}
-		
-		return answer;
+		return answer.getContent();
 	}
 	
-	/**
-	 * Resizes an image to a max witdh of 400px
-	 * @param in the input image
-	 * @return the resized image data
-	 * @throws IOException
-	 */
-	private static BufferedImage resizeImage(InputStream in) 
-	throws IOException
-	{
-		BufferedImage srcImage = null;
-		try
-		{
-			srcImage = ImageIO.read(in);
-			if(srcImage.getWidth() < MAX_WIDTH)
-			{
-				return srcImage;
-			}
-			
-			BufferedImage scaledImage = Scalr.resize(srcImage, Method.QUALITY, Mode.FIT_TO_WIDTH, MAX_WIDTH); // Scale image
-			return scaledImage;
-		}
-		finally
-		{
-			//if(srcImage != null) srcImage.flush();
-		}
-	}
+	
 	
 	/**
 	 * Builds a unique filename for an image
@@ -191,7 +153,7 @@ public class TheGamesDB
 			}
 		    
 		    in = entity1.getContent();
-		    image = resizeImage(in);
+		    image = QDUtils.resizeImage(in);
 		    
 		    String filename = buildFileName(name, matchIndex, imageType);
 			String path = (matchIndex > 1 ? args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar : args.romsDir + "downloaded_images"+File.separatorChar) + filename;
@@ -412,7 +374,7 @@ public class TheGamesDB
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			e.printStackTrace(); // should not happen
 		}
 	}
 	

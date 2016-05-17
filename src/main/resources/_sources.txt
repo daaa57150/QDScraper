@@ -28,6 +28,4 @@ https://www.igdb.com/api
 
 
 
-http://www.giantbomb.com/api/documentation#toc-0-15 => 4bad1865e579ed1b68af10ed52b179cd7bea0b4c
-http://www.giantbomb.com/api/search/?api_key=4bad1865e579ed1b68af10ed52b179cd7bea0b4c&query=Metal%20Slug%20-%20Super%20Vehicle-001&resources=game
-http://www.giantbomb.com/api/search/?api_key=4bad1865e579ed1b68af10ed52b179cd7bea0b4c&query=Metal%20Slug%20-%20Super%20Vehicle-001&resources=game&format=json
+http://www.giantbomb.com/api/documentation#toc-0-15
