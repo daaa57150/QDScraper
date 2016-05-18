@@ -16,6 +16,7 @@ import daaa.qdscrapper.utils.QDUtils;
  */
 public class Platform
 {
+	// supported by thegamesdb != supported by giantbomb
 	private static final Properties PLATFORMS = QDUtils.loadClasspathProperties("platform.properties");
 	private static Set<String> SUPPORTED_PLATFORMS;
 	static {
@@ -44,6 +45,17 @@ public class Platform
 	{
 		if(esName == null) return null;
 		return PLATFORMS.getProperty(esName + ".thegamesdb");
+	}
+	
+	/**
+	 * Input the ES name, get the GamesDB name
+	 * @param esName name of the ES platform (snes, nes, ngpc...)
+	 * @return
+	 */
+	public static String asGiantBomb(String esName)
+	{
+		if(esName == null) return null;
+		return PLATFORMS.getProperty(esName + ".giantbomb");
 	}
 	
 	/**
