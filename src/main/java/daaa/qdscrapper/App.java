@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import daaa.qdscrapper.model.Game;
 import daaa.qdscrapper.model.GamelistXML;
 import daaa.qdscrapper.services.ArcadeRoms;
+import daaa.qdscrapper.services.GiantBomb;
 import daaa.qdscrapper.services.RomBrowser;
 import daaa.qdscrapper.services.TheGamesDB;
 import daaa.qdscrapper.utils.QDUtils;
@@ -41,7 +42,6 @@ public class App
 	throws IOException {
 		
 		if(args.romFile != null) {
-			System.out.println("Using rom file " + args.romFile + " as the list of roms");
 			return RomBrowser.listRomsFromFile(args.romFile);
 		}
 		//else {
@@ -130,11 +130,20 @@ public class App
 				}
 				else // not found
 				{
-					Game empty = new Game(NO_API_ID);
-					empty.setRom(rom);
-					empty.setName(name);
-					notFound.addGame(empty);
-					System.out.println("Nothing found for " + rom + (args.arcade ? (" (" + RomCleaner.cleanRomName(name, false) + ")" ): ""));
+					// try giantBomb
+					Game game = GiantBomb.search(rom, name, args);
+					if(game != null)
+					{
+						gameList.addGame(game);
+					}
+					else // not found again
+					{
+						Game empty = new Game(NO_API_ID);
+						empty.setRom(rom);
+						empty.setName(name);
+						notFound.addGame(empty);
+						System.out.println("Nothing found for " + rom + (args.arcade ? (" (" + RomCleaner.cleanRomName(name, false) + ")" ): ""));
+					}
 				}
 			}
 			

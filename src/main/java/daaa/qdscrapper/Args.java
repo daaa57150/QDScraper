@@ -152,9 +152,15 @@ public class Args
 			System.exit(5);
 		}
 		
+		//TODO: validate giantbomb api key ?
+		
 		
 		// messages 
 		System.out.println("Working in rom directory " + this.romsDir);
+		if(romFile != null)
+		{
+			System.out.println("Using rom file " + romFile + " as the list of roms");
+		}
 		if(StringUtils.isEmpty(platform)) {
 			System.out.println("No platform specified, will make queries without specifying it");
 		}

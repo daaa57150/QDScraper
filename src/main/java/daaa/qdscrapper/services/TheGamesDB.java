@@ -17,7 +17,6 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -249,8 +248,7 @@ public class TheGamesDB
 	{
 		// xml parsing stuff
 		Document document = QDUtils.parseXML(xml);
-		XPathFactory xpathFactory = XPathFactory.newInstance();
-		XPath xpath = xpathFactory.newXPath();
+		XPath xpath = QDUtils.getXPath();
 		
 		List<Game> games = new ArrayList<>();
 		for(int i=1; ; i++)

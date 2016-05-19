@@ -15,6 +15,8 @@ import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -297,6 +299,16 @@ public class QDUtils
 	}
 	
 	
+	private static final XPath XPATH = XPathFactory.newInstance().newXPath();
+	/**
+	 * Get the xpath to query Documents
+	 * @return the xpath to query Documents
+	 */
+	public static XPath getXPath() {
+		return XPATH;
+	}
+	
+	
 	/* ---------------------------------------------------- */
 	/*							HTTP						*/
 	/* ---------------------------------------------------- */
@@ -304,7 +316,8 @@ public class QDUtils
 	/**
 	 * The lazy loaded http client
 	 */
-	private static HttpClient httpClient = null;
+	private static HttpClient HTTP_CLIENT = null;
+	
 	
 	/**
 	 * Builds the shared  http client
@@ -313,7 +326,7 @@ public class QDUtils
 	 */
 	public static HttpClient getHttpClient(Args args)
 	{		
-		if(httpClient == null)
+		if(HTTP_CLIENT == null)
 		{
 			HttpClientBuilder builder = HttpClientBuilder.create();
 			if(!StringUtils.isEmpty(args.proxyHost))
@@ -331,6 +344,9 @@ public class QDUtils
 				builder.setDefaultCredentialsProvider(credsProvider);
 			}
 			
+			// giantbomb wants a user agent absolutely
+			builder.setUserAgent(Props.get("http.user-agent")); // "https://github.com/daaa57150/QDScrapper"
+			
 			/*RequestConfig config = RequestConfig.custom()
 				    .setSocketTimeout(10 * 1000)
 				    .setConnectTimeout(10 * 1000)
@@ -339,11 +355,11 @@ public class QDUtils
 			
 			//TODO: add a configurable timeout
 			
-			httpClient = builder.build();
+			HTTP_CLIENT = builder.build();
 			
 			
 		}
-		return httpClient;
+		return HTTP_CLIENT;
 	}
 	
 	
@@ -382,7 +398,7 @@ public class QDUtils
 	public static HttpAnswer httpGet(Args args, String url) 
 	throws ClientProtocolException, IOException
 	{
-		HttpClient httpclient = QDUtils.getHttpClient(args);
+		HttpClient httpclient = getHttpClient(args);
 		HttpGet httpGet = new HttpGet(url);
 		HttpResponse response1 = httpclient.execute(httpGet);
 		HttpEntity entity1 = null;

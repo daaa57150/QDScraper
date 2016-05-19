@@ -5,10 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -63,11 +61,6 @@ public class ArcadeRoms {
 	}
 	
 	
-	
-	// static xpath to go a bit faster
-	private static XPathFactory XPATHFACTORY = XPathFactory.newInstance();
-	private static XPath XPATH = XPATHFACTORY.newXPath();
-	
 	/**
 	 * Get the name of the game from the name of the rom
 	 * @param rom the name of the rom, with the .zip extension
@@ -83,7 +76,7 @@ public class ArcadeRoms {
 		rom = RomCleaner.removeExtension(rom);
 		for(Document doc: getRomFiles())
 		{
-			Element node = (Element) XPATH.evaluate("menu/game[@name='"+rom+"']", doc, XPathConstants.NODE);
+			Element node = (Element) QDUtils.getXPath().evaluate("menu/game[@name='"+rom+"']", doc, XPathConstants.NODE);
 			if(node != null)
 			{
 				try
