@@ -6,6 +6,8 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import daaa.qdscrapper.Args;
+
 
 /**
  * Utilities to clean rom names 
@@ -148,6 +150,38 @@ public class RomCleaner
 	{
 		Matcher m = PATTERN_TYPE.matcher(filename);
 		return removeMultiSpaces(m.replaceAll(""));	
+	}
+	
+	/**
+	 * Get the name of the game that the user wants:
+	 * - the title from the api
+	 * - the raw rom name without the extension
+	 * - a cleaned rom name
+	 * @param rom name of the rom
+	 * @param translatedName the name of the rom file, or a converted name for arcade games
+	 * @param title title from thegamesdb
+	 * @param args app args
+	 * @return the desired name
+	 */
+	public static String getUserDesiredFilename(String rom, String translatedName, String title, Args args)
+	{
+		String name = null;
+		if(args.useFilename || StringUtils.isEmpty(title))
+		{
+			if(!StringUtils.isEmpty(args.cleanFilename))
+			{
+				name = RomCleaner.cleanWithArgs(translatedName, args.cleanFilename);
+			}
+			else
+			{
+				name = RomCleaner.removeExtension(translatedName);
+			}
+		}
+		else
+		{
+			name = title;
+		}
+		return name;
 	}
 }
 

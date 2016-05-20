@@ -101,8 +101,21 @@ public class App
 					System.out.println(rom + " is the rom name of " + name);
 				}
 				
-				// find matches
+				// find matches on TheGamesDB
+				System.out.println("Asking TheGamesDB...");
 				List<Game> games = TheGamesDB.search(rom, name, args);
+				if(CollectionUtils.isEmpty(games))
+				{
+					// then on giantbomb if nothing is found
+					System.out.println("Nothing found, trying GiantBomb...");
+					games = GiantBomb.search(rom, name, args);
+					if(CollectionUtils.isEmpty(games))
+					{
+						//System.out.println("No match either.");
+					}
+				}
+				
+				// now we have found games
 				if(CollectionUtils.isNotEmpty(games))
 				{
 					Game first = games.get(0);
@@ -130,20 +143,11 @@ public class App
 				}
 				else // not found
 				{
-					// try giantBomb
-					Game game = GiantBomb.search(rom, name, args);
-					if(game != null)
-					{
-						gameList.addGame(game);
-					}
-					else // not found again
-					{
-						Game empty = new Game(NO_API_ID);
-						empty.setRom(rom);
-						empty.setName(name);
-						notFound.addGame(empty);
-						System.out.println("Nothing found for " + rom + (args.arcade ? (" (" + RomCleaner.cleanRomName(name, false) + ")" ): ""));
-					}
+					Game empty = new Game(NO_API_ID);
+					empty.setRom(rom);
+					empty.setName(name);
+					notFound.addGame(empty);
+					System.out.println("Nothing found for " + rom + (args.arcade ? (" (" + RomCleaner.cleanRomName(name, false) + ")" ): ""));
 				}
 			}
 			

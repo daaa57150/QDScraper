@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -19,6 +21,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -412,6 +415,69 @@ public class QDUtils
 		    	EntityUtils.consume(entity1);
 		    }
 		}
+	}
+	
+	/**
+	 * Downloads an image
+	 * @param imageUrl the image to download
+	 * @param savePathNoExt the path where to save it, without the extension
+	 * @param args app args
+	 * @return the path where it was saved (with the extension)
+	 * @throws Exception
+	 */
+	public static String downloadImage(String imageUrl, String savePathNoExt, Args args) 
+	throws Exception
+	{
+		HttpClient httpclient = getHttpClient(args);
+		HttpGet httpGet = new HttpGet(imageUrl);
+		HttpResponse response1 = httpclient.execute(httpGet);
+		
+	    //System.out.println(response1.getStatusLine());
+	    HttpEntity entity1 = null;
+	    InputStream in = null;
+	    BufferedImage image = null;
+	    try {
+		    entity1 = response1.getEntity();
+			String contentType = entity1.getContentType().getValue();
+			String imageType = "";
+			if("image/png".equals(contentType))
+			{
+				imageType = "png";
+			}
+			else if("image/jpeg".equals(contentType))
+			{
+				imageType = "jpg";
+			}
+			else
+			{
+				// giantbomb sends application/octetstream for some images
+				//throw new Exception("Image type " + contentType + " not supported");
+				imageType = FilenameUtils.getExtension(imageUrl);
+				if(!"jpg".equals(imageType) && !"png".equals(imageType))
+				{
+					throw new Exception("Image type " + contentType + " with extension "+imageType+" not supported");
+				}
+			}
+		    
+		    in = entity1.getContent();
+		    image = QDUtils.resizeImage(in);
+		    
+		    //String filename = buildFileName(name, matchIndex, imageType);
+			//String path = (matchIndex > 1 ? args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar : args.romsDir + "downloaded_images"+File.separatorChar) + filename;
+		    String path = savePathNoExt + "." + imageType;
+		    File f = new File(path);
+			Files.deleteIfExists(f.toPath());
+		    Files.createDirectories(Paths.get(f.getParent()));
+			
+		    ImageIO.write(image, imageType, f);
+		    image.flush();
+		    return path;
+	    }
+	    finally {
+	    	if(entity1 != null) 	try { EntityUtils.consume(entity1); } finally{}
+	    	if(in != null) 			try { in.close(); 					} finally{}
+	    	if(image != null) 		try { image.flush(); 				} finally{}
+	    }
 	}
 	
 }

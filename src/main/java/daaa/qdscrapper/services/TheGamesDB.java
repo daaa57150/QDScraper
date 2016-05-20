@@ -1,9 +1,7 @@
 package daaa.qdscrapper.services;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -15,19 +13,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.xml.xpath.XPath;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.util.EntityUtils;
 import org.w3c.dom.Document;
 
 import daaa.qdscrapper.Args;
@@ -107,72 +100,15 @@ public class TheGamesDB
 	 * @param imageType extension for the image (png/jpg)
 	 * @return a unique filename for this run
 	 */
-	private static String buildFileName(String name, int matchIndex, String imageType)
+	private static String buildImageFileName(String name, int matchIndex, String imageType)
 	{
-		return QDUtils.sanitizeFilename(name) + "-daaa-" + matchIndex + "-img" + (imageType == null ? "" : ("." + imageType));
+		return QDUtils.sanitizeFilename(name) + "-" + THEGAMESDB_API_ID + "-" + matchIndex + (imageType == null ? "" : ("." + imageType));
 	}
 	
-	/**
-	 * Downloads the boxart from thegamesdb
-	 * @param name name of the game
-	 * @param imageUrl relative url of the boxart
-	 * @param imageBaseUrl base url of all images on thegamesdb
-	 * @param matchIndex the current match index
-	 * @param args app's arguments
-	 * @return the name of the downloaded image (not the path, just the file name)
-	 * @throws Exception
-	 */
-	private static String downloadImage(String name, String imageUrl, String imageBaseUrl, int matchIndex, Args args) 
-	throws Exception
-	{
-		HttpClient httpclient = QDUtils.getHttpClient(args);
-		String uri = imageBaseUrl + imageUrl;
-		HttpGet httpGet = new HttpGet(uri);
-		HttpResponse response1 = httpclient.execute(httpGet);
-		
-	    //System.out.println(response1.getStatusLine());
-	    HttpEntity entity1 = null;
-	    InputStream in = null;
-	    BufferedImage image = null;
-	    try {
-		    entity1 = response1.getEntity();
-			String contentType = entity1.getContentType().getValue();
-			String imageType = "";
-			if("image/png".equals(contentType))
-			{
-				imageType = "png";
-			}
-			else if("image/jpeg".equals(contentType))
-			{
-				imageType = "jpg";
-			}
-			else
-			{
-				throw new Exception("Image type " + contentType + " not supported");
-			}
-		    
-		    in = entity1.getContent();
-		    image = QDUtils.resizeImage(in);
-		    
-		    String filename = buildFileName(name, matchIndex, imageType);
-			String path = (matchIndex > 1 ? args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar : args.romsDir + "downloaded_images"+File.separatorChar) + filename;
-		    File f = new File(path);
-			Files.deleteIfExists(f.toPath());
-		    Files.createDirectories(Paths.get(f.getParent()));
-			
-		    ImageIO.write(image, imageType, f);
-		    image.flush();
-		    return filename;
-	    }
-	    finally {
-	    	if(entity1 != null) 	try { EntityUtils.consume(entity1); } finally{}
-	    	if(in != null) 			try { in.close(); 					} finally{}
-	    	if(image != null) 		try { image.flush(); 				} finally{}
-	    }
-	}
+	
 	
 	/**
-	 * Parses a date in MM/dd/yyyy format and sets the time to 00:00:00
+	 * Parses a date in MM/dd/yyyy format
 	 * @param input
 	 * @return
 	 */
@@ -186,6 +122,7 @@ public class TheGamesDB
 		{
 			try
 			{
+				// sometimes they only have the year
 				int year = Integer.valueOf(input);
 				Calendar cal = Calendar.getInstance();
 				cal.set(Calendar.YEAR, year);
@@ -200,37 +137,7 @@ public class TheGamesDB
 		}
 	}
 	
-	/**
-	 * Get the name of the game that the user wants:
-	 * - the title from thegames db
-	 * - the raw rom name without the extension
-	 * - a cleaned rom name
-	 * @param rom name of the rom
-	 * @param translatedName the name of the rom file, or a converted name for arcade games
-	 * @param title title from thegamesdb
-	 * @param args app args
-	 * @return the desired name
-	 */
-	public static String getUserDesiredFilename(String rom, String translatedName, String title, Args args)  // TODO: move somewhere else, it should be shared
-	{
-		String name = null;
-		if(args.useFilename || StringUtils.isEmpty(title))
-		{
-			if(!StringUtils.isEmpty(args.cleanFilename))
-			{
-				name = RomCleaner.cleanWithArgs(translatedName, args.cleanFilename);
-			}
-			else
-			{
-				name = RomCleaner.removeExtension(translatedName);
-			}
-		}
-		else
-		{
-			name = title;
-		}
-		return name;
-	}
+	
 
 	/**
 	 * Transforms an xml answer from thegamesdb to a list of games.
@@ -278,7 +185,7 @@ public class TheGamesDB
 			String title = xpath.evaluate("/Data/Game["+i+"]/GameTitle", document);
 			
 			// the user desired name
-			String name = getUserDesiredFilename(rom, translatedName, title, args);
+			String name = RomCleaner.getUserDesiredFilename(rom, translatedName, title, args);
 			
 			// genre
 			String genre = "";
@@ -301,7 +208,11 @@ public class TheGamesDB
 			String imageBaseUrl = xpath.evaluate("/Data/baseImgUrl", document);
 			//String imageBaseUrl = "http://thegamesdb.net/banners/_gameviewcache/"; // better image as it's the japanes original, but always width = 300
 			String imageUrl = xpath.evaluate("/Data/Game["+i+"]/Images/boxart[@side = 'front']", document);
-			String image = downloadImage(name, imageUrl, imageBaseUrl, i, args);
+			String filename = buildImageFileName(rom, i, null);
+			String path = (i > 1 ? args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar : args.romsDir + "downloaded_images" + File.separatorChar) + filename;
+			path = QDUtils.downloadImage(imageBaseUrl+imageUrl, path, args);
+			String pathExt = FilenameUtils.getExtension(path);
+			String image = StringUtils.isEmpty(pathExt) ? filename : (filename + "." + pathExt);
 			
 			game.setName(name);
 			game.setDesc(desc);
@@ -326,8 +237,8 @@ public class TheGamesDB
 				
 				// move the image from dupes to first if not first
 				if(i > 1) {
-					moveImage(args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar, args.romsDir + "downloaded_images" + File.separatorChar, buildFileName(name, i, null));
-					moveImage(args.romsDir + "downloaded_images" + File.separatorChar, args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar, buildFileName(name, 1, null));
+					moveImage(args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar, args.romsDir + "downloaded_images" + File.separatorChar, buildImageFileName(name, i, null));
+					moveImage(args.romsDir + "downloaded_images" + File.separatorChar, args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar, buildImageFileName(name, 1, null));
 				}
 				
 				if(sure.size() >= 2) //because some ... were output
