@@ -102,12 +102,12 @@ public class App
 				}
 				
 				// find matches on TheGamesDB
-				System.out.println("Asking TheGamesDB...");
+				//System.out.println("Asking TheGamesDB...");
 				List<Game> games = TheGamesDB.search(rom, name, args);
 				if(CollectionUtils.isEmpty(games))
 				{
 					// then on giantbomb if nothing is found
-					System.out.println("Nothing found, trying GiantBomb...");
+					//System.out.println("Nothing found, trying GiantBomb...");
 					games = GiantBomb.search(rom, name, args);
 					if(CollectionUtils.isEmpty(games))
 					{
@@ -121,12 +121,12 @@ public class App
 					Game first = games.get(0);
 					if(games.size() == 1)
 					{
-						System.out.println("found a match: " + first.getTitle() + " (" + first.getId() + ")");
+						System.out.println("found a match: " + first.getTitle() + " (" + first.getApi() + " " + first.getId() + ")");
 					}
 					else
 					{
 						System.out.println("found "+ games.size() +" matches:");
-						System.out.println("\t- "+ first.getTitle() + " (" + first.getId() + ")");
+						System.out.println("\t- "+ first.getTitle() + " (" + first.getApi() + " " + first.getId() + ")");
 					}
 					
 					gameList.addGame(games.get(0));
@@ -136,7 +136,7 @@ public class App
 					for(int i=1; i<games.size(); i++)
 					{
 						Game dupe = games.get(i);
-						System.out.println("\t- "+ dupe.getTitle() + " (" + dupe.getId() + ")");
+						System.out.println("\t- "+ dupe.getTitle() + " (" + dupe.getApi() + " " + dupe.getId() + ")");
 						gameListDupes.addGame(dupe);
 						gameListDupes.writeFile();
 					}
