@@ -116,7 +116,7 @@ public class Args
 		}
 		
 		if(StringUtils.isEmpty(romsDir)) {
-			System.out.println("Where are the roms and where do we output everything? use -romsDir");
+			System.out.println("Where are the roms and where do we output everything? use -dir");
 			System.exit(15);
 		}
 		

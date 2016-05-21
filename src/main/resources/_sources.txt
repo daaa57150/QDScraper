@@ -24,9 +24,15 @@ Files:
 
 ## Possible other sources ##
 http://api.gamesdbase.com/
-https://www.igdb.com/api
-arcade-museum.com
+http://www.arcade-museum.com
+https://www.mediawiki.org/wiki/API:Main_page#A_simple_example
+http://emumovies.com/
 
+
+https://www.igdb.com/api
+=> https://www.igdb.com/api/v1/documentation
+=> All we ask in return is that you state the following in a visible manner: Game information was freely provided by IGDB.com.
+=> api key: https://www.igdb.com/users/daaa57150/api_key: x2-XsIKkkmEFnAhj5oE33TtqPivfgs5hvfYbtV-Mpl8
 
 
 http://www.giantbomb.com/api/documentation#toc-0-15

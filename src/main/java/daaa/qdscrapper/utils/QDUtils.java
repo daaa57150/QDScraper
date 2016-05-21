@@ -24,6 +24,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -388,6 +391,9 @@ public class QDUtils
 		public String getContent() { return content; }
 		/** @param content the content to set */
 		public void setContent(String content) { this.content = content; }
+		/** {@inheritDoc}*/
+		@Override
+		public String toString(){return ReflectionToStringBuilder.toString(this, ToStringStyle.MULTI_LINE_STYLE);}
 	}
 	
 	/**
@@ -401,8 +407,30 @@ public class QDUtils
 	public static HttpAnswer httpGet(Args args, String url) 
 	throws ClientProtocolException, IOException
 	{
+		return httpGet(args, url, null);
+	}
+	
+	/**
+	 * Performs an http get query and returns the code and content as String
+	 * @param args app args
+	 * @param url the url to get
+	 * @param headers headers to add to the request
+	 * @return the content of the url with the status code
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 */
+	public static HttpAnswer httpGet(Args args, String url, Header[] headers)
+	throws ClientProtocolException, IOException
+	{
 		HttpClient httpclient = getHttpClient(args);
 		HttpGet httpGet = new HttpGet(url);
+		if(headers != null)
+		{
+			for(Header header:headers)
+			{
+				httpGet.setHeader(header);
+			}
+		}
 		HttpResponse response1 = httpclient.execute(httpGet);
 		HttpEntity entity1 = null;
 		try {
@@ -416,6 +444,7 @@ public class QDUtils
 		    }
 		}
 	}
+	
 	
 	/**
 	 * Downloads an image
