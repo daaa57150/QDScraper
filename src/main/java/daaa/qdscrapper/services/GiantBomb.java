@@ -311,12 +311,15 @@ public class GiantBomb
 		
 		// image
 		String imageUrl = xpath.evaluate("response/results/image/super_url", gameDocument);
-		String filename = buildImageFileName(rom, index, null);
-		String path = (index > 1 ? args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar : args.romsDir + "downloaded_images" + File.separatorChar) + filename;
-	    String imagePath = QDUtils.downloadImage(imageUrl, path, args);
-	    String pathExt = FilenameUtils.getExtension(imagePath);
-		String image = StringUtils.isEmpty(pathExt) ? filename : (filename + "." + pathExt);
-		
+		String image = null;
+		if(!StringUtils.isEmpty(imageUrl))
+		{
+			String filename = buildImageFileName(rom, index, null);
+			String path = (index > 1 ? args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar : args.romsDir + "downloaded_images" + File.separatorChar) + filename;
+		    String imagePath = QDUtils.downloadImage(imageUrl, path, args);
+		    String pathExt = FilenameUtils.getExtension(imagePath);
+			image = StringUtils.isEmpty(pathExt) ? filename : (filename + "." + pathExt);
+		}
 	    // put everything together
 	    game.setName(name);
 		game.setDesc(desc);
@@ -387,6 +390,7 @@ public class GiantBomb
 				{	
 					if(RomCleaner.isSameRom(translatedName, game.getTitle()))
 					{
+						// TODO: move to app
 						// 100% match on the name, ensure this gets to top result
 						List<Game> sure = new ArrayList<Game>();
 						sure.add(game);

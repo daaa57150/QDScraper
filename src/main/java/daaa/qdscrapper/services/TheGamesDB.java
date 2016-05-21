@@ -208,11 +208,15 @@ public class TheGamesDB
 			String imageBaseUrl = xpath.evaluate("/Data/baseImgUrl", document);
 			//String imageBaseUrl = "http://thegamesdb.net/banners/_gameviewcache/"; // better image as it's the japanes original, but always width = 300
 			String imageUrl = xpath.evaluate("/Data/Game["+i+"]/Images/boxart[@side = 'front']", document);
-			String filename = buildImageFileName(rom, i, null);
-			String path = (i > 1 ? args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar : args.romsDir + "downloaded_images" + File.separatorChar) + filename;
-			path = QDUtils.downloadImage(imageBaseUrl+imageUrl, path, args);
-			String pathExt = FilenameUtils.getExtension(path);
-			String image = StringUtils.isEmpty(pathExt) ? filename : (filename + "." + pathExt);
+			String image = null;
+			if(!StringUtils.isEmpty(imageUrl))
+			{
+				String filename = buildImageFileName(rom, i, null);
+				String path = (i > 1 ? args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar : args.romsDir + "downloaded_images" + File.separatorChar) + filename;
+				path = QDUtils.downloadImage(imageBaseUrl+imageUrl, path, args);
+				String pathExt = FilenameUtils.getExtension(path);
+				image = StringUtils.isEmpty(pathExt) ? filename : (filename + "." + pathExt);
+			}
 			
 			game.setName(name);
 			game.setDesc(desc);
@@ -227,7 +231,7 @@ public class TheGamesDB
 			game.setId(id);
 			game.setTitle(title);
 			
-			
+			// TODO: move to app, mix with giantbomb results if no 100% match
 			if(RomCleaner.isSameRom(translatedName, title))
 			{
 				// 100% match on the name, ensure this gets to top result

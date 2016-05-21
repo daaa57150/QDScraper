@@ -25,6 +25,7 @@ Files:
 ## Possible other sources ##
 http://api.gamesdbase.com/
 https://www.igdb.com/api
+arcade-museum.com
 
 
 
