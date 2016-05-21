@@ -228,7 +228,7 @@ public class TheGamesDB
 			game.setTitle(title);
 			
 			
-			if(RomCleaner.isSameRom(rom, title))
+			if(RomCleaner.isSameRom(translatedName, title))
 			{
 				// 100% match on the name, ensure this gets to top result
 				List<Game> sure = new ArrayList<Game>();

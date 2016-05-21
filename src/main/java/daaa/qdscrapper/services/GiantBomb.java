@@ -3,6 +3,10 @@ package daaa.qdscrapper.services;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -380,13 +384,34 @@ public class GiantBomb
 			try {
 				Game game = toGame(rom, translatedName, gameDocument, args, i+1);
 				if(game!=null)
-				{
-					games.add(game);
+				{	
+					if(RomCleaner.isSameRom(translatedName, game.getTitle()))
+					{
+						// 100% match on the name, ensure this gets to top result
+						List<Game> sure = new ArrayList<Game>();
+						sure.add(game);
+						sure.addAll(games);
+						
+						// move the image from dupes to first if not first
+						if(i > 1) {
+							Path dupePath = Paths.get(args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar, args.romsDir + "downloaded_images" + File.separatorChar);
+							Path downPath = Paths.get(args.romsDir + "downloaded_images" + File.separatorChar, args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar);
+							
+							Files.move(Paths.get(dupePath.toString(), game.getImage()), Paths.get(downPath.toString(), game.getImage()), StandardCopyOption.REPLACE_EXISTING);
+							Files.move(Paths.get(downPath.toString(), games.get(0).getImage()), Paths.get(dupePath.toString(), games.get(0).getImage()), StandardCopyOption.REPLACE_EXISTING);
+						}
+						
+						return sure; 
+					}
+					else
+					{
+						games.add(game);
+					}
 				}
 			} catch (Exception e) {
 				System.err.println("Error parsing xml from giantbomb!");
 				e.printStackTrace();
-				System.exit(15); //TODO: erreur avec mslugX!
+				System.exit(15);
 			}
 			
 		}

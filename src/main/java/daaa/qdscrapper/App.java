@@ -93,7 +93,7 @@ public class App
 						empty.setName(name);
 						notFound.addGame(empty);
 
-						System.out.println("Nothing found for " + rom + " in the arcade roms files");
+						System.out.println("  => Nothing found for " + rom + " in the arcade roms files");
 						
 						continue;
 					}
@@ -121,11 +121,11 @@ public class App
 					Game first = games.get(0);
 					if(games.size() == 1)
 					{
-						System.out.println("found a match: " + first.getTitle() + " (" + first.getApi() + " " + first.getId() + ")");
+						System.out.println("  => Found a match: " + first.getTitle() + " (" + first.getApi() + " " + first.getId() + ")");
 					}
 					else
 					{
-						System.out.println("found "+ games.size() +" matches:");
+						System.out.println("  => Found "+ games.size() +" matches:");
 						System.out.println("\t- "+ first.getTitle() + " (" + first.getApi() + " " + first.getId() + ")");
 					}
 					
@@ -147,7 +147,7 @@ public class App
 					empty.setRom(rom);
 					empty.setName(name);
 					notFound.addGame(empty);
-					System.out.println("Nothing found for " + rom + (args.arcade ? (" (" + RomCleaner.cleanRomName(name, false) + ")" ): ""));
+					System.out.println("  => Nothing found for " + rom + (args.arcade ? (" (" + RomCleaner.cleanRomName(name, false) + ")" ): ""));
 				}
 			}
 			

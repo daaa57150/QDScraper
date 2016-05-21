@@ -44,7 +44,7 @@ public class RomCleaner
 		
 		if(hard)
 		{
-			cleanRom = cleanRom.replaceAll("[!-:,;.%?_']", "");
+			cleanRom = cleanRom.replaceAll("[-!:,;.%?_']", " ");
 		}
 		
 		cleanRom = removeMultiSpaces(cleanRom);
