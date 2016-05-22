@@ -53,21 +53,6 @@ public class RomCleaner
 		return cleanRom;
 	}
 	
-	/**
-	 * compares the hard cleaned names of 2 roms 
-	 * @param rom1
-	 * @param rom2
-	 * @return
-	 */
-	public static boolean isSameRom(String rom1, String rom2)
-	{
-		rom1 = cleanRomName(rom1, true);
-		rom1 = rom1.toLowerCase();
-		rom2 = cleanRomName(rom2, true);
-		rom2 = rom2.toLowerCase();
-		
-		return rom1.equals(rom2);
-	}
 	
 	/**
 	 * Removes a file's extension, limitation is that the extension cannot be more than 3 chars long 

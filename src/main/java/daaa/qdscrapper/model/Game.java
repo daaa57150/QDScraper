@@ -26,9 +26,11 @@ public class Game
 	private List<String> genres = new ArrayList<>();
 	private String players;
 	private boolean bios = false;
-	
+	private boolean perfectMatch = false;
+
 	// the api that retrieved this result
 	private String api;
+	private String legalText; //some apis request showing a legal text to the user
 	
 	/* *
 	 * Default constructor
@@ -244,7 +246,32 @@ public class Game
 	{
 		this.id = id;
 	}
-	
+	/**
+	 * @return the perfectMatch
+	 */
+	public boolean isPerfectMatch() {
+		return perfectMatch;
+	}
+	/**
+	 * @param perfectMatch the perfectMatch to set
+	 */
+	public void setPerfectMatch(boolean perfectMatch) {
+		this.perfectMatch = perfectMatch;
+	}
+	/**
+	 * @return the legalText
+	 */
+	public String getLegalText() {
+		return legalText;
+	}
+
+	/**
+	 * @param legalText the legalText to set
+	 */
+	public void setLegalText(String legalText) {
+		this.legalText = legalText;
+	}
+
 	
 
 	/**

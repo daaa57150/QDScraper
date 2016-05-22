@@ -1,6 +1,11 @@
 package daaa.qdscrapper;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -9,9 +14,10 @@ import org.apache.commons.lang3.StringUtils;
 import daaa.qdscrapper.model.Game;
 import daaa.qdscrapper.model.GamelistXML;
 import daaa.qdscrapper.services.ArcadeRoms;
-import daaa.qdscrapper.services.GiantBomb;
 import daaa.qdscrapper.services.RomBrowser;
-import daaa.qdscrapper.services.TheGamesDB;
+import daaa.qdscrapper.services.api.ApiService;
+import daaa.qdscrapper.services.api.impl.GiantBombApiService;
+import daaa.qdscrapper.services.api.impl.TheGamesDBApiService;
 import daaa.qdscrapper.utils.QDUtils;
 import daaa.qdscrapper.utils.RomCleaner;
 
@@ -27,6 +33,14 @@ public class App
 	 * Files containing duplicate entries are prefixed with this
 	 */
 	private static final String DUPE_PREFIX = Props.get("dupes.prefix");
+	/**
+	 * Dupe images will go into this folder
+	 */
+	private static final String DUPE_IMAGES_FOLDER = Props.get("dupe.images.folder");
+	/**
+	 * Images will go inside this folder
+	 */
+	private static final String IMAGES_FOLDER = Props.get("images.folder");
 	/**
 	 * Empty and bios games are marked with this api flag
 	 */
@@ -44,9 +58,58 @@ public class App
 		if(args.romFile != null) {
 			return RomBrowser.listRomsFromFile(args.romFile);
 		}
-		//else {
-			return RomBrowser.listRomsInFolder(args.romsDir);
-		//}
+		//else
+		return RomBrowser.listRomsInFolder(args.romsDir);
+	}
+	
+	/**
+	 * Finds the perfect match in the list of games
+	 * @param games
+	 * @return
+	 */
+	private static Game findPerfectMatch(List<Game> games)
+	{
+		for(Game game: games)
+		{
+			if(game.isPerfectMatch()) return game;
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Builds a String describing a game meant to output to the user in the console
+	 * @param game the game to format
+	 * @return the game as a String
+	 */
+	private static String formatGameForSysout(Game game)
+	{
+		String str = game.getTitle() + " (" + game.getApi() + " " + game.getId() + ")";
+		String legal = game.getLegalText();
+		if(!StringUtils.isEmpty(legal))
+		{
+			str += ("  // " + legal);
+		}
+		return str;
+	}
+	
+	/**
+	 * Moves a file, ensures directory structure exists
+	 * @param from the image to move
+	 * @param to the path to move to
+	 * @throws IOException 
+	 */
+	private static void moveFile(String from, String to) 
+	throws IOException
+	{
+		File ff = new File(from);
+		File ft = new File(to);
+		
+		if(ff.exists())
+		{
+			ft.mkdirs();
+			Files.move(Paths.get(from), Paths.get(to), StandardCopyOption.REPLACE_EXISTING);
+		}
 	}
 	
 	/**
@@ -63,6 +126,17 @@ public class App
 		GamelistXML gameList = new GamelistXML(args.romsDir + "gamelist.xml", args.appendToName);
 		GamelistXML notFound = new GamelistXML(args.romsDir + "NOT_FOUND.xml", args.appendToName);
 		
+		// services to use, in that order, to look for a perfect match
+		List<ApiService> apiServices = new ArrayList<>();
+		apiServices.add(new TheGamesDBApiService());
+		
+		if(args.giantBombApiKey != null)
+		{
+			apiServices.add(new GiantBombApiService());
+		}
+		
+		
+		// process roms
 		List<String> roms = findRoms(args);
 		for(String rom: roms)
 		{
@@ -93,7 +167,7 @@ public class App
 						empty.setName(name);
 						notFound.addGame(empty);
 
-						System.out.println("  => Nothing found for " + rom + " in the arcade roms files");
+						System.out.println("  => Nothing found for " + rom + " in the arcade rom files");
 						
 						continue;
 					}
@@ -101,44 +175,65 @@ public class App
 					System.out.println(rom + " is the rom name of " + name);
 				}
 				
-				// find matches on TheGamesDB
-				//System.out.println("Asking TheGamesDB...");
-				List<Game> games = TheGamesDB.search(rom, name, args);
-				if(CollectionUtils.isEmpty(games))
+				// ask the services
+				List<Game> games = new ArrayList<>();
+				for(ApiService service: apiServices)
 				{
-					// then on giantbomb if nothing is found
-					//System.out.println("Nothing found, trying GiantBomb...");
-					games = GiantBomb.search(rom, name, args);
-					if(CollectionUtils.isEmpty(games))
+					List<Game> apiGames = service.search(rom, name, args);
+					if(!CollectionUtils.isEmpty(apiGames))
 					{
-						//System.out.println("No match either.");
+						games.addAll(apiGames);
+						Game perfectMatch = findPerfectMatch(apiGames);
+						if(perfectMatch != null)
+						{
+							break;
+						}
 					}
 				}
+				
 				
 				// now we have found games
 				if(CollectionUtils.isNotEmpty(games))
 				{
-					Game first = games.get(0);
-					if(games.size() == 1)
+					// TODO: move dupe images
+					Game topResult = findPerfectMatch(games);
+					if(topResult != null) // perfect match found
 					{
-						System.out.println("  => Found a match: " + first.getTitle() + " (" + first.getApi() + " " + first.getId() + ")");
+						System.out.println("  => Found a perfect match: " + formatGameForSysout(topResult));
+						gameList.addGame(topResult);
 					}
 					else
 					{
-						System.out.println("  => Found "+ games.size() +" matches:");
-						System.out.println("\t- "+ first.getTitle() + " (" + first.getApi() + " " + first.getId() + ")");
-					}
-					
-					gameList.addGame(games.get(0));
-					
-					//dupes
-					GamelistXML gameListDupes = new GamelistXML(args.dupesDir + DUPE_PREFIX + QDUtils.sanitizeFilename(rom) + ".xml", args.appendToName);
-					for(int i=1; i<games.size(); i++)
-					{
-						Game dupe = games.get(i);
-						System.out.println("\t- "+ dupe.getTitle() + " (" + dupe.getApi() + " " + dupe.getId() + ")");
-						gameListDupes.addGame(dupe);
-						gameListDupes.writeFile();
+						topResult = games.get(0); //  first match is the best I guess
+						gameList.addGame(topResult);
+						if(games.size() == 1) // only one match
+						{
+							System.out.println("  => Found a match: " + formatGameForSysout(topResult));
+						}
+						else // many results found
+						{
+							System.out.println("  => Found "+ games.size() +" matches:");
+							System.out.println("\t- "+ formatGameForSysout(topResult));
+							
+							//dupes
+							GamelistXML gameListDupes = new GamelistXML(args.dupesDir + DUPE_PREFIX + QDUtils.sanitizeFilename(rom) + ".xml", args.appendToName);
+							for(Game dupe: games)
+							{
+								if(dupe != topResult) // it's really a dupe
+								{
+									System.out.println("\t- "+ formatGameForSysout(dupe));
+									gameListDupes.addGame(dupe);
+									if(!StringUtils.isEmpty(dupe.getImage()))
+									{
+										// move the image to the dupe images directory
+										String from = args.romsDir + File.separatorChar + IMAGES_FOLDER + File.separatorChar + dupe.getImage();
+										String to = args.dupesDir + File.separatorChar + DUPE_IMAGES_FOLDER + File.separatorChar + dupe.getImage();
+										moveFile(from, to);
+									}
+								}
+							}
+							gameListDupes.writeFile();
+						}
 					}
 				}
 				else // not found

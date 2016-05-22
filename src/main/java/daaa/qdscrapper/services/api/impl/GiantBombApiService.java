@@ -1,12 +1,8 @@
-package daaa.qdscrapper.services;
+package daaa.qdscrapper.services.api.impl;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,6 +28,8 @@ import org.xml.sax.SAXException;
 import daaa.qdscrapper.Args;
 import daaa.qdscrapper.Props;
 import daaa.qdscrapper.model.Game;
+import daaa.qdscrapper.services.Platform;
+import daaa.qdscrapper.services.api.ApiService;
 import daaa.qdscrapper.utils.QDUtils;
 import daaa.qdscrapper.utils.QDUtils.HttpAnswer;
 import daaa.qdscrapper.utils.RomCleaner;
@@ -46,16 +44,13 @@ import daaa.qdscrapper.utils.RomCleaner;
  * @author daaa
  *
  */
-public class GiantBomb 
+public class GiantBombApiService extends ApiService
 {
-	private GiantBomb(){} // do not instanciate
-
 	private static final String URL_GIANTBOMB_API = Props.get("giantbomb.url"); //"http://www.giantbomb.com/api/"; 
-	//private static final String SEARCH = "search/?resources=game";
 	private static final String GIANTBOMB_API_ID = "GiantBomb";
 	private static final int SEARCH_LIMIT = Integer.valueOf(Props.get("giantbomb.search.limit"));
 	private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	private static final String DUPE_IMAGES_FOLDER = Props.get("dupe.images.folder");
+	private static final String IMAGES_FOLDER = Props.get("images.folder");
 	
 	
 	/**
@@ -65,7 +60,7 @@ public class GiantBomb
 	 * @return the forged url 
 	 * @throws URISyntaxException
 	 */
-	private static String buildUrlSearch(String name, String apiKey) 
+	private String buildUrlSearch(String name, String apiKey) 
 	throws URISyntaxException
 	{
 		URIBuilder uri = new URIBuilder(URL_GIANTBOMB_API + "search/");
@@ -83,7 +78,7 @@ public class GiantBomb
 	 * @return the forged url
 	 * @throws URISyntaxException 
 	 */
-	private static String buildUrlGame(String url, String apiKey) 
+	private String buildUrlGame(String url, String apiKey) 
 	throws URISyntaxException
 	{
 		URIBuilder uri = new URIBuilder(url);
@@ -101,7 +96,7 @@ public class GiantBomb
 	 * @throws IOException
 	 * @throws XPathExpressionException
 	 */
-	private static boolean validateXmlAnswer(Document document)
+	private boolean validateXmlAnswer(Document document)
 	{
 		try
 		{
@@ -133,7 +128,7 @@ public class GiantBomb
 	 * @throws ParserConfigurationException
 	 * @throws SAXException
 	 */
-	private static Document search(String name, Args args) 
+	private Document search(String name, Args args) 
 	{
 		try
 		{
@@ -167,7 +162,7 @@ public class GiantBomb
 	 * @param wantedPlatforms
 	 * @return the list of url to games that match
 	 */
-	private static List<String> getUrlOfFirstGamesForPlatforms(Document searchDocument, String[] wantedPlatforms)
+	private List<String> getUrlOfFirstGamesForPlatforms(Document searchDocument, String[] wantedPlatforms)
 	{
 		List<String> urls = new ArrayList<String>();
 		List<String> wpList = Arrays.asList(wantedPlatforms);
@@ -207,7 +202,7 @@ public class GiantBomb
 	 * @param args app's args
 	 * @return the parsed document
 	 */
-	private static Document parseGame(String url, Args args)
+	private Document parseGame(String url, Args args)
 	{
 		try
 		{
@@ -240,7 +235,7 @@ public class GiantBomb
 	 * @param input
 	 * @return
 	 */
-	private static Date parseDate(String input)
+	private Date parseDate(String input)
 	{
 		try
 		{
@@ -259,7 +254,7 @@ public class GiantBomb
 	 * @param imageType extension for the image (png/jpg)
 	 * @return a unique filename for this run
 	 */
-	private static String buildImageFileName(String name, int matchIndex, String imageType)
+	private String buildImageFileName(String name, int matchIndex, String imageType)
 	{
 		return QDUtils.sanitizeFilename(name) + "-" + GIANTBOMB_API_ID + "-" + matchIndex + (imageType == null ? "" : ("." + imageType));
 	}
@@ -274,7 +269,7 @@ public class GiantBomb
 	 * @return the game
 	 * @throws XPathExpressionException 
 	 */
-	private static Game toGame(String rom, String translatedName, Document gameDocument, Args args, int index) 
+	private Game toGame(String rom, String translatedName, Document gameDocument, Args args, int index) 
 	throws Exception
 	{
 		XPath xpath = QDUtils.getXPath();
@@ -315,7 +310,7 @@ public class GiantBomb
 		if(!StringUtils.isEmpty(imageUrl))
 		{
 			String filename = buildImageFileName(rom, index, null);
-			String path = (index > 1 ? args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar : args.romsDir + "downloaded_images" + File.separatorChar) + filename;
+			String path = args.romsDir + IMAGES_FOLDER + File.separatorChar + filename;
 		    String imagePath = QDUtils.downloadImage(imageUrl, path, args);
 		    String pathExt = FilenameUtils.getExtension(imagePath);
 			image = StringUtils.isEmpty(pathExt) ? filename : (filename + "." + pathExt);
@@ -342,11 +337,11 @@ public class GiantBomb
 	 * @param args app's arguments
 	 * @return the first few matches
 	 */
-	public static List<Game> search(String rom, String translatedName, Args args) 
+	@Override
+	public List<Game> search(String rom, String translatedName, Args args) 
 	{
 		if(args.giantBombApiKey == null)
 		{
-			
 			return null;
 		}
 		
@@ -388,28 +383,12 @@ public class GiantBomb
 				Game game = toGame(rom, translatedName, gameDocument, args, i+1);
 				if(game!=null)
 				{	
-					if(RomCleaner.isSameRom(translatedName, game.getTitle()))
+					games.add(game);
+					if(isSameRom(translatedName, game.getTitle()))
 					{
-						// TODO: move to app
-						// 100% match on the name, ensure this gets to top result
-						List<Game> sure = new ArrayList<Game>();
-						sure.add(game);
-						sure.addAll(games);
-						
-						// move the image from dupes to first if not first
-						if(i > 1) {
-							Path dupePath = Paths.get(args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar, args.romsDir + "downloaded_images" + File.separatorChar);
-							Path downPath = Paths.get(args.romsDir + "downloaded_images" + File.separatorChar, args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar);
-							
-							Files.move(Paths.get(dupePath.toString(), game.getImage()), Paths.get(downPath.toString(), game.getImage()), StandardCopyOption.REPLACE_EXISTING);
-							Files.move(Paths.get(downPath.toString(), games.get(0).getImage()), Paths.get(dupePath.toString(), games.get(0).getImage()), StandardCopyOption.REPLACE_EXISTING);
-						}
-						
-						return sure; 
-					}
-					else
-					{
-						games.add(game);
+						// 100% match on the name, we can stop
+						game.setPerfectMatch(true);
+						return games;
 					}
 				}
 			} catch (Exception e) {

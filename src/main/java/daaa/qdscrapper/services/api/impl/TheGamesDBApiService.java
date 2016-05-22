@@ -1,11 +1,8 @@
-package daaa.qdscrapper.services;
+package daaa.qdscrapper.services.api.impl;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,6 +23,8 @@ import org.w3c.dom.Document;
 import daaa.qdscrapper.Args;
 import daaa.qdscrapper.Props;
 import daaa.qdscrapper.model.Game;
+import daaa.qdscrapper.services.Platform;
+import daaa.qdscrapper.services.api.ApiService;
 import daaa.qdscrapper.utils.QDUtils;
 import daaa.qdscrapper.utils.QDUtils.HttpAnswer;
 import daaa.qdscrapper.utils.RomCleaner;
@@ -36,15 +35,14 @@ import daaa.qdscrapper.utils.RomCleaner;
  * @author daaa
  *
  */
-public class TheGamesDB
+public class TheGamesDBApiService extends ApiService
 {
-	private TheGamesDB(){} // do not instanciate
 	
 	private static final String URL_GAMESDB_API = Props.get("thegamesdb.url");//"http://thegamesdb.net/api/"; 
 	private static final String GET_GAME = "GetGame.php";
 	private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyy");
-	private static final String DUPE_IMAGES_FOLDER = Props.get("dupe.images.folder");
 	private static final String THEGAMESDB_API_ID = "TheGamesDB";
+	private static final String IMAGES_FOLDER = Props.get("images.folder");
 	
 	
 	
@@ -55,7 +53,7 @@ public class TheGamesDB
 	 * @return the xml result from thegamesdb
 	 * @throws URISyntaxException
 	 */
-	private static String buildGetGame(String name, String platform) throws URISyntaxException
+	private String buildGetGame(String name, String platform) throws URISyntaxException
 	{
 		URIBuilder uri = new URIBuilder(URL_GAMESDB_API + GET_GAME);
 		uri.addParameter("name", name);
@@ -78,7 +76,7 @@ public class TheGamesDB
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 */
-	private static String searchXml(String name, String platform, Args args)
+	private String searchXml(String name, String platform, Args args)
 	throws ClientProtocolException, IOException, URISyntaxException
 	{
 		String url = buildGetGame(name, platform);
@@ -100,7 +98,7 @@ public class TheGamesDB
 	 * @param imageType extension for the image (png/jpg)
 	 * @return a unique filename for this run
 	 */
-	private static String buildImageFileName(String name, int matchIndex, String imageType)
+	private String buildImageFileName(String name, int matchIndex, String imageType)
 	{
 		return QDUtils.sanitizeFilename(name) + "-" + THEGAMESDB_API_ID + "-" + matchIndex + (imageType == null ? "" : ("." + imageType));
 	}
@@ -112,7 +110,7 @@ public class TheGamesDB
 	 * @param input
 	 * @return
 	 */
-	private static Date parseDate(String input)
+	private Date parseDate(String input)
 	{
 		try
 		{
@@ -150,7 +148,7 @@ public class TheGamesDB
 	 * @return the list of games
 	 * @throws Exception
 	 */
-	private static List<Game> toGames(String rom, String translatedName, String xml, Args args) 
+	private List<Game> toGames(String rom, String translatedName, String xml, Args args) 
 	throws Exception
 	{
 		// xml parsing stuff
@@ -212,7 +210,7 @@ public class TheGamesDB
 			if(!StringUtils.isEmpty(imageUrl))
 			{
 				String filename = buildImageFileName(rom, i, null);
-				String path = (i > 1 ? args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar : args.romsDir + "downloaded_images" + File.separatorChar) + filename;
+				String path = args.romsDir + IMAGES_FOLDER + File.separatorChar + filename;
 				path = QDUtils.downloadImage(imageBaseUrl+imageUrl, path, args);
 				String pathExt = FilenameUtils.getExtension(path);
 				image = StringUtils.isEmpty(pathExt) ? filename : (filename + "." + pathExt);
@@ -231,30 +229,19 @@ public class TheGamesDB
 			game.setId(id);
 			game.setTitle(title);
 			
-			// TODO: move to app, mix with giantbomb results if no 100% match
-			if(RomCleaner.isSameRom(translatedName, title))
+			games.add(game);
+			
+			if(isSameRom(translatedName, title))
 			{
-				// 100% match on the name, ensure this gets to top result
-				List<Game> sure = new ArrayList<Game>();
-				sure.add(game);
-				sure.addAll(games);
+				game.setPerfectMatch(true);
 				
-				// move the image from dupes to first if not first
-				if(i > 1) {
-					moveImage(args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar, args.romsDir + "downloaded_images" + File.separatorChar, buildImageFileName(name, i, null));
-					moveImage(args.romsDir + "downloaded_images" + File.separatorChar, args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar, buildImageFileName(name, 1, null));
-				}
-				
-				if(sure.size() >= 2) //because some ... were output
+				// 100% match on the name, we can stop
+				if(games.size() >= 2) //because some ... were output
 				{
 					System.out.println("");
 				}
 				
-				return sure; 
-			}
-			else
-			{
-				games.add(game);
+				return games; // stop 
 			}
 		}
 		
@@ -266,13 +253,13 @@ public class TheGamesDB
 		return games;
 	}
 	
-	/**
+	/* *
 	 * Moves an image from one folder to another
 	 * @param from
 	 * @param to
 	 * @param nameWithoutExtension
-	 */
-	private static void moveImage(String from, String to, String nameWithoutExtension)
+	 * /
+	private void moveImage(String from, String to, String nameWithoutExtension)
 	{
 		File f = Paths.get(from, nameWithoutExtension + ".jpg").toFile();
 		String ext = "jpg";
@@ -289,16 +276,17 @@ public class TheGamesDB
 		{
 			e.printStackTrace(); // should not happen
 		}
-	}
+	} */
 	
 	/**
-	 * 
+	 * Searches TheGamesDB
 	 * @param rom name of the rom to look for (file name)
 	 * @param translatedName the name to use for searches, might be == rom or something else (arcade games)
 	 * @return the list of games found, first match should be the one
 	 * @throws Exception
 	 */
-	public static List<Game> search(String rom, String translatedName, Args args) 
+	@Override
+	public List<Game> search(String rom, String translatedName, Args args) 
 	{
 		String cleanName = RomCleaner.cleanRomName(translatedName, false);
 			

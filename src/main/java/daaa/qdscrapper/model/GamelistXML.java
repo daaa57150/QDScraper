@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import daaa.qdscrapper.Props;
 import daaa.qdscrapper.utils.QDUtils;
 
 
@@ -32,7 +33,7 @@ public class GamelistXML
 	private static final String GAMELIST_ROOT_TAGNAME = "gameList";
 	private static final String GAMELIST_GAME_TAGNAME = "game";
 	private static final String ROM_PATH = "./";
-	private static final String IMAGE_PATH = ROM_PATH + "downloaded_images/";
+	private static final String IMAGE_PATH = ROM_PATH + Props.get("images.folder") + File.separatorChar;
 	private static final String TEMPLATE_GAME = 
 			  "<path>{path}</path>\n"
 			+ "<name>{name}</name>\n"
@@ -83,7 +84,7 @@ public class GamelistXML
 	 * @param apiGameTitle the title of the game exactly as retrieved from the api (useful for dupes)
 	 * @return the open &lt;game> tag
 	 */
-	private String makeGameTagOpen(String api, String gameId, String apiGameTitle) 
+	private String makeGameTagOpen(Game game) 
 	{
 		/*if(StringUtils.isEmpty(gameId))
 		{
@@ -91,11 +92,18 @@ public class GamelistXML
 		}
 		// else 
 		*/
+		
+		String api = game.getApi();
+		String gameId = game.getId();
+		String apiGameTitle = StringEscapeUtils.escapeXml(game.getTitle());
 		 
 		Map<String, String> attrs = new HashMap<String, String>();
 		attrs.put("id", gameId);
 		attrs.put("source", api);
 		attrs.put("api-title", apiGameTitle);
+		if(game.isPerfectMatch()) {
+			attrs.put("perfect-match", "true");
+		}
 		return QDUtils.makeTagOpen(GAMELIST_GAME_TAGNAME, attrs);
 	}
 	
@@ -145,8 +153,7 @@ public class GamelistXML
 			String path = ROM_PATH + StringEscapeUtils.escapeXml(game.getRom());
 
 			// start game
-			String title = StringEscapeUtils.escapeXml(game.getTitle());
-			out.write(QDUtils.tabulate(makeGameTagOpen(game.getApi(), game.getId(), title), 1) + "\n");
+			out.write(QDUtils.tabulate(makeGameTagOpen(game), 1) + "\n");
 			
 			
 			// is it a bios file?
@@ -165,13 +172,13 @@ public class GamelistXML
 			{
 				// format and escape everything, bis
 				String name = StringEscapeUtils.escapeXml(game.getName() + addToName);
-				String desc = StringEscapeUtils.escapeXml(game.getDesc());
-				String image = StringUtils.isEmpty(game.getImage()) ? "" : StringEscapeUtils.escapeXml(IMAGE_PATH + game.getImage()); //TODO: image should not contain slashes
+				String desc = StringEscapeUtils.escapeXml(game.getDesc()); //TODO: add the legal text? let's see if igdb says something
+				String image = StringUtils.isEmpty(game.getImage()) ? "" : StringEscapeUtils.escapeXml(IMAGE_PATH + game.getImage());
 				String rating = game.getRating() == 0 ? "" : "" + (game.getRating() / 10.0f);
 				String releasedate = game.getReleasedate() == null ? "" : SDF.format(game.getReleasedate());
 				String developer = StringUtils.isEmpty(game.getDeveloper()) ? "" : StringEscapeUtils.escapeXml(game.getDeveloper());
 				String publisher = StringUtils.isEmpty(game.getPublisher()) ? "" : StringEscapeUtils.escapeXml(game.getPublisher());
-				String genre = CollectionUtils.isEmpty(game.getGenres()) ? "" : StringUtils.join(game.getGenres(), "/"); // TODO: shorten the genres, remove "Action" if many
+				String genre = CollectionUtils.isEmpty(game.getGenres()) ? "" : StringUtils.join(game.getGenres(), "/"); // TODO: shorten the genres, remove "Action" if many => see apiService?
 				String players = game.getPlayers();
 				
 				// template
