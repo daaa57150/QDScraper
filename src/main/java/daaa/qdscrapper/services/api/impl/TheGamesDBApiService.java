@@ -293,14 +293,14 @@ public class TheGamesDBApiService extends ApiService
 		String xml = null;
 		
 		// we'll search for these platforms
-		String[] platforms = null; 	
+		String[] platforms = null; 	// TODO: wantedplatforms
 		if(args.arcade)
 		{
 			platforms = new String[]{Platform.NEOGEO, Platform.ARCADE};
 		}
 		else
 		{
-			platforms = new String[]{args.platform};
+			platforms = new String[]{args.platform}; // TODO: many
 		}
 		
 		// search

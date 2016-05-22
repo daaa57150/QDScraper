@@ -358,7 +358,7 @@ public class GiantBombApiService extends ApiService
 		}
 		else
 		{
-			wantedPlatforms = new String[]{Platform.asGiantBomb(args.platform)};
+			wantedPlatforms = new String[]{Platform.asGiantBomb(args.platform)}; // TODO: many
 		}
 		
 		// search
