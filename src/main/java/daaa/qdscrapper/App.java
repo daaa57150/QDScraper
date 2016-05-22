@@ -151,7 +151,7 @@ public class App
 				game.setRom(rom);
 				game.setBios(true);
 				gameList.addGame(game);
-				System.out.println("this is a bios file, added as hidden");
+				System.out.println("  => This is a bios file, added as hidden");
 			}
 			else
 			{
@@ -186,7 +186,7 @@ public class App
 						Game perfectMatch = findPerfectMatch(apiGames);
 						if(perfectMatch != null)
 						{
-							break;
+							break; // yes there is a perfect match, we stop here
 						}
 					}
 				}
@@ -195,9 +195,8 @@ public class App
 				// now we have found games
 				if(CollectionUtils.isNotEmpty(games))
 				{
-					// TODO: move dupe images
 					Game topResult = findPerfectMatch(games);
-					if(topResult != null) // perfect match found
+					if(topResult != null) // perfect match found TODO: perfect match with image > perfect match without!!
 					{
 						System.out.println("  => Found a perfect match: " + formatGameForSysout(topResult));
 						gameList.addGame(topResult);

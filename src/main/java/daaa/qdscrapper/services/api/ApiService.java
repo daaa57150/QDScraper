@@ -38,4 +38,6 @@ public abstract class ApiService
 	{
 		return null;
 	}
+	
+	// TODO: add some progress info (... from TGDB)
 }
