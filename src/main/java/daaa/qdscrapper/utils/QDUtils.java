@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -49,6 +50,7 @@ import org.xml.sax.SAXException;
 
 import daaa.qdscrapper.Args;
 import daaa.qdscrapper.Props;
+import daaa.qdscrapper.model.Game;
 
 /**
  * All-purposes utils that had no place anywhere else
@@ -136,6 +138,22 @@ public class QDUtils
 		{
 			//if(srcImage != null) srcImage.flush();
 		}
+	}
+	
+	
+	/**
+	 * Finds the perfect match in the list of games
+	 * @param games
+	 * @return
+	 */
+	public static Game findPerfectMatch(List<Game> games)
+	{
+		for(Game game: games)
+		{
+			if(game.isPerfectMatch()) return game;
+		}
+		
+		return null;
 	}
 	
 	

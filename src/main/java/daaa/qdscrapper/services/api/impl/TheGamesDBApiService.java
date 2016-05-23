@@ -12,7 +12,6 @@ import java.util.List;
 
 import javax.xml.xpath.XPath;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -49,18 +48,17 @@ public class TheGamesDBApiService extends ApiService
 	/**
 	 * Builds the 'getGame' api url
 	 * @param name name of the game
-	 * @param platform optional platform (ES platform name)
+	 * @param wantedPlatform optional platform (TGDB platform name)
 	 * @return the xml result from thegamesdb
 	 * @throws URISyntaxException
 	 */
-	private String buildGetGame(String name, String platform) throws URISyntaxException
+	private String buildGetGame(String name, String wantedPlatform) throws URISyntaxException
 	{
 		URIBuilder uri = new URIBuilder(URL_GAMESDB_API + GET_GAME);
 		uri.addParameter("name", name);
-		String p = Platform.asTheGamesDB(platform);
-		if(StringUtils.isNotEmpty(p))
+		if(StringUtils.isNotEmpty(wantedPlatform))
 		{
-			uri.addParameter("platform", p);
+			uri.addParameter("platform", wantedPlatform);
 		}
 		
 		return uri.toString();
@@ -69,17 +67,17 @@ public class TheGamesDBApiService extends ApiService
 	/**
 	 * Searches a game on thegamesdb, return its xml answer
 	 * @param name the name of the game to search
-	 * @param platform the platform filter
+	 * @param wantedPlatform the platform filter in TGDB format
 	 * @param args the app's arguments (uses the platform)
 	 * @return the xml answer from thegamesdb
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 */
-	private String searchXml(String name, String platform, Args args)
+	private String searchXml(String name, String wantedPlatform, Args args)
 	throws ClientProtocolException, IOException, URISyntaxException
 	{
-		String url = buildGetGame(name, platform);
+		String url = buildGetGame(name, wantedPlatform);
 		HttpAnswer answer = QDUtils.httpGet(args, url);
 		if(answer.getCode() != HttpStatus.SC_OK)
 		{
@@ -236,7 +234,7 @@ public class TheGamesDBApiService extends ApiService
 				game.setPerfectMatch(true);
 				
 				// 100% match on the name, we can stop
-				if(games.size() >= 2) //because some ... were output
+				if(games.size() >= 2) //because some ... were output TODO: delegate to super class
 				{
 					System.out.println("");
 				}
@@ -293,22 +291,17 @@ public class TheGamesDBApiService extends ApiService
 		String xml = null;
 		
 		// we'll search for these platforms
-		String[] platforms = null; 	// TODO: wantedplatforms
-		if(args.arcade)
-		{
-			platforms = new String[]{Platform.NEOGEO, Platform.ARCADE};
-		}
-		else
-		{
-			platforms = new String[]{args.platform}; // TODO: many
-		}
+		String[] wantedPlatforms = Platform.asTheGamesDB(args.platform); // if args.arcade, platform is already 'arcade'
+		
+		// will contain our matches
+		List<Game> games = new ArrayList<Game>();
 		
 		// search
-		for(String platform: platforms)
+		for(String wantedPlatform: wantedPlatforms)
 		{
 			try
 			{
-				xml = searchXml(cleanName, platform, args);
+				xml = searchXml(cleanName, wantedPlatform, args);
 			}
 			catch(IOException | URISyntaxException e)
 			{
@@ -319,12 +312,13 @@ public class TheGamesDBApiService extends ApiService
 			// TODO: try to search and if nothing comes out, retry the search by cleaning more chars (-,!) etc..
 			try
 			{
-				List<Game> games = toGames(rom, translatedName, xml, args);
-				if(!CollectionUtils.isEmpty(games))
+				List<Game> gamesThisPlatform = toGames(rom, translatedName, xml, args);
+				if(QDUtils.findPerfectMatch(gamesThisPlatform) != null)
 				{
 					return games;
 				}
 				// else continue searching
+				games.addAll(gamesThisPlatform);
 			}
 			catch(Exception e)
 			{
@@ -336,7 +330,7 @@ public class TheGamesDBApiService extends ApiService
 			};
 		}
 		 
-		return null;
+		return games;
 	}
 }
 

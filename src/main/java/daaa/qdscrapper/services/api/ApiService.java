@@ -23,12 +23,19 @@ public abstract class ApiService
 	 * @param rom2
 	 * @return
 	 */
-	protected boolean isSameRom(String rom1, String rom2)
+	protected boolean isSameRom(String rom1, String rom2) 
 	{
 		rom1 = RomCleaner.cleanRomName(rom1, true);
 		rom1 = rom1.toLowerCase();
+		rom1 = rom1.replaceAll("\\bthe\\b", ""); // are there other words sometimes misplaced?
+		rom1 = RomCleaner.removeMultiSpaces(rom1);
+		rom1 = rom1.trim();
+		
 		rom2 = RomCleaner.cleanRomName(rom2, true);
 		rom2 = rom2.toLowerCase();
+		rom2 = rom2.replaceAll("\\bthe\\b", "");
+		rom2 = RomCleaner.removeMultiSpaces(rom2);
+		rom2 = rom2.trim();
 		
 		return rom1.equals(rom2);
 	}

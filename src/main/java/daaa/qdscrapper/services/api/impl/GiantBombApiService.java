@@ -351,15 +351,7 @@ public class GiantBombApiService extends ApiService
 		String cleanName = RomCleaner.cleanRomName(translatedName, false);
 		
 		// we'll search for these platforms
-		String[] wantedPlatforms = null; 	
-		if(args.arcade)
-		{
-			wantedPlatforms = new String[]{Platform.asGiantBomb(Platform.NEOGEO), Platform.asGiantBomb(Platform.ARCADE)};
-		}
-		else
-		{
-			wantedPlatforms = new String[]{Platform.asGiantBomb(args.platform)}; // TODO: many
-		}
+		String[] wantedPlatforms = Platform.asGiantBomb(args.platform); // if args.arcade, platform is already 'arcade'
 		
 		// search
 		Document searchDocument = search(cleanName, args);

@@ -26,7 +26,7 @@ public class RomCleaner
 	 * @param s the string to clean
 	 * @return the cleaned string
 	 */
-	private static String removeMultiSpaces(String s)
+	public static String removeMultiSpaces(String s)
 	{
 		return s.replaceAll("\\s+", " ");
 	}

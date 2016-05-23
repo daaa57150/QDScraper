@@ -63,21 +63,6 @@ public class App
 	}
 	
 	/**
-	 * Finds the perfect match in the list of games
-	 * @param games
-	 * @return
-	 */
-	private static Game findPerfectMatch(List<Game> games)
-	{
-		for(Game game: games)
-		{
-			if(game.isPerfectMatch()) return game;
-		}
-		
-		return null;
-	}
-	
-	/**
 	 * Builds a String describing a game meant to output to the user in the console
 	 * @param game the game to format
 	 * @return the game as a String
@@ -183,7 +168,7 @@ public class App
 					if(!CollectionUtils.isEmpty(apiGames))
 					{
 						games.addAll(apiGames);
-						Game perfectMatch = findPerfectMatch(apiGames);
+						Game perfectMatch = QDUtils.findPerfectMatch(apiGames);
 						if(perfectMatch != null)
 						{
 							break; // yes there is a perfect match, we stop here
@@ -195,11 +180,11 @@ public class App
 				// now we have found games
 				if(CollectionUtils.isNotEmpty(games))
 				{
-					Game topResult = findPerfectMatch(games);
+					Game topResult = QDUtils.findPerfectMatch(games);
 					if(topResult != null) // perfect match found TODO: perfect match with image > perfect match without!!
 					{
 						System.out.println("  => Found a perfect match: " + formatGameForSysout(topResult));
-						gameList.addGame(topResult);
+						gameList.addGame(topResult); //TODO: still output the dupes
 					}
 					else
 					{
@@ -213,26 +198,35 @@ public class App
 						{
 							System.out.println("  => Found "+ games.size() +" matches:");
 							System.out.println("\t- "+ formatGameForSysout(topResult));
-							
-							//dupes
-							GamelistXML gameListDupes = new GamelistXML(args.dupesDir + DUPE_PREFIX + QDUtils.sanitizeFilename(rom) + ".xml", args.appendToName);
-							for(Game dupe: games)
+						}
+					}
+
+						
+					//dupes
+					if(games.size() > 1)
+					{
+						GamelistXML gameListDupes = new GamelistXML(args.dupesDir + DUPE_PREFIX + QDUtils.sanitizeFilename(rom) + ".xml", args.appendToName);
+						for(Game dupe: games)
+						{
+							if(dupe != topResult) // it's really a dupe
 							{
-								if(dupe != topResult) // it's really a dupe
+								// if perfect match, the user is not interested in dupes
+								if(!topResult.isPerfectMatch())
 								{
 									System.out.println("\t- "+ formatGameForSysout(dupe));
-									gameListDupes.addGame(dupe);
-									if(!StringUtils.isEmpty(dupe.getImage()))
-									{
-										// move the image to the dupe images directory
-										String from = args.romsDir + File.separatorChar + IMAGES_FOLDER + File.separatorChar + dupe.getImage();
-										String to = args.dupesDir + File.separatorChar + DUPE_IMAGES_FOLDER + File.separatorChar + dupe.getImage();
-										moveFile(from, to);
-									}
+								}
+								
+								gameListDupes.addGame(dupe);
+								if(!StringUtils.isEmpty(dupe.getImage()))
+								{
+									// move the image to the dupe images directory
+									String from = args.romsDir + File.separatorChar + IMAGES_FOLDER + File.separatorChar + dupe.getImage();
+									String to = args.dupesDir + File.separatorChar + DUPE_IMAGES_FOLDER + File.separatorChar + dupe.getImage();
+									moveFile(from, to);
 								}
 							}
-							gameListDupes.writeFile();
 						}
+						gameListDupes.writeFile();
 					}
 				}
 				else // not found

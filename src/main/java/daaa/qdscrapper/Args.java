@@ -125,15 +125,15 @@ public class Args
 		
 		if(arcade)
 		{
-			platform = Platform.ARCADE; //TODO: also neogeo
+			platform = Platform.ARCADE;
 		}
 		else
 		{
-			if(!Platform.isSupported(platform))
+			/*if(!Platform.isSupported(platform))
 			{
 				System.out.println("Platform '" + platform + "' not supported, will make queries without specifying it");
 				System.out.println("Supported platforms: " + StringUtils.join(Platform.getSupportedPlatforms(), ", "));
-			}
+			}*/
 		}
 		
 		// TODO: list of error numbers?
