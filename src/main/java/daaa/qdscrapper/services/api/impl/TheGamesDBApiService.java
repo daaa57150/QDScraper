@@ -81,7 +81,7 @@ public class TheGamesDBApiService extends ApiService
 		HttpAnswer answer = QDUtils.httpGet(args, url);
 		if(answer.getCode() != HttpStatus.SC_OK)
 		{
-			System.err.println("Error querying TheGamesDB (code "+answer.getCode()+") with url " + url);
+			System.err.println("Error querying TheGamesDB (code "+answer.getCode()+": '"+answer.getReason()+"') with url " + url);
 			return null;
 		}
 		return answer.getContent();

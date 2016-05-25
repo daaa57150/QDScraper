@@ -396,10 +396,12 @@ public class QDUtils
 	{
 		private int code;
 		private String content;
+		private String reason;
 		/** Constructor */
-		public HttpAnswer(int code, String response){
+		public HttpAnswer(int code, String response, String reason){
 			this.code = code;
 			this.content = response;
+			this.reason = reason;
 		}
 		/** @return the code */
 		public int getCode() { return code; }
@@ -409,6 +411,10 @@ public class QDUtils
 		public String getContent() { return content; }
 		/** @param content the content to set */
 		public void setContent(String content) { this.content = content; }
+		/** @return the reason */
+		public String getReason() { return reason; }
+		/** @param reason the reason to set */
+		public void setReason(String reason) { this.reason = reason; }
 		/** {@inheritDoc}*/
 		@Override
 		public String toString(){return ReflectionToStringBuilder.toString(this, ToStringStyle.MULTI_LINE_STYLE);}
@@ -455,7 +461,8 @@ public class QDUtils
 		    entity1 = response1.getEntity();
 		    String content = IOUtils.toString(entity1.getContent(), Charset.forName("UTF-8"));
 		    int code = response1.getStatusLine().getStatusCode();
-		    return new HttpAnswer(code, content);
+		    String reason = response1.getStatusLine().getReasonPhrase();
+		    return new HttpAnswer(code, content, reason);
 		} finally {
 		    if(entity1 != null) {
 		    	EntityUtils.consume(entity1);
