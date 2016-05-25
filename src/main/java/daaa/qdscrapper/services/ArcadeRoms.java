@@ -39,7 +39,7 @@ public class ArcadeRoms {
 	private static List<Document> DOCUMENTS = null;
 	
 	/**
-	 * Parses the xml files do documents ready for xpath
+	 * Parses the xml files to documents ready for xpath
 	 * @return
 	 * @throws ParserConfigurationException
 	 * @throws SAXException

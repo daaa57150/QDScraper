@@ -26,7 +26,10 @@ public class Game
 	private List<String> genres = new ArrayList<>();
 	private String players;
 	private boolean bios = false;
-	private boolean perfectMatch = false;
+	//private boolean perfectMatch = false;
+	
+	// 1 = perfect match, 0 = totally different
+	private double score;
 
 	// the api that retrieved this result
 	private String api;
@@ -246,18 +249,27 @@ public class Game
 	{
 		this.id = id;
 	}
+	
 	/**
-	 * @return the perfectMatch
+	 * @return the match
+	 */
+	public double getScore() {
+		return score;
+	}
+	/**
+	 * @param match the match to set
+	 */
+	public void setScore(double score) {
+		this.score = score;
+	}
+	
+	/**
+	 * @return true if perfect match
 	 */
 	public boolean isPerfectMatch() {
-		return perfectMatch;
+		return score == 1;
 	}
-	/**
-	 * @param perfectMatch the perfectMatch to set
-	 */
-	public void setPerfectMatch(boolean perfectMatch) {
-		this.perfectMatch = perfectMatch;
-	}
+
 	/**
 	 * @return the legalText
 	 */

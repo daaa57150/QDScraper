@@ -69,7 +69,7 @@ public class App
 	 */
 	private static String formatGameForSysout(Game game)
 	{
-		String str = game.getTitle() + " (" + game.getApi() + " " + game.getId() + ")";
+		String str = game.getTitle() + " (" + game.getApi() + " " + game.getId() + " / " + (game.getScore() * 100) + "%)";
 		String legal = game.getLegalText();
 		if(!StringUtils.isEmpty(legal))
 		{
@@ -117,6 +117,7 @@ public class App
 		
 		if(args.giantBombApiKey != null)
 		{
+			//System.out.println("GiantBomb api key is present, we'll ask GiantBomb");
 			apiServices.add(new GiantBombApiService());
 		}
 		
@@ -188,7 +189,7 @@ public class App
 					}
 					else
 					{
-						topResult = games.get(0); //  first match is the best I guess
+						topResult = games.get(0); //  first match is the best I guess //TODO: use the score instead!
 						gameList.addGame(topResult);
 						if(games.size() == 1) // only one match
 						{

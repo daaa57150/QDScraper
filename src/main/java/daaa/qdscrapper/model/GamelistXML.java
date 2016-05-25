@@ -6,10 +6,13 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -95,15 +98,18 @@ public class GamelistXML
 		
 		String api = game.getApi();
 		String gameId = game.getId();
-		String apiGameTitle = StringEscapeUtils.escapeXml(game.getTitle());
+		String apiGameTitle = StringEscapeUtils.escapeXml10(game.getTitle());
+		
+		DecimalFormat df = new DecimalFormat("0", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+		//df.setMaximumFractionDigits(340); //340 = DecimalFormat.DOUBLE_FRACTION_DIGITS
+		df.setMaximumFractionDigits(4);
+		String score = df.format(game.getScore());
 		 
 		Map<String, String> attrs = new HashMap<String, String>();
 		attrs.put("id", gameId);
 		attrs.put("source", api);
 		attrs.put("api-title", apiGameTitle);
-		if(game.isPerfectMatch()) {
-			attrs.put("perfect-match", "true");
-		}
+		attrs.put("score", score);
 		return QDUtils.makeTagOpen(GAMELIST_GAME_TAGNAME, attrs);
 	}
 	
@@ -150,7 +156,7 @@ public class GamelistXML
 		for(Game game: games)
 		{
 			// path to the rom in the recalbox
-			String path = ROM_PATH + StringEscapeUtils.escapeXml(game.getRom());
+			String path = ROM_PATH + StringEscapeUtils.escapeXml10(game.getRom());
 
 			// start game
 			out.write(QDUtils.tabulate(makeGameTagOpen(game), 1) + "\n");
@@ -171,13 +177,13 @@ public class GamelistXML
 			else // a game
 			{
 				// format and escape everything, bis
-				String name = StringEscapeUtils.escapeXml(game.getName() + addToName);
-				String desc = StringEscapeUtils.escapeXml(game.getDesc()); //TODO: add the legal text? let's see if igdb says something
-				String image = StringUtils.isEmpty(game.getImage()) ? "" : StringEscapeUtils.escapeXml(IMAGE_PATH + game.getImage());
+				String name = StringEscapeUtils.escapeXml10(game.getName() + addToName);
+				String desc = StringEscapeUtils.escapeXml10(game.getDesc()); //TODO: add the legal text? let's see if igdb says something
+				String image = StringUtils.isEmpty(game.getImage()) ? "" : StringEscapeUtils.escapeXml10(IMAGE_PATH + game.getImage());
 				String rating = game.getRating() == 0 ? "" : "" + (game.getRating() / 10.0f);
 				String releasedate = game.getReleasedate() == null ? "" : SDF.format(game.getReleasedate());
-				String developer = StringUtils.isEmpty(game.getDeveloper()) ? "" : StringEscapeUtils.escapeXml(game.getDeveloper());
-				String publisher = StringUtils.isEmpty(game.getPublisher()) ? "" : StringEscapeUtils.escapeXml(game.getPublisher());
+				String developer = StringUtils.isEmpty(game.getDeveloper()) ? "" : StringEscapeUtils.escapeXml10(game.getDeveloper());
+				String publisher = StringUtils.isEmpty(game.getPublisher()) ? "" : StringEscapeUtils.escapeXml10(game.getPublisher());
 				String genre = CollectionUtils.isEmpty(game.getGenres()) ? "" : StringUtils.join(game.getGenres(), "/"); // TODO: shorten the genres, remove "Action" if many => see apiService?
 				String players = game.getPlayers();
 				

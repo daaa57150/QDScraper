@@ -2,6 +2,10 @@ package daaa.qdscrapper.services.api;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.ibm.icu.text.Normalizer2;
+
 import daaa.qdscrapper.Args;
 import daaa.qdscrapper.model.Game;
 import daaa.qdscrapper.utils.RomCleaner;
@@ -17,27 +21,47 @@ public abstract class ApiService
 	public abstract List<Game> search(String rom, String translatedName, Args args);
 	
 	
+	
+	private static String normalize(String rom)
+	{
+		rom = RomCleaner.cleanRomName(rom, true);
+		rom = StringUtils.stripAccents(rom);
+		rom = Normalizer2.getNFKCCasefoldInstance().normalize(rom);//rom.toLowerCase();
+		rom = rom.replaceAll("\\bthe\\b", ""); // are there other words sometimes misplaced?
+		rom = rom.replaceAll("æ", "ae");
+		rom = rom.replaceAll("œ", "oe");
+		rom = RomCleaner.removeMultiSpaces(rom);
+		rom = rom.trim();
+		
+		return rom;
+	}
+	
 	/**
 	 * compares the hard cleaned names of 2 roms 
 	 * @param rom1
 	 * @param rom2
 	 * @return
 	 */
-	protected boolean isSameRom(String rom1, String rom2) 
+	public static boolean isSameRom(String rom1, String rom2) 
 	{
-		rom1 = RomCleaner.cleanRomName(rom1, true);
-		rom1 = rom1.toLowerCase();
-		rom1 = rom1.replaceAll("\\bthe\\b", ""); // are there other words sometimes misplaced?
-		rom1 = RomCleaner.removeMultiSpaces(rom1);
-		rom1 = rom1.trim();
-		
-		rom2 = RomCleaner.cleanRomName(rom2, true);
-		rom2 = rom2.toLowerCase();
-		rom2 = rom2.replaceAll("\\bthe\\b", "");
-		rom2 = RomCleaner.removeMultiSpaces(rom2);
-		rom2 = rom2.trim();
+		rom1 = normalize(rom1);
+		rom2 = normalize(rom2);
 		
 		return rom1.equals(rom2);
+	}
+	
+	public static double scoreComparison(String rom1, String rom2)
+	{
+		rom1 = normalize(rom1);
+		rom2 = normalize(rom2);
+		
+		return StringUtils.getJaroWinklerDistance(rom1, rom2);
+	}
+	
+	protected void setGameScore(Game game, String translatedName, String apiTitle)
+	{
+		double score = scoreComparison(translatedName, apiTitle);
+		game.setScore(score);
 	}
 	
 	// TODO: remove "Action" if there are other genres + use only 2 max
@@ -48,3 +72,21 @@ public abstract class ApiService
 	
 	// TODO: add some progress info (... from TGDB)
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
