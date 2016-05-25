@@ -229,10 +229,9 @@ public class TheGamesDBApiService extends ApiService
 			
 			games.add(game);
 			
-			if(isSameRom(translatedName, title))
-			{
-				game.setPerfectMatch(true);
-				
+			setGameScore(game, translatedName, title);
+			if(game.isPerfectMatch())
+			{	
 				// 100% match on the name, we can stop
 				if(games.size() >= 2) //because some ... were output TODO: delegate to super class
 				{
@@ -315,7 +314,7 @@ public class TheGamesDBApiService extends ApiService
 				List<Game> gamesThisPlatform = toGames(rom, translatedName, xml, args);
 				if(QDUtils.findPerfectMatch(gamesThisPlatform) != null)
 				{
-					return games;
+					return gamesThisPlatform;
 				}
 				// else continue searching
 				games.addAll(gamesThisPlatform);

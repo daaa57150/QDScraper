@@ -64,7 +64,7 @@ public class QDUtils
 	private QDUtils() {} //do not instanciate
 	
 	/**
-	 * add tabulations before each lines of the input string
+	 * add tabulations before each line of the input string
 	 * @param in the input string to tabulate
 	 * @param nb the number of tabulations to add to each line
 	 * @return the tabulated string
@@ -150,7 +150,7 @@ public class QDUtils
 	{
 		for(Game game: games)
 		{
-			if(game.isPerfectMatch()) return game;
+			if(game.getScore() == 1.0) return game;
 		}
 		
 		return null;
@@ -504,6 +504,7 @@ public class QDUtils
 					imageType = FilenameUtils.getExtension(imageUrl);
 					if(!"jpg".equals(imageType) && !"png".equals(imageType))
 					{
+						// TODO: convert gif to jpeg or png
 						throw new Exception("Image type " + contentType + " with extension "+imageType+" not supported");
 					}
 				}

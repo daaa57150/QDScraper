@@ -376,10 +376,10 @@ public class GiantBombApiService extends ApiService
 				if(game!=null)
 				{	
 					games.add(game);
-					if(isSameRom(translatedName, game.getTitle()))
+					setGameScore(game, translatedName, game.getTitle());
+					if(game.isPerfectMatch())
 					{
 						// 100% match on the name, we can stop
-						game.setPerfectMatch(true);
 						return games;
 					}
 				}

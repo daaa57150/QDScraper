@@ -1,7 +1,18 @@
 package daaa.QDScrapper.services;
 
-import daaa.qdscrapper.utils.RomCleaner;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.TestCase;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.ibm.icu.text.Normalizer2;
+
+import daaa.qdscrapper.services.api.ApiService;
+import daaa.qdscrapper.utils.RomCleaner;
 
 /**
  * Some random tests
@@ -28,4 +39,72 @@ public class MultiTest extends TestCase {
 		assertTrue(rom1.trim().equals(rom2.trim()));
 	}
 	
+	public static void testJaroWinklerScore()
+	{
+		List<String> compareMe = new ArrayList<String>();
+		
+		compareMe.add("The legend of zelda");
+		compareMe.add("Legend of zelda, the");
+		
+		compareMe.add("Metal Slug - Super Vehicle-001");
+		compareMe.add("Metal Slug");
+		
+		compareMe.add("Metal Slug - Super Vehicle-001");
+		compareMe.add("Metal Slug X");
+		
+		compareMe.add("Mærchen Maze");
+		compareMe.add("Märchen Maze");
+
+		compareMe.add("Marchen Maze");
+		compareMe.add("Märchen Maze");
+		
+		for(int i=0; i<compareMe.size()-1; i+=2)
+		{
+			processJarodWinkler(compareMe.get(i), compareMe.get(i+1));
+		}
+	}
+	
+	private static void processJarodWinkler(String s1, String s2)
+	{
+		double score = ApiService.scoreComparison(s1, s2);//StringUtils.getJaroWinklerDistance(s1, s2);
+		System.out.println(s1 + " // " + s2 + " => " + score);
+	}
+	
+	public static void testNormalizeString()
+	{
+		String[] ss = {"Mærchen Maze", "Märchen Maze", "Maerchen Maze", "¼½¾ÆæĲĳŒœﬀﬁﬂﬃﬄﬅﬆ"};
+		
+		
+		
+		
+		for(String s: ss)
+		{
+			System.out.println("## " + s + " : ");
+			System.out.println("Apache => " + StringUtils.stripAccents(s));
+			System.out.println("J NFC  => " + Normalizer.normalize(s, Form.NFC));
+			System.out.println("J NFD  => " + Normalizer.normalize(s, Form.NFD));
+			System.out.println("J NFKC => " + Normalizer.normalize(s, Form.NFKC));
+			System.out.println("J NFKD => " + Normalizer.normalize(s, Form.NFKD));
+			System.out.println("I NFC  => " + Normalizer2.getNFCInstance().normalize(s));
+			System.out.println("I NFD  => " + Normalizer2.getNFDInstance().normalize(s));
+			System.out.println("I NFKCC=> " + Normalizer2.getNFKCCasefoldInstance().normalize(s));
+			System.out.println("I NFKC => " + Normalizer2.getNFKCInstance().normalize(s));
+			System.out.println("I NFCKD=> " + Normalizer2.getNFKDInstance().normalize(s));
+			System.out.println();
+		}
+	}
+	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
