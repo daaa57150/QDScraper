@@ -1,0 +1,48 @@
+### ROMS DIR ###
+
+# amstradcpc
+# atari2600
+# atari7800
+# atarist
+cavestory
+# fba
+# fba_libretro
+# fds
+# gamegear
+# gb
+# gba
+# gbc
+# gw
+lutro
+# lynx
+# mame
+# mastersystem
+# megadrive
+moonlight
+# msx
+# msx1
+# msx2
+# n64
+# neogeo
+# nes
+# ngp
+# ngpc
+# o2em
+# pcengine
+# pcenginecd
+prboom
+# psx
+scummvm
+# sega32x
+# segacd
+# sg1000
+# snes
+# supergrafx
+# vectrex
+# virtualboy
+# wswan
+# wswanc
+zx81
+# zxspectrum
+
+

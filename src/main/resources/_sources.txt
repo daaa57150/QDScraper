@@ -9,9 +9,11 @@ Sources used:
 	- http://www.mamedb.com/category/BIOS
 	
 ## platform.properties ##
-Converts recalbox platforms (folder names) to TheGamesDb platforms
+Converts recalbox platforms (folder names) to the apis platforms
 Sources used:
 	- http://thegamesdb.net/api/GetPlatformsList.php
+	- http://www.giantbomb.com/api/platforms/?api_key=xxx
+	- https://www.igdb.com/api/v1/platforms
 	- The recalbox share/roms folder over the network
 
 ## Arcade game names ##
@@ -21,6 +23,16 @@ Files:
 	- Final Burn Alpha.xml 	v1.0			05/15/2015
 
 	
+## ScummVM game names ##
+Source: http://scummvm.sourceforge.net/compatibility/
+File:
+	- ScummVM.xls	v1.8.1 	05/26/2016
+
+
+
+
+
+
 
 ## Possible other sources ##
 http://api.gamesdbase.com/
