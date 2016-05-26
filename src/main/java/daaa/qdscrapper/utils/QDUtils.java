@@ -511,16 +511,14 @@ public class QDUtils
 					imageType = FilenameUtils.getExtension(imageUrl);
 					if(!"jpg".equals(imageType) && !"png".equals(imageType))
 					{
-						// TODO: convert gif to jpeg or png
-						throw new Exception("Image type " + contentType + " with extension "+imageType+" not supported");
+						// back to default png, might be externalizable
+						imageType="png";
 					}
 				}
 			    
 			    in = entity1.getContent();
 			    image = QDUtils.resizeImage(in);
 			    
-			    //String filename = buildFileName(name, matchIndex, imageType);
-				//String path = (matchIndex > 1 ? args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar : args.romsDir + "downloaded_images"+File.separatorChar) + filename;
 			    String path = savePathNoExt + "." + imageType;
 			    File f = new File(path);
 				Files.deleteIfExists(f.toPath());
