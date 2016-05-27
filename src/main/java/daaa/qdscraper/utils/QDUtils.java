@@ -1,4 +1,4 @@
-package daaa.qdscrapper.utils;
+package daaa.qdscraper.utils;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -51,9 +51,9 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import daaa.qdscrapper.Args;
-import daaa.qdscrapper.Props;
-import daaa.qdscrapper.model.Game;
+import daaa.qdscraper.Args;
+import daaa.qdscraper.Props;
+import daaa.qdscraper.model.Game;
 
 /**
  * All-purposes utils that had no place anywhere else

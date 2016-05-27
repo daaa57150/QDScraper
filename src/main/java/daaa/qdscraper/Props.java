@@ -1,10 +1,10 @@
-package daaa.qdscrapper;
+package daaa.qdscraper;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
 
-import daaa.qdscrapper.utils.QDUtils;
+import daaa.qdscraper.utils.QDUtils;
 
 /**
  * Contains all the properties for the app; ie values that should not
@@ -46,7 +46,7 @@ public class Props {
 		{
 			if(FILE == null)
 			{
-				PROPS = QDUtils.loadClasspathProperties("scrapper.properties");
+				PROPS = QDUtils.loadClasspathProperties("scraper.properties");
 			}
 			else
 			{

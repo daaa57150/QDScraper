@@ -1,4 +1,4 @@
-package daaa.qdscrapper.utils;
+package daaa.qdscraper.utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import daaa.qdscrapper.Args;
+import daaa.qdscraper.Args;
 
 
 /**

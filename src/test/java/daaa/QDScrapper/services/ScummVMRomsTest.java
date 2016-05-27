@@ -11,7 +11,7 @@ import junit.framework.TestCase;
 import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.SAXException;
 
-import daaa.qdscrapper.services.ScummVMRoms;
+import daaa.qdscraper.services.ScummVMRoms;
 
 /**
  * Tests the ArcadeRoms class

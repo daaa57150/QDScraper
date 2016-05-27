@@ -1,4 +1,4 @@
-package daaa.qdscrapper.services.api.impl;
+package daaa.qdscraper.services.api.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,14 +19,14 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.utils.URIBuilder;
 import org.w3c.dom.Document;
 
-import daaa.qdscrapper.Args;
-import daaa.qdscrapper.Props;
-import daaa.qdscrapper.model.Game;
-import daaa.qdscrapper.services.PlatformConverter;
-import daaa.qdscrapper.services.api.ApiService;
-import daaa.qdscrapper.utils.QDUtils;
-import daaa.qdscrapper.utils.QDUtils.HttpAnswer;
-import daaa.qdscrapper.utils.RomCleaner;
+import daaa.qdscraper.Args;
+import daaa.qdscraper.Props;
+import daaa.qdscraper.model.Game;
+import daaa.qdscraper.services.PlatformConverter;
+import daaa.qdscraper.services.api.ApiService;
+import daaa.qdscraper.utils.QDUtils;
+import daaa.qdscraper.utils.RomCleaner;
+import daaa.qdscraper.utils.QDUtils.HttpAnswer;
 
 /**
  * Utilities to query http://thegamesdb.net/ using its API

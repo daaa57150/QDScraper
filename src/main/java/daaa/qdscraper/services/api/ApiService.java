@@ -1,4 +1,4 @@
-package daaa.qdscrapper.services.api;
+package daaa.qdscraper.services.api;
 
 import java.util.List;
 
@@ -6,9 +6,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.icu.text.Normalizer2;
 
-import daaa.qdscrapper.Args;
-import daaa.qdscrapper.model.Game;
-import daaa.qdscrapper.utils.RomCleaner;
+import daaa.qdscraper.Args;
+import daaa.qdscraper.model.Game;
+import daaa.qdscraper.utils.RomCleaner;
 
 public abstract class ApiService 
 {

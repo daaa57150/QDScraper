@@ -1,4 +1,4 @@
-package daaa.qdscrapper.model;
+package daaa.qdscraper.model;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -21,8 +21,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import daaa.qdscrapper.Props;
-import daaa.qdscrapper.utils.QDUtils;
+import daaa.qdscraper.Props;
+import daaa.qdscraper.utils.QDUtils;
 
 
 /**

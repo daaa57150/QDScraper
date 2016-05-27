@@ -1,4 +1,4 @@
-package daaa.qdscrapper.services.api.impl;
+package daaa.qdscraper.services.api.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,14 +25,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import daaa.qdscrapper.Args;
-import daaa.qdscrapper.Props;
-import daaa.qdscrapper.model.Game;
-import daaa.qdscrapper.services.PlatformConverter;
-import daaa.qdscrapper.services.api.ApiService;
-import daaa.qdscrapper.utils.QDUtils;
-import daaa.qdscrapper.utils.QDUtils.HttpAnswer;
-import daaa.qdscrapper.utils.RomCleaner;
+import daaa.qdscraper.Args;
+import daaa.qdscraper.Props;
+import daaa.qdscraper.model.Game;
+import daaa.qdscraper.services.PlatformConverter;
+import daaa.qdscraper.services.api.ApiService;
+import daaa.qdscraper.utils.QDUtils;
+import daaa.qdscraper.utils.RomCleaner;
+import daaa.qdscraper.utils.QDUtils.HttpAnswer;
 
 
 // http://www.giantbomb.com/api/search/?api_key=xxxx&query=Metal%20Slug%20-%20Super%20Vehicle-001&resources=game&field_list=deck,description,id,image,name,original_release_date,platforms,api_detail_url

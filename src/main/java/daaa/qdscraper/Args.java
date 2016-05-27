@@ -1,10 +1,10 @@
-package daaa.qdscrapper;
+package daaa.qdscraper;
 
 import java.io.File;
 
 import org.apache.commons.lang3.StringUtils;
 
-import daaa.qdscrapper.services.PlatformConverter;
+import daaa.qdscraper.services.PlatformConverter;
 
 /**
  * Program arguments parsed and usable throughout the app

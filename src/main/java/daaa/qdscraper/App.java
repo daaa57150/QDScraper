@@ -1,4 +1,4 @@
-package daaa.qdscrapper;
+package daaa.qdscraper;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,16 +16,16 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.SAXException;
 
-import daaa.qdscrapper.model.Game;
-import daaa.qdscrapper.model.GamelistXML;
-import daaa.qdscrapper.services.ArcadeRoms;
-import daaa.qdscrapper.services.RomBrowser;
-import daaa.qdscrapper.services.ScummVMRoms;
-import daaa.qdscrapper.services.api.ApiService;
-import daaa.qdscrapper.services.api.impl.GiantBombApiService;
-import daaa.qdscrapper.services.api.impl.TheGamesDBApiService;
-import daaa.qdscrapper.utils.QDUtils;
-import daaa.qdscrapper.utils.RomCleaner;
+import daaa.qdscraper.model.Game;
+import daaa.qdscraper.model.GamelistXML;
+import daaa.qdscraper.services.ArcadeRoms;
+import daaa.qdscraper.services.RomBrowser;
+import daaa.qdscraper.services.ScummVMRoms;
+import daaa.qdscraper.services.api.ApiService;
+import daaa.qdscraper.services.api.impl.GiantBombApiService;
+import daaa.qdscraper.services.api.impl.TheGamesDBApiService;
+import daaa.qdscraper.utils.QDUtils;
+import daaa.qdscraper.utils.RomCleaner;
 
 /**
  * The scrapper's main entry

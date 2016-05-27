@@ -1,4 +1,4 @@
-package daaa.qdscrapper.services;
+package daaa.qdscraper.services;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -11,8 +11,8 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 
-import daaa.qdscrapper.utils.QDUtils;
-import daaa.qdscrapper.utils.RomCleaner;
+import daaa.qdscraper.utils.QDUtils;
+import daaa.qdscraper.utils.RomCleaner;
 
 
 /**

@@ -1,4 +1,4 @@
-package daaa.qdscrapper.services;
+package daaa.qdscraper.services;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,9 +12,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import daaa.qdscrapper.Props;
-import daaa.qdscrapper.utils.QDUtils;
-import daaa.qdscrapper.utils.RomCleaner;
+import daaa.qdscraper.Props;
+import daaa.qdscraper.utils.QDUtils;
+import daaa.qdscraper.utils.RomCleaner;
 
 
 

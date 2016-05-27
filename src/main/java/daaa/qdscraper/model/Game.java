@@ -1,4 +1,4 @@
-package daaa.qdscrapper.model;
+package daaa.qdscraper.model;
 
 import java.util.ArrayList;
 import java.util.Date;

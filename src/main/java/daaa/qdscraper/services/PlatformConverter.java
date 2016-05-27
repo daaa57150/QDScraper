@@ -1,8 +1,8 @@
-package daaa.qdscrapper.services;
+package daaa.qdscraper.services;
 
 import java.util.Properties;
 
-import daaa.qdscrapper.utils.QDUtils;
+import daaa.qdscraper.utils.QDUtils;
 
 /**
  * Converts ES platform names to api platform names

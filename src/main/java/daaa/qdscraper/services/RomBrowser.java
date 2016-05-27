@@ -1,4 +1,4 @@
-package daaa.qdscrapper.services;
+package daaa.qdscraper.services;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,9 +13,9 @@ import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import daaa.qdscrapper.Args;
-import daaa.qdscrapper.Props;
-import daaa.qdscrapper.utils.QDUtils;
+import daaa.qdscraper.Args;
+import daaa.qdscraper.Props;
+import daaa.qdscraper.utils.QDUtils;
 
 
 /**

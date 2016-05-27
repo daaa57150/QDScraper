@@ -11,7 +11,7 @@ import junit.framework.TestCase;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.xml.sax.SAXException;
 
-import daaa.qdscrapper.services.ArcadeRoms;
+import daaa.qdscraper.services.ArcadeRoms;
 
 /**
  * Tests the ArcadeRoms class

@@ -12,8 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.icu.text.Normalizer2;
 
-import daaa.qdscrapper.services.api.ApiService;
-import daaa.qdscrapper.utils.RomCleaner;
+import daaa.qdscraper.services.api.ApiService;
+import daaa.qdscraper.utils.RomCleaner;
 
 /**
  * Some random tests

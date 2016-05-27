@@ -8,9 +8,9 @@ import org.apache.http.Header;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.message.BasicHeader;
 
-import daaa.qdscrapper.Args;
-import daaa.qdscrapper.utils.QDUtils;
-import daaa.qdscrapper.utils.QDUtils.HttpAnswer;
+import daaa.qdscraper.Args;
+import daaa.qdscraper.utils.QDUtils;
+import daaa.qdscraper.utils.QDUtils.HttpAnswer;
 
 public class IGDBTest extends TestCase {
 
