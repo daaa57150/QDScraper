@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.apache.commons.lang3.StringUtils;
 
-import daaa.qdscrapper.services.Platform;
+import daaa.qdscrapper.services.PlatformConverter;
 
 /**
  * Program arguments parsed and usable throughout the app
@@ -125,7 +125,7 @@ public class Args
 		
 		if(arcade)
 		{
-			platform = Platform.ARCADE;
+			platform = PlatformConverter.ARCADE;
 		}
 		else
 		{

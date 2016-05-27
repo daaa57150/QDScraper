@@ -61,11 +61,11 @@ public class App
 	private static List<String> findRoms(Args args) 
 	throws IOException {
 		
-		if(args.romFile != null) {
-			return RomBrowser.listRomsFromFile(args.romFile);
-		}
-		//else
-		return RomBrowser.listRomsInFolder(args.romsDir);
+//		if(args.romFile != null) {
+//			return RomBrowser.listRomsFromFile(args.romFile);
+//		}
+//		//else
+		return RomBrowser.listRoms(args);
 	}
 	
 	/**

@@ -13,6 +13,7 @@ import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import daaa.qdscrapper.Args;
 import daaa.qdscrapper.Props;
 import daaa.qdscrapper.utils.QDUtils;
 
@@ -31,6 +32,7 @@ public class RomBrowser {
 	 * Finds roms in a directory, non recursively
 	 * 
 	 * @param inFolder the folder to look for the roms
+	 * @param args app's args
 	 * @return the list of found roms
 	 * @throws IOException
 	 */
@@ -50,7 +52,7 @@ public class RomBrowser {
 	        	 // no directory
 	        	 if(file.isDirectory()) return false;
 	        	 
-	        	 // no dupe that may have been created vy a previous run
+	        	 // no dupe that may have been created by a previous run
 	        	 if(filename.startsWith(Props.get("dupes.prefix"))) return false;
 	        	 
 	        	 // OS or working files 
@@ -72,10 +74,36 @@ public class RomBrowser {
         		
         for (Path path : directoryStream) 
         {
-            fileNames.add(path.toString());
+            fileNames.add(path.getFileName().toString());
         }
         
         return fileNames;
+	}
+	
+	/**
+	 * Lists roms given the args:
+	 * - if a rom file is given, list that
+	 * - if scummvm, find only .scummvm files in subdirectories
+	 * - otherwise list files non recursively
+	 * @param args app's args
+	 * @return the list of roms
+	 * @throws IOException 
+	 */
+	public static List<String> listRoms(Args args) 
+	throws IOException
+	{
+		if(!StringUtils.isEmpty(args.romFile))
+		{
+			return listRomsFromFile(args.romFile);
+		}
+		
+		if("scummvm".equals(args.platform))
+		{
+			
+		}
+		
+		// else
+		return listRomsInFolder(args.romsDir);
 	}
 	
 	/**

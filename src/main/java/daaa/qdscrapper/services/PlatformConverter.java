@@ -13,7 +13,7 @@ import daaa.qdscrapper.utils.QDUtils;
  * @author daaa
  *
  */
-public class Platform
+public class PlatformConverter
 {
 	// TODO: each api has different supported platforms
 	private static final Properties PLATFORMS = QDUtils.loadClasspathProperties("platform.properties");
@@ -26,36 +26,40 @@ public class Platform
 		}
 	}*/
 	
-	// TODO: one ES platform = many API platforms
 	/**
 	 * Special platform to process arcade games (key in platform.properties).
 	 */
 	public static final String ARCADE = "arcade";
-	/**
-	 * Special platform to process neogeo games (key in platform.properties).
-	 */
-	public static final String NEOGEO = "neogeo"; //remove, it belongs to the arcade list
+	
 	
 	/**
 	 * Input the ES name, get the GamesDB name
 	 * @param esName name of the ES platform (snes, nes, ngpc...)
 	 * @return
-	 */
+	 */ // TODO: return List<Platform>
 	public static String[] asTheGamesDB(String esName)
 	{
 		if(esName == null) return null;
-		return PLATFORMS.getProperty(esName + ".thegamesdb").split(",");
+		String property = PLATFORMS.getProperty(esName + ".thegamesdb");
+		if(property != null) {
+			return property.split(",");
+		}
+		return null;
 	}
 	
 	/**
 	 * Input the ES name, get the GamesDB name
 	 * @param esName name of the ES platform (snes, nes, ngpc...)
 	 * @return
-	 */
+	 */ // TODO: return List<Platform>
 	public static String[] asGiantBomb(String esName)
 	{
 		if(esName == null) return null;
-		return PLATFORMS.getProperty(esName + ".giantbomb").split(",");
+		String property = PLATFORMS.getProperty(esName + ".giantbomb");
+		if(property != null) {
+			return property.split(",");
+		}
+		return null;
 	}
 	
 	/* *

@@ -28,7 +28,7 @@ import org.xml.sax.SAXException;
 import daaa.qdscrapper.Args;
 import daaa.qdscrapper.Props;
 import daaa.qdscrapper.model.Game;
-import daaa.qdscrapper.services.Platform;
+import daaa.qdscrapper.services.PlatformConverter;
 import daaa.qdscrapper.services.api.ApiService;
 import daaa.qdscrapper.utils.QDUtils;
 import daaa.qdscrapper.utils.QDUtils.HttpAnswer;
@@ -354,8 +354,7 @@ public class GiantBombApiService extends ApiService
 		String cleanName = RomCleaner.cleanRomName(translatedName, false);
 		
 		// we'll search for these platforms
-		String[] wantedPlatforms = Platform.asGiantBomb(args.platform); // if args.arcade, platform is already 'arcade'
-		//if(wantedPlatforms == null) wantedPlatforms = new String[]{null};
+		String[] wantedPlatforms = PlatformConverter.asGiantBomb(args.platform); // if args.arcade, platform is already 'arcade'
 		
 		// search
 		Document searchDocument = search(cleanName, args);

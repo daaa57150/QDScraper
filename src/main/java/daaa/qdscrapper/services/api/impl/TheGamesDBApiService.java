@@ -22,7 +22,7 @@ import org.w3c.dom.Document;
 import daaa.qdscrapper.Args;
 import daaa.qdscrapper.Props;
 import daaa.qdscrapper.model.Game;
-import daaa.qdscrapper.services.Platform;
+import daaa.qdscrapper.services.PlatformConverter;
 import daaa.qdscrapper.services.api.ApiService;
 import daaa.qdscrapper.utils.QDUtils;
 import daaa.qdscrapper.utils.QDUtils.HttpAnswer;
@@ -291,7 +291,7 @@ public class TheGamesDBApiService extends ApiService
 		String xml = null;
 		
 		// we'll search for these platforms
-		String[] wantedPlatforms = Platform.asTheGamesDB(args.platform); // if args.arcade, platform is already 'arcade'
+		String[] wantedPlatforms = PlatformConverter.asTheGamesDB(args.platform); // if args.arcade, platform is already 'arcade'
 		if(wantedPlatforms == null) wantedPlatforms = new String[]{null};
 		
 		// will contain our matches
