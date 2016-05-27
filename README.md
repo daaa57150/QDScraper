@@ -1,4 +1,4 @@
-# QDScrapper
+# QDScraper
 Quick and dirty rom scrapper for recalbox
 Complements sselph's scrapper which uses rom hashes to find matches, I use the name of the rom.
 
