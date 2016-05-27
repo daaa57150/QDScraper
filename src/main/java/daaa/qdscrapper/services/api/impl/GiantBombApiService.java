@@ -165,7 +165,9 @@ public class GiantBombApiService extends ApiService
 	private List<String> getUrlOfFirstGamesForPlatforms(Document searchDocument, String[] wantedPlatforms)
 	{
 		List<String> urls = new ArrayList<String>();
-		List<String> wpList = Arrays.asList(wantedPlatforms);
+		List<String> wpList = new ArrayList<String>();
+		if(wantedPlatforms != null) wpList.addAll(Arrays.asList(wantedPlatforms));
+		
 		try {
 			XPath xpath = QDUtils.getXPath();
 			NodeList games = (NodeList) xpath.evaluate("response/results/game", searchDocument, XPathConstants.NODESET);
@@ -180,7 +182,8 @@ public class GiantBombApiService extends ApiService
 					String platformName = platform.getElementsByTagName("name").item(0).getTextContent().trim();
 					//System.out.println(platformName);
 					
-					if(wpList.contains(platformName.trim()))
+					// if platform is not supported, just return it
+					if(wantedPlatforms == null || wpList.contains(platformName.trim()))
 					{
 						urls.add(game.getElementsByTagName("api_detail_url").item(0).getTextContent());
 						if(urls.size() == SEARCH_LIMIT) return urls;
@@ -352,6 +355,7 @@ public class GiantBombApiService extends ApiService
 		
 		// we'll search for these platforms
 		String[] wantedPlatforms = Platform.asGiantBomb(args.platform); // if args.arcade, platform is already 'arcade'
+		//if(wantedPlatforms == null) wantedPlatforms = new String[]{null};
 		
 		// search
 		Document searchDocument = search(cleanName, args);
@@ -382,6 +386,7 @@ public class GiantBombApiService extends ApiService
 						// 100% match on the name, we can stop
 						return games;
 					}
+					//TODO: also stop if score below threshold 
 				}
 			} catch (Exception e) {
 				System.err.println("Error parsing xml from giantbomb!");

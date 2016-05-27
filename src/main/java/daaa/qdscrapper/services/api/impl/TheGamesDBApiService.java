@@ -240,6 +240,7 @@ public class TheGamesDBApiService extends ApiService
 				
 				return games; // stop 
 			}
+			//TODO: also stop if score below a threshold
 		}
 		
 		if(games.size() >= 2) //because some ... were output
@@ -291,6 +292,7 @@ public class TheGamesDBApiService extends ApiService
 		
 		// we'll search for these platforms
 		String[] wantedPlatforms = Platform.asTheGamesDB(args.platform); // if args.arcade, platform is already 'arcade'
+		if(wantedPlatforms == null) wantedPlatforms = new String[]{null};
 		
 		// will contain our matches
 		List<Game> games = new ArrayList<Game>();

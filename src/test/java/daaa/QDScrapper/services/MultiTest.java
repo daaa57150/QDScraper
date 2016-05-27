@@ -3,6 +3,7 @@ package daaa.QDScrapper.services;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -92,6 +93,15 @@ public class MultiTest extends TestCase {
 			System.out.println("I NFCKD=> " + Normalizer2.getNFKDInstance().normalize(s));
 			System.out.println();
 		}
+	}
+	
+	public static void testAsList()
+	{
+		/*String[] wantedPlatforms = null;
+		List<String> wpList = Arrays.asList(wantedPlatforms);
+		wpList.contains("coucou");
+		*/
+		// EXCEPTION
 	}
 	
 }
