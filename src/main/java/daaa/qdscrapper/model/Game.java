@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -11,15 +12,15 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  * Represents a game
  * @author daaa
  */
-public class Game
+public class Game implements Comparable<Game>
 {
 	private String rom; //name of the rom (file)
 	private String name; //name we want in the gamelist.xml
-	private String title; //name from theGamesDB
+	private String title; //name from apî
 	private String id; //id from theGamesDB or other api
 	private String desc;
 	private String image;
-	private float rating;
+	private float rating = 0;
 	private Date releasedate;
 	private String developer;
 	private String publisher;
@@ -29,7 +30,7 @@ public class Game
 	//private boolean perfectMatch = false;
 	
 	// 1 = perfect match, 0 = totally different
-	private double score;
+	private double score = 0;
 
 	// the api that retrieved this result
 	private String api;
@@ -40,6 +41,49 @@ public class Game
 	 * / 
 	public Game(){}
 	*/
+	
+
+	/**
+	 * Compares the quality of theis match with another game.
+	 * Most important thing is the score, then the description and the image, then the other metas that were filled.
+	 */
+	@Override
+	public int compareTo(Game o2) {
+		// 1) score is important
+		if(getScore() != o2.getScore()) {
+			return ((Double)getScore()).compareTo(o2.getScore()) *-1; // *-1 because high scores are first
+		}
+		
+		// 2) number of criterions (desc is super important, image is super important, the rest not really)
+		return getCriterionsScore().compareTo(o2.getCriterionsScore()) *-1; // *-1 because high scores are first
+		
+		// we could check the quality of the image
+	}
+	
+	/**
+	 * Calculates a score based on the criterions that are filled
+	 * @return
+	 */
+	private Integer getCriterionsScore()
+	{
+		int cs = 0;
+		if(!StringUtils.isEmpty(desc)) {
+			if(desc.length() >= 200) cs += 5;
+			else cs += 3;
+		}
+		if(!StringUtils.isEmpty(image)) {
+			cs += 6;
+		}
+		
+		if(rating > 0) cs ++;
+		if(releasedate != null) cs += 2;
+		if(!StringUtils.isEmpty(developer)) cs += 2;
+		if(!StringUtils.isEmpty(publisher)) cs ++;
+		if(genres.size() > 0) cs ++;
+		if(!StringUtils.isEmpty(players)) cs += 2;
+		
+		return cs;
+	}
 	
 	/**
 	 * Constructor with api, use this!

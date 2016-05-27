@@ -9,6 +9,8 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +43,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Method;
 import org.imgscalr.Scalr.Mode;
@@ -142,15 +145,22 @@ public class QDUtils
 	
 	
 	/**
-	 * Finds the perfect match in the list of games
+	 * Finds the best perfect match in the list of games
 	 * @param games
 	 * @return
 	 */
-	public static Game findPerfectMatch(List<Game> games)
+	public static Game findBestPerfectMatch(List<Game> games)
 	{
+		List<Game> perfectMatches = new ArrayList<Game>();
 		for(Game game: games)
 		{
-			if(game.getScore() == 1.0) return game;
+			if(game.getScore() == 1.0 && !StringUtils.isEmpty(game.getImage())) perfectMatches.add(game);
+		}
+		
+		if(perfectMatches.size() > 0)
+		{
+			Collections.sort(perfectMatches);
+			return perfectMatches.get(0);
 		}
 		
 		return null;
@@ -175,6 +185,22 @@ public class QDUtils
 			System.exit(8);
 		}
 		return null;
+	}
+	
+	
+	/**
+	 * Loads an excel file from the classpath, in particular the files embedded in the released jar
+	 * @param name the name of the file to load, which should be at the top of the resources folder
+	 * @return the content of the read file
+	 * @throws IOException
+	 */
+	public static HSSFWorkbook loadClasspathXls(String name) 
+	throws IOException
+	{
+		InputStream in = QDUtils.class.getClassLoader().getResourceAsStream(name);
+		HSSFWorkbook wb = new HSSFWorkbook(in);
+		in.close();
+		return wb;
 	}
 	
 	/**

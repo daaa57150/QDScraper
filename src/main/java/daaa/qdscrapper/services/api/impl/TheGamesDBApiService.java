@@ -312,7 +312,7 @@ public class TheGamesDBApiService extends ApiService
 			try
 			{
 				List<Game> gamesThisPlatform = toGames(rom, translatedName, xml, args);
-				if(QDUtils.findPerfectMatch(gamesThisPlatform) != null)
+				if(QDUtils.findBestPerfectMatch(gamesThisPlatform) != null)
 				{
 					return gamesThisPlatform;
 				}

@@ -55,14 +55,14 @@ public class RomCleaner
 	
 	
 	/**
-	 * Removes a file's extension, limitation is that the extension cannot be more than 3 chars long 
+	 * Removes a file's extension, limitation is that the extension cannot be more than 7 chars long (scummvm) 
 	 * or it will be ignored. this is because some games have a dot in their names (Capcom Vs. SNK)
 	 * @param filename the filename to clean
 	 * @return the filename without its extension
 	 */
 	public static String removeExtension(String filename) {
 		String clean = filename;
-		if(filename.lastIndexOf(".") >= filename.length()-4)
+		if(filename.lastIndexOf(".") >= filename.length()-8)
 		{
 			clean = FilenameUtils.removeExtension(filename);			
 		}

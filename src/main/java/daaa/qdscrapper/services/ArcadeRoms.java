@@ -45,7 +45,7 @@ public class ArcadeRoms {
 	 * @throws SAXException
 	 * @throws IOException
 	 */
-	public static List<Document> getRomFiles() 
+	private static List<Document> getRomFiles() 
 	throws ParserConfigurationException, SAXException, IOException
 	{
 		if(DOCUMENTS == null)

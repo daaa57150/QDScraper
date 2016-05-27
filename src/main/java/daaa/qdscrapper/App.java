@@ -6,15 +6,21 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.xml.sax.SAXException;
 
 import daaa.qdscrapper.model.Game;
 import daaa.qdscrapper.model.GamelistXML;
 import daaa.qdscrapper.services.ArcadeRoms;
 import daaa.qdscrapper.services.RomBrowser;
+import daaa.qdscrapper.services.ScummVMRoms;
 import daaa.qdscrapper.services.api.ApiService;
 import daaa.qdscrapper.services.api.impl.GiantBombApiService;
 import daaa.qdscrapper.services.api.impl.TheGamesDBApiService;
@@ -98,6 +104,68 @@ public class App
 	}
 	
 	/**
+	 * Adds an empty game to the "notfound" xml file
+	 * @param notFound
+	 * @param rom
+	 * @param name
+	 */
+	private static void addEmptyGame(GamelistXML notFound, String rom, String name)
+	{
+		Game empty = new Game(NO_API_ID);
+		empty.setRom(rom);
+		empty.setName(name);
+		notFound.addGame(empty);
+	}
+	
+	// TODO: List<Game> should be a class by itself
+	/**
+	 * Sorts the game by best match
+	 * @param games
+	 * @return
+	 */
+	private static List<Game>sortByBestMatch(List<Game> games)
+	{
+		Collections.sort(games);
+		return games;
+	}
+	
+	private static String getRealNameOfRom(String rom, Args args) 
+	throws IOException, XPathExpressionException, ParserConfigurationException, SAXException
+	{
+		String name = rom; // for arcade/scumm, the name is our match in the DB, for the rest it's the rom
+		
+		//if it's an arcade game, look in the arcade roms "DB"
+		if(args.arcade)
+		{
+			name = ArcadeRoms.getRomTitle(rom);
+			if(StringUtils.isEmpty(name))
+			{
+				//addEmptyGame(notFound, rom, name);
+				System.out.println("  => Nothing found for " + rom + " in the arcade rom files");
+				return null;
+			}
+			//else
+			System.out.println(rom + " is the arcade rom name of " + name);
+		}
+		
+		// if it's a scummvm game, look in the scummvm roms "DB"
+		if("scummvm".equals(args.platform))
+		{
+			name = ScummVMRoms.getRomTitle(rom);
+			if(StringUtils.isEmpty(name))
+			{
+				//addEmptyGame(notFound, rom, name);
+				System.out.println("  => Nothing found for " + rom + " in the scummvm rom files");
+				return null;
+			}
+			//else
+			System.out.println(rom + " is the scummvm rom name of " + name);
+		}
+		
+		return name;
+	}
+	
+	/**
 	 * Main!
 	 * 
 	 * @param commands the command line arguments
@@ -141,24 +209,11 @@ public class App
 			}
 			else
 			{
-				//if it's an arcade game, look in the arcade roms "DB"
-				String name = rom; // for arcade, the name is our match in the DB, for the rest it's the rom
-				if(args.arcade)
+				String name = getRealNameOfRom(rom, args); // for arcade/scumm, the name is our match in the DB, for the rest it's the rom
+				if(name == null)
 				{
-					name = ArcadeRoms.getRomTitle(rom);
-					if(StringUtils.isEmpty(name))
-					{
-						Game empty = new Game(NO_API_ID);
-						empty.setRom(rom);
-						empty.setName(name);
-						notFound.addGame(empty);
-
-						System.out.println("  => Nothing found for " + rom + " in the arcade rom files");
-						
-						continue;
-					}
-					//else
-					System.out.println(rom + " is the rom name of " + name);
+					addEmptyGame(notFound, rom, "");
+					continue;
 				}
 				
 				// ask the services
@@ -169,10 +224,10 @@ public class App
 					if(!CollectionUtils.isEmpty(apiGames))
 					{
 						games.addAll(apiGames);
-						Game perfectMatch = QDUtils.findPerfectMatch(apiGames);
+						Game perfectMatch = QDUtils.findBestPerfectMatch(apiGames);
 						if(perfectMatch != null)
 						{
-							break; // yes there is a perfect match, we stop here
+							break; // yes there is a perfect match, we stop here => TODO: should we still ask other apis to perhaps find a best perfect match ?
 						}
 					}
 				}
@@ -181,15 +236,17 @@ public class App
 				// now we have found games
 				if(CollectionUtils.isNotEmpty(games))
 				{
-					Game topResult = QDUtils.findPerfectMatch(games);
-					if(topResult != null) // perfect match found TODO: perfect match with image > perfect match without!!
+					Game topResult = QDUtils.findBestPerfectMatch(games);
+					if(topResult != null) // perfect match found
 					{
 						System.out.println("  => Found a perfect match: " + formatGameForSysout(topResult));
-						gameList.addGame(topResult); //TODO: still output the dupes
+						gameList.addGame(topResult);
 					}
 					else
 					{
-						topResult = games.get(0); //  first match is the best I guess //TODO: use the score instead!
+						// sort by best match
+						sortByBestMatch(games);
+						topResult = games.get(0);
 						gameList.addGame(topResult);
 						if(games.size() == 1) // only one match
 						{
@@ -232,11 +289,13 @@ public class App
 				}
 				else // not found
 				{
-					Game empty = new Game(NO_API_ID);
-					empty.setRom(rom);
-					empty.setName(name);
-					notFound.addGame(empty);
-					System.out.println("  => Nothing found for " + rom + (args.arcade ? (" (" + RomCleaner.cleanRomName(name, false) + ")" ): ""));
+					addEmptyGame(notFound, rom, name);
+					String precision = null;
+					if(args.arcade || "scummvm".equals(args.platform))
+					{
+						precision = "(" + RomCleaner.cleanRomName(name, false) + ")";
+					}
+					System.out.println("  => Nothing found for " + rom + (precision == null ? "" : precision));
 				}
 			}
 			
