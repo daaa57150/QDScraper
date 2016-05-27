@@ -40,6 +40,9 @@ http://www.arcade-museum.com
 https://www.mediawiki.org/wiki/API:Main_page#A_simple_example
 http://emumovies.com/
 
+# bientot une api, super contenu:
+http://www.mobygames.com/forums/dga,2/dgb,3/dgm,223636/
+
 
 https://www.igdb.com/api
 => https://www.igdb.com/api/v1/documentation

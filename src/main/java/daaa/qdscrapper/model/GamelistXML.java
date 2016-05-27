@@ -52,7 +52,7 @@ public class GamelistXML
 			  "<path>{path}</path>\n"
 			+ "<name>{name}</name>\n"
 			+ "<desc>This is a bios file</desc>\n"
-			+ "<hidden/>";
+			+ "<hidden>true</hidden>";
 	private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyyMMdd'T000000'");
 	
 	private String addToName;

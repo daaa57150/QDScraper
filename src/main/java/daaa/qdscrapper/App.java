@@ -227,7 +227,7 @@ public class App
 						Game perfectMatch = QDUtils.findBestPerfectMatch(apiGames);
 						if(perfectMatch != null)
 						{
-							break; // yes there is a perfect match, we stop here => TODO: should we still ask other apis to perhaps find a best perfect match ?
+							//break; // yes there is a perfect match, we stop here => TODO: should we still ask other apis to perhaps find a best perfect match ?
 						}
 					}
 				}
