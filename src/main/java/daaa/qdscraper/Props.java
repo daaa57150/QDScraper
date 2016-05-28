@@ -2,8 +2,10 @@ package daaa.qdscraper;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.security.GeneralSecurityException;
 import java.util.Properties;
 
+import daaa.qdscraper.utils.CryptoUtils;
 import daaa.qdscraper.utils.QDUtils;
 
 /**
@@ -70,6 +72,23 @@ public class Props {
 			System.exit(13);
 		}
 		return prop;
+	}
+	
+	/**
+	 * Get the encrypted property for the given key. If it doesn't exist, the program stops with an error.
+	 * @param key the wanted property 
+	 * @return the property
+	 */
+	public static String getEncrypted(String key)
+	{
+		String prop = get(key);
+		try {
+			return CryptoUtils.decrypt(prop);
+		} catch (GeneralSecurityException | IOException e) {
+			e.printStackTrace();
+			System.exit(20);
+		}
+		return null;
 	}
 	
 	

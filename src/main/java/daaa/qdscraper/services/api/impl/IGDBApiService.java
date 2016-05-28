@@ -24,7 +24,7 @@ import daaa.qdscraper.utils.QDUtils.HttpAnswer;
 public class IGDBApiService extends ApiService {
 
 	/** My key to query IGDB, this gives us 10000 queries per day */
-	private static final String API_KEY = Props.get("igdb.apiKey");
+	private static final String API_KEY = Props.getEncrypted("igdb.apiKey");
 	/** APi url https://www.igdb.com/api/v1/ */
 	private static final String URL_IGDB_API = Props.get("igdb.url");
 	/** This lets us filter by platform, the value is a comma separated list of ids (integers) */

@@ -1,9 +1,10 @@
 package daaa.QDScrapper.services;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -13,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.ibm.icu.text.Normalizer2;
 
 import daaa.qdscraper.services.api.ApiService;
+import daaa.qdscraper.utils.CryptoUtils;
 import daaa.qdscraper.utils.RomCleaner;
 
 /**
@@ -104,6 +106,15 @@ public class MultiTest extends TestCase {
 		// EXCEPTION
 	}
 	
+	public static void testEncryptDecrypt() 
+	throws GeneralSecurityException, IOException
+	{	
+		String toEncrypt = "bob";
+		String crypted = CryptoUtils.encrypt(toEncrypt);
+		System.out.println(crypted);
+		String decrypted = CryptoUtils.decrypt(crypted);
+		assertEquals(toEncrypt, decrypted);
+	}
 }
 
 
