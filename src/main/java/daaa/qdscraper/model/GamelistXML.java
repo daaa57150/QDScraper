@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
@@ -201,11 +202,13 @@ public class GamelistXML
 				String str = QDUtils.tabulate(TEMPLATE_BIOS, 2);
 			
 				// path to the rom in the recalbox
-				String romPath = ROM_PATH + game.getFile().replaceAll("\\", "/"); //in recalbox they must be slashes
+				String romPath = ROM_PATH + game.getFile().replaceAll("\\\\", "/"); //in recalbox they must be slashes
+				
+				String filename = FilenameUtils.removeExtension(Paths.get(game.getFile()).getFileName().toString());
 				
 				// add to the template
 				str = replaceAllowNull(str, "{path}", romPath);
-				str = replaceAllowNull(str, "{name}", game.getName() + " (BIOS)");
+				str = replaceAllowNull(str, "{name}", "BIOS " + filename);
 				
 				out.write(str + "\n");
 				
