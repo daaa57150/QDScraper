@@ -222,7 +222,7 @@ public class TheGamesDBApiService extends ApiService
 			game.setImage(image);
 			game.setRating(StringUtils.isEmpty(rating) ? 0 : Float.valueOf(rating));
 			game.setReleasedate(StringUtils.isEmpty(releasedate) ? null : parseDate(releasedate));
-			game.setRom(rom);
+			game.setFile(rom);
 			game.setPlayers(players);
 			game.setPublisher(publisher);
 			game.setId(id);
@@ -290,7 +290,7 @@ public class TheGamesDBApiService extends ApiService
 			// TODO: try to search and if nothing comes out, retry the search by cleaning more chars (-,!) etc..
 			try
 			{
-				List<Game> gamesThisPlatform = toGames(rom.getRom(), translatedName, xml, args);
+				List<Game> gamesThisPlatform = toGames(rom.getFile(), translatedName, xml, args);
 				if(QDUtils.findBestPerfectMatch(gamesThisPlatform) != null)
 				{
 					return gamesThisPlatform;

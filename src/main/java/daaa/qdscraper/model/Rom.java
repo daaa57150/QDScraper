@@ -9,7 +9,7 @@ import daaa.qdscraper.utils.QDUtils;
  */
 public class Rom {
 	// name of the file
-	private String rom;
+	private String file;
 	// path on the filesystem
 	private String path;
 	// md5 hash if possible
@@ -25,16 +25,16 @@ public class Rom {
 	
 	
 	/**
-	 * @return the rom
+	 * @return the file
 	 */
-	public String getRom() {
-		return rom;
+	public String getFile() {
+		return file;
 	}
 	/**
 	 * @param rom the rom to set (name of the file relative to the romsDir) 
 	 */
-	public void setRom(String rom) {
-		this.rom = rom;
+	public void setFile(String file) {
+		this.file = file;
 	}
 	/**
 	 * @return the isTranslated

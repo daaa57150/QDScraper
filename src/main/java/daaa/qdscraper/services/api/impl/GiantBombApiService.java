@@ -326,7 +326,7 @@ public class GiantBombApiService extends ApiService
 		game.setGenres(genres);
 		game.setImage(image);
 		game.setReleasedate(StringUtils.isEmpty(releasedate) ? null : parseDate(releasedate));
-		game.setRom(rom);
+		game.setFile(rom);
 		game.setPublisher(publisher);
 		game.setId(id);
 		game.setTitle(title);
@@ -376,7 +376,7 @@ public class GiantBombApiService extends ApiService
 			
 			// transform to game
 			try {
-				Game game = toGame(rom.getRom(), translatedName, gameDocument, args, i+1);
+				Game game = toGame(rom.getFile(), translatedName, gameDocument, args, i+1);
 				if(game!=null)
 				{	
 					games.add(game);

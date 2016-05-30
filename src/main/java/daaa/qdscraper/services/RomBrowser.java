@@ -45,8 +45,8 @@ public class RomBrowser {
 	private static void setTranslatedName(Rom rom, Args args) 
 	throws XPathExpressionException, IOException, ParserConfigurationException, SAXException
 	{
-		String file = rom.getRom();
-		String name = rom.getRom(); // for arcade/scumm, the name is our match in the DB, for the rest it's the rom => should we get rid of the possible relative path?
+		String file = rom.getFile();
+		String name = rom.getFile(); // for arcade/scumm, the name is our match in the DB, for the rest it's the rom => should we get rid of the possible relative path?
 		
 		
 		//if it's an arcade game, look in the arcade roms "DB"
@@ -115,12 +115,12 @@ public class RomBrowser {
 		
         DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(inFolder), filter);
         		
-        for (Path path : directoryStream) 
+        for (Path path : directoryStream) // wrong for scummvm
         {
         	String filename = path.getFileName().toString();
         	Rom rom = new Rom();
         	rom.setPath(path.toString());
-        	rom.setRom(filename);
+        	rom.setFile(filename);
         	rom.setIsBios(isBios(filename));
         	rom.setIsRealFile(true);
         	setTranslatedName(rom, args);
@@ -186,7 +186,7 @@ public class RomBrowser {
 				line = line.trim();
 	        	Rom rom = new Rom();
 	        	rom.setPath(args.romsDir + line);
-	        	rom.setRom(line);
+	        	rom.setFile(line);
 	        	rom.setIsBios(isBios(line));
 	        	rom.setIsRealFile(false);
 	        	setTranslatedName(rom, args);

@@ -111,7 +111,7 @@ public class App
 	private static void addEmptyGame(GamelistXML notFound, String rom, String name)
 	{
 		Game empty = new Game(NO_API_ID);
-		empty.setRom(rom);
+		empty.setFile(rom);
 		empty.setName(name);
 		notFound.addGame(empty);
 	}
@@ -157,13 +157,13 @@ public class App
 		List<Rom> roms = findRoms(args);
 		for(Rom rom: roms)
 		{
-			System.out.println("# Processing " + rom.getRom() + " ...");
+			System.out.println("# Processing " + rom.getFile() + " ...");
 			
 			// is it a bios?
 			if(rom.isBios())
 			{
 				Game game = new Game(NO_API_ID);
-				game.setRom(rom.getRom());
+				game.setFile(rom.getFile());
 				game.setBios(true);
 				gameList.addGame(game);
 				System.out.println("  => This is a bios file, added as hidden");
@@ -173,13 +173,13 @@ public class App
 				String name = rom.getTranslatedName(); // for arcade/scumm, the name is our match in the DB, for the rest it's the rom
 				if(name == null) // needed translation but wasn't found in our DB, highly unlikely
 				{
-					addEmptyGame(notFound, rom.getRom(), "");
-					System.out.println("  => Nothing found for " + rom.getRom() + " in our data files");
+					addEmptyGame(notFound, rom.getFile(), "");
+					System.out.println("  => Nothing found for " + rom.getFile() + " in our data files");
 					continue;
 				}
 				if(rom.isTranslated())
 				{
-					System.out.println(rom.getRom() + " is the rom file name of " + name);
+					System.out.println(rom.getFile() + " is the rom file name of " + name);
 				}
 				
 				// ask the services
@@ -229,7 +229,7 @@ public class App
 					//dupes
 					if(games.size() > 1)
 					{
-						GamelistXML gameListDupes = new GamelistXML(args.dupesDir + DUPE_PREFIX + QDUtils.sanitizeFilename(rom.getRom()) + ".xml", args.appendToName);
+						GamelistXML gameListDupes = new GamelistXML(args.dupesDir + DUPE_PREFIX + QDUtils.sanitizeFilename(rom.getFile()) + ".xml", args.appendToName);
 						for(Game dupe: games)
 						{
 							if(dupe != topResult) // it's really a dupe
@@ -255,7 +255,7 @@ public class App
 				}
 				else // not found
 				{
-					addEmptyGame(notFound, rom.getRom(), name);
+					addEmptyGame(notFound, rom.getFile(), name);
 					String precision = null;
 					if(args.arcade || "scummvm".equals(args.platform))
 					{

@@ -14,7 +14,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  */
 public class Game implements Comparable<Game>
 {
-	private String rom; //name of the rom (file)
+	private String file; //name of the rom (file, as a relative path to romsDir)
 	private String name; //name we want in the gamelist.xml
 	private String title; //name from apî
 	private String id; //id from theGamesDB or other api
@@ -141,16 +141,16 @@ public class Game implements Comparable<Game>
 	/**
 	 * @return the rom
 	 */
-	public String getRom()
+	public String getFile()
 	{
-		return rom;
+		return file;
 	}
 	/**
 	 * @param rom the rom to set
 	 */
-	public void setRom(String rom)
+	public void setFile(String file)
 	{
-		this.rom = rom;
+		this.file = file;
 	}
 	/**
 	 * @return the name

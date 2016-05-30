@@ -156,7 +156,7 @@ public class GamelistXML
 		for(Game game: games)
 		{
 			// path to the rom in the recalbox
-			String path = ROM_PATH + StringEscapeUtils.escapeXml10(game.getRom());
+			String path = ROM_PATH + StringEscapeUtils.escapeXml10(game.getFile());
 
 			// start game
 			out.write(QDUtils.tabulate(makeGameTagOpen(game), 1) + "\n");
@@ -170,7 +170,7 @@ public class GamelistXML
 				
 				// add to the template
 				str = replaceAllowNull(str, "{path}", path);
-				str = replaceAllowNull(str, "{name}", game.getRom() + " (BIOS)");
+				str = replaceAllowNull(str, "{name}", game.getFile() + " (BIOS)");
 				
 				out.write(str + "\n");
 			}
