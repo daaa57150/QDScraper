@@ -30,12 +30,16 @@ public class Game implements Comparable<Game>
 	//private boolean perfectMatch = false;
 	
 	// 1 = perfect match, 0 = totally different
-	private double score = 0;
+	private double score = 0; // jarod-winkler
+	// levenstein
+	private int distance = Integer.MAX_VALUE; // levenshtein
+	
 	// set to true if the game was matched using a hash, ie 100% sure it's the same rom
 	private boolean md5Match = false;
 	// the api that retrieved this result
 	private String api;
-	private String legalText; //some apis request showing a legal text to the user
+	//some apis request showing a legal text to the user
+	private String legalText; 
 	
 	/* *
 	 * Default constructor
@@ -53,7 +57,11 @@ public class Game implements Comparable<Game>
 		
 		// 1) score is important
 		if(getScore() != o2.getScore()) {
-			return ((Double)getScore()).compareTo(o2.getScore()) *-1; // *-1 because high scores are first
+			return ((Double)getScore()).compareTo(o2.getScore()) *-1; // *-1 because high scores are better
+		}
+		
+		if(getDistance() != o2.getDistance()) {  
+			return ((Integer)getDistance()).compareTo(o2.getDistance()); // small distance is best here
 		}
 		
 		// 2) number of criterions (desc is super important, image is super important, the rest not really)
@@ -166,6 +174,20 @@ public class Game implements Comparable<Game>
 	{
 		this.name = name;
 	}
+	/**
+	 * @return the distance
+	 */
+	public int getDistance() {
+		return distance;
+	}
+
+	/**
+	 * @param distance the distance to set
+	 */
+	public void setDistance(int distance) {
+		this.distance = distance;
+	}
+
 	/**
 	 * @return the desc
 	 */

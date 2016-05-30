@@ -1,5 +1,8 @@
 package daaa.qdscraper.model;
 
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import daaa.qdscraper.utils.QDUtils;
 
 /**
@@ -116,6 +119,13 @@ public class Rom {
 	
 	
 	
-	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String toString()
+	{
+		return ReflectionToStringBuilder.toString(this, ToStringStyle.MULTI_LINE_STYLE);
+	}
 	
 }

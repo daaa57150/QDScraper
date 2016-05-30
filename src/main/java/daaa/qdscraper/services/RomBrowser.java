@@ -3,9 +3,12 @@ package daaa.qdscraper.services;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,8 +48,8 @@ public class RomBrowser {
 	private static void setTranslatedName(Rom rom, Args args) 
 	throws XPathExpressionException, IOException, ParserConfigurationException, SAXException
 	{
-		String file = rom.getFile();
-		String name = rom.getFile(); // for arcade/scumm, the name is our match in the DB, for the rest it's the rom => should we get rid of the possible relative path?
+		// for arcade/scumm, the name is our match in the DB, for the rest it's the same as the file, but only the file itself, no path
+		String name = Paths.get(rom.getFile()).getFileName().toString(); 
 		
 		
 		//if it's an arcade game, look in the arcade roms "DB"
@@ -59,17 +62,48 @@ public class RomBrowser {
 		// if it's a scummvm game, look in the scummvm roms "DB"
 		else if("scummvm".equals(args.platform))
 		{
-			name = ScummVMRoms.getRomTitle(file);  // can be null here => checked by app later
+			name = ScummVMRoms.getRomTitle(name);  // can be null here => checked by app later
 			rom.setIsTranslated(true);
 		}
 		
 		rom.setTranslatedName(name);
 	}
 	
-	
+	/**
+	 * Tells if a path can be a rom or a bios
+	 * @param path tha path to test
+	 * @return true if this can be a rom
+	 * @throws IOException
+	 */
+	private static boolean acceptAsRom(Path path)
+	throws IOException
+	{
+		String filename = path.getFileName().toString();
+   	 	String ext = FilenameUtils.getExtension(path.getFileName().toString());
+	   	File file = path.toFile();
+	   			 
+	   	 
+	   	// no directory
+	   	if(file.isDirectory()) return false;
+	   	
+	   	// no dupe that may have been created by a previous run
+	   	if(filename.startsWith(Props.get("dupes.prefix"))) return false;
+	   	
+	   	// OS or working files 
+	   	if(filename.startsWith(".")) return false;
+	   	
+	   	// don't process hidden files
+	   	if(file.isHidden()) return false;
+	   	
+	   	// remove extensions we know are not roms and may be there
+	   	if(ext.toLowerCase().matches("xml|txt|jpg|png|htm|html|doc|docx|ini|xls")) return false;
+	   	 
+	   	 
+	   	return true;
+	}
 	
 	/**
-	 * Finds roms in a directory, non recursively
+	 * Finds roms/bioses in a directory, non recursively
 	 * 
 	 * @param inFolder the folder to look for the roms
 	 * @param args app's args
@@ -86,32 +120,9 @@ public class RomBrowser {
 		
 		DirectoryStream.Filter<Path> filter = new DirectoryStream.Filter<Path>() {
 	         public boolean accept(Path path) throws IOException {
-	             
-	        	 String filename = path.getFileName().toString();
-	        	 String ext = FilenameUtils.getExtension(path.getFileName().toString());
-	        	 File file = path.toFile();
-	        			 
-	        	 
-	        	 // no directory
-	        	 if(file.isDirectory()) return false;
-	        	 
-	        	 // no dupe that may have been created by a previous run
-	        	 if(filename.startsWith(Props.get("dupes.prefix"))) return false;
-	        	 
-	        	 // OS or working files 
-	        	 if(filename.startsWith(".")) return false;
-	        	 
-	        	 // don't process hidden files
-	        	 if(file.isHidden()) return false;
-	        	 
-	        	 // remove extensions we know are not roms and may be there
-	        	 if(ext.toLowerCase().matches("xml|txt|jpg|png|htm|html|doc|docx|ini|xls")) return false;
-	        	 
-	        	 
-	        	 return true;
+	             return acceptAsRom(path);
 	         }
 	     };
-		
 		
         DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(inFolder), filter);
         		
@@ -128,6 +139,100 @@ public class RomBrowser {
         }
         
         return roms;
+	}
+	
+	/**
+	 * Lists all roms/bioses in a folder, recursively, but only to a certain depth 
+	 * @param inFolder starting folder
+	 * @param depth the number of depth we can go; 0 => only files, 1 => also visit subfolders, 2 => also visit subfolders of subfolders...
+	 * @param args app's args
+	 * @return the list of paths found
+	 * @throws IOException
+	 */
+	public static List<Path> listRomsInFolderWithDepth(final String inFolder, final int depth, final Args args)
+	throws IOException
+	{
+		final Path start = Paths.get(inFolder);
+		final List<Path> files = new ArrayList<>();
+		Files.walkFileTree(start, new FileVisitor<Path>() {
+
+			@Override
+			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) 
+			throws IOException 
+			{
+				Path relative = start.relativize(dir);
+				//String[] components = relative.toString().split("" + File.separatorChar);
+				if(relative.getNameCount() > depth)
+				{
+					return FileVisitResult.SKIP_SUBTREE;
+				}
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) 
+			throws IOException 
+			{
+				if(acceptAsRom(file))
+				{
+					files.add(file);
+				}
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFileFailed(Path file, IOException exc)
+			throws IOException 
+			{
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+			throws IOException 
+			{
+				return FileVisitResult.CONTINUE;
+			}
+			
+		});
+		
+		return files;
+	}
+	
+	/**
+	 * Lists all scummvm roms. They need each to be in its own subfolder
+	 * @param inFolder the folder where to look for the roms
+	 * @param args app's args
+	 * @return the list of scummvm roms found
+	 * @throws IOException
+	 * @throws XPathExpressionException
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 */
+	private static List<Rom> listScummvmRoms(String inFolder, Args args) 
+	throws IOException, XPathExpressionException, ParserConfigurationException, SAXException
+	{
+		List<Path> paths = listRomsInFolderWithDepth(inFolder, 1, args);
+		List<Rom> roms = new ArrayList<Rom>(paths.size());
+		
+		final Path start = Paths.get(inFolder);
+		for(Path path: paths)
+		{
+			String ext = FilenameUtils.getExtension(path.getFileName().toString());
+			if("scummvm".equals(ext))
+			{
+				String relative = start.relativize(path).toString();
+				Rom rom = new Rom();
+				rom.setFile(relative);
+				rom.setIsRealFile(true);
+				//rom.setIsTranslated(true);
+				rom.setPath(path.toString());
+				setTranslatedName(rom, args);
+				roms.add(rom);
+			}
+		}
+		
+		return roms;
 	}
 	
 	/**
@@ -150,9 +255,10 @@ public class RomBrowser {
 			return listRomsFromFile(args.romFile, args);
 		}
 		
+		// else
 		if("scummvm".equals(args.platform))
 		{
-			//TODO: implement scummvm folders
+			return listScummvmRoms(args.romsDir, args);
 		}
 		
 		// else

@@ -51,18 +51,42 @@ public abstract class ApiService
 		return rom1.equals(rom2);
 	}
 	
+	/**
+	 * Performs the Jaro Winkler Distance algo on normalized rom names
+	 * @param rom1 
+	 * @param rom2
+	 * @return
+	 */
 	public static double scoreComparison(String rom1, String rom2)
 	{
 		rom1 = normalize(rom1);
 		rom2 = normalize(rom2);
 		
-		return StringUtils.getJaroWinklerDistance(rom1, rom2);
+		double jarodWinkler = StringUtils.getJaroWinklerDistance(rom1, rom2);
+		return jarodWinkler;
 	}
 	
-	protected void setGameScore(Game game, String translatedName, String apiTitle)
+	/**
+	 * Performs the Levenshtein distance algo on normalized rom names
+	 * @param rom1
+	 * @param rom2
+	 * @return
+	 */
+	public static int scoreDistance(String rom1, String rom2)
+	{
+		rom1 = normalize(rom1);
+		rom2 = normalize(rom2);
+		
+		int levenshtein = StringUtils.getLevenshteinDistance(rom1, rom2);
+		return levenshtein;
+	}
+	
+	protected void setGameScores(Game game, String translatedName, String apiTitle)
 	{
 		double score = scoreComparison(translatedName, apiTitle);
 		game.setScore(score);
+		int distance = scoreDistance(translatedName, apiTitle);
+		game.setDistance(distance);
 	}
 	
 	// TODO: remove "Action" if there are other genres + use only 2 max

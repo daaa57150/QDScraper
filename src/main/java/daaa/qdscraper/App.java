@@ -19,9 +19,7 @@ import org.xml.sax.SAXException;
 import daaa.qdscraper.model.Game;
 import daaa.qdscraper.model.GamelistXML;
 import daaa.qdscraper.model.Rom;
-import daaa.qdscraper.services.ArcadeRoms;
 import daaa.qdscraper.services.RomBrowser;
-import daaa.qdscraper.services.ScummVMRoms;
 import daaa.qdscraper.services.api.ApiService;
 import daaa.qdscraper.services.api.impl.GiantBombApiService;
 import daaa.qdscraper.services.api.impl.TheGamesDBApiService;
@@ -74,7 +72,7 @@ public class App
 	 */
 	private static String formatGameForSysout(Game game)
 	{
-		String str = game.getTitle() + " (" + game.getApi() + " " + game.getId() + " / " + (game.getScore() * 100) + "%)";
+		String str = game.getTitle() + " (" + game.getApi() + " " + game.getId() + " / " + (game.getScore() * 100) + "%["+game.getDistance()+"])";
 		String legal = game.getLegalText();
 		if(!StringUtils.isEmpty(legal))
 		{
@@ -194,6 +192,7 @@ public class App
 						if(perfectMatch != null)
 						{
 							//break; // yes there is a perfect match, we stop here => TODO: should we still ask other apis to perhaps find a best perfect match ?
+							// => TODO: if the score is perfect + has everything in the metas, stop; otherwise try to find a better perfect match
 						}
 					}
 				}

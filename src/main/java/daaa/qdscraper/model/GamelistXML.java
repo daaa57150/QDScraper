@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -35,8 +36,10 @@ public class GamelistXML
 	private String path;
 	private static final String GAMELIST_ROOT_TAGNAME = "gameList";
 	private static final String GAMELIST_GAME_TAGNAME = "game";
-	private static final String ROM_PATH = "./";
-	private static final String IMAGE_PATH = ROM_PATH + Props.get("images.folder") + File.separatorChar;
+	private static final String GAMELIST_FOLDER_TAGNAME = "folder";
+	private static final String ROM_PATH = "./"; //must be slashes in recalbox
+	private static final String IMAGE_PATH = ROM_PATH + Props.get("images.folder") + "/"; //must be slashes in recalbox
+	//private static final String IMAGE_FOLDER = Props.get("images.folder");
 	private static final String TEMPLATE_GAME = 
 			  "<path>{path}</path>\n"
 			+ "<name>{name}</name>\n"
@@ -53,6 +56,7 @@ public class GamelistXML
 			+ "<name>{name}</name>\n"
 			+ "<desc>This is a bios file</desc>\n"
 			+ "<hidden>true</hidden>";
+	
 	private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyyMMdd'T000000'");
 	
 	private String addToName;
@@ -79,23 +83,13 @@ public class GamelistXML
 		games.add(game);
 	};
 	
-	
 	/**
-	 * Opens a &lt;game> tag with an id and the source set as thegamesdb
-	 * @param api the api that retrieved the game
-	 * @param gameId id of the game on thegamesdb
-	 * @param apiGameTitle the title of the game exactly as retrieved from the api (useful for dupes)
-	 * @return the open &lt;game> tag
+	 * Opens a tag with an id, source, score, api-title
+	 * @param game the result game
+	 * @return the open tag
 	 */
-	private String makeGameTagOpen(Game game) 
+	private String makeTagOpen(String tag, Game game)
 	{
-		/*if(StringUtils.isEmpty(gameId))
-		{
-			return QDUtils.makeTagOpen(GAMELIST_GAME_TAGNAME);
-		}
-		// else 
-		*/
-		
 		String api = game.getApi();
 		String gameId = game.getId();
 		String apiGameTitle = StringEscapeUtils.escapeXml10(game.getTitle());
@@ -110,7 +104,7 @@ public class GamelistXML
 		attrs.put("source", api);
 		attrs.put("api-title", apiGameTitle);
 		attrs.put("score", score);
-		return QDUtils.makeTagOpen(GAMELIST_GAME_TAGNAME, attrs);
+		return QDUtils.makeTagOpen(tag, attrs);
 	}
 	
 	/**
@@ -132,7 +126,49 @@ public class GamelistXML
 	private String replaceAllowNull(String in, String toReplace, String replacement)
 	{
 		if(replacement == null) replacement = "";
-		return in.replace(toReplace, replacement);
+		//return in.replaceFirst(toReplace, replacement);
+		return StringUtils.replaceOnce(in, toReplace, replacement);
+	}
+	
+	/**
+	 * Replaces all placeholders '{xxx}' in a template with its value from the game
+	 * @param template the template to use
+	 * @param game the game to process
+	 * @param nbTabulations number of tabulations to apply on each xml element
+	 * @return
+	 */
+	private String fillTemplate(String template, Game game, int nbTabulations)
+	{
+		// path to the rom in the recalbox
+		String romPath = ROM_PATH + game.getFile().replaceAll("[\\\\]", "/"); //in recalbox they must be slashes
+		
+		// format and escape everything
+		String name = StringEscapeUtils.escapeXml10(game.getName() + addToName);
+		String desc = StringEscapeUtils.escapeXml10(game.getDesc()); //TODO: add the legal text? let's see if igdb says something
+		String image = StringUtils.isEmpty(game.getImage()) ? "" : StringEscapeUtils.escapeXml10(IMAGE_PATH + game.getImage()); //must be slashes in recalbox
+		String rating = game.getRating() == 0 ? "" : "" + (game.getRating() / 10.0f);
+		String releasedate = game.getReleasedate() == null ? "" : SDF.format(game.getReleasedate());
+		String developer = StringUtils.isEmpty(game.getDeveloper()) ? "" : StringEscapeUtils.escapeXml10(game.getDeveloper());
+		String publisher = StringUtils.isEmpty(game.getPublisher()) ? "" : StringEscapeUtils.escapeXml10(game.getPublisher());
+		String genre = CollectionUtils.isEmpty(game.getGenres()) ? "" : StringUtils.join(game.getGenres(), "/"); // TODO: shorten the genres, remove "Action" if many => see apiService?
+		String players = game.getPlayers();
+		
+		// template
+		String str = QDUtils.tabulate(template, nbTabulations);
+		
+		// add to the template
+		str = replaceAllowNull(str, "{path}", romPath);
+		str = replaceAllowNull(str, "{name}", name);
+		str = replaceAllowNull(str, "{desc}", desc);
+		str = replaceAllowNull(str, "{image}", image);
+		str = replaceAllowNull(str, "{rating}", rating);
+		str = replaceAllowNull(str, "{releasedate}", releasedate);
+		str = replaceAllowNull(str, "{developer}", developer);
+		str = replaceAllowNull(str, "{publisher}", publisher);
+		str = replaceAllowNull(str, "{genre}", genre);
+		str = replaceAllowNull(str, "{players}", players);
+		
+		return str;
 	}
 	
 	/**
@@ -155,58 +191,60 @@ public class GamelistXML
 		
 		for(Game game: games)
 		{
-			// path to the rom in the recalbox
-			String path = ROM_PATH + StringEscapeUtils.escapeXml10(game.getFile());
-
-			// start game
-			out.write(QDUtils.tabulate(makeGameTagOpen(game), 1) + "\n");
-			
-			
 			// is it a bios file?
 			if(game.isBios())
 			{
+				// start game
+				out.write(QDUtils.tabulate(makeTagOpen(GAMELIST_GAME_TAGNAME, game), 1) + "\n");
+				
 				// template 
 				String str = QDUtils.tabulate(TEMPLATE_BIOS, 2);
+			
+				// path to the rom in the recalbox
+				String romPath = ROM_PATH + game.getFile().replaceAll("\\", "/"); //in recalbox they must be slashes
 				
 				// add to the template
-				str = replaceAllowNull(str, "{path}", path);
-				str = replaceAllowNull(str, "{name}", game.getFile() + " (BIOS)");
+				str = replaceAllowNull(str, "{path}", romPath);
+				str = replaceAllowNull(str, "{name}", game.getName() + " (BIOS)");
 				
 				out.write(str + "\n");
+				
+				// end game
+				out.write(QDUtils.tabulate(QDUtils.makeTagclosed(GAMELIST_GAME_TAGNAME), 1) + "\n");
 			}
 			else // a game
 			{
-				// format and escape everything, bis
-				String name = StringEscapeUtils.escapeXml10(game.getName() + addToName);
-				String desc = StringEscapeUtils.escapeXml10(game.getDesc()); //TODO: add the legal text? let's see if igdb says something
-				String image = StringUtils.isEmpty(game.getImage()) ? "" : StringEscapeUtils.escapeXml10(IMAGE_PATH + game.getImage());
-				String rating = game.getRating() == 0 ? "" : "" + (game.getRating() / 10.0f);
-				String releasedate = game.getReleasedate() == null ? "" : SDF.format(game.getReleasedate());
-				String developer = StringUtils.isEmpty(game.getDeveloper()) ? "" : StringEscapeUtils.escapeXml10(game.getDeveloper());
-				String publisher = StringUtils.isEmpty(game.getPublisher()) ? "" : StringEscapeUtils.escapeXml10(game.getPublisher());
-				String genre = CollectionUtils.isEmpty(game.getGenres()) ? "" : StringUtils.join(game.getGenres(), "/"); // TODO: shorten the genres, remove "Action" if many => see apiService?
-				String players = game.getPlayers();
+				// find out if this is a scummvm type of rom, which absolutely needs the meta on its folder
+				Path rom = Paths.get(game.getFile());
+				boolean isInAFolder = rom.getNameCount() == 2;
+				if(isInAFolder) //this is a scummvm-like rom
+				{
+					// start folder
+					out.write(QDUtils.tabulate(makeTagOpen(GAMELIST_FOLDER_TAGNAME, game), 1) + "\n");
+					
+					String str = fillTemplate(TEMPLATE_GAME, game, 2);
+					out.write(str + "\n");
+					
+					// end folder
+					out.write(QDUtils.tabulate(QDUtils.makeTagclosed(GAMELIST_FOLDER_TAGNAME), 1) + "\n");
+				}
 				
-				// template
-				String str = QDUtils.tabulate(TEMPLATE_GAME, 2);
+				// start game
+				out.write(QDUtils.tabulate(makeTagOpen(GAMELIST_GAME_TAGNAME, game), 1) + "\n");
 				
-				// add to the template
-				str = replaceAllowNull(str, "{path}", path);
-				str = replaceAllowNull(str, "{name}", name);
-				str = replaceAllowNull(str, "{desc}", desc);
-				str = replaceAllowNull(str, "{image}", image);
-				str = replaceAllowNull(str, "{rating}", rating);
-				str = replaceAllowNull(str, "{releasedate}", releasedate);
-				str = replaceAllowNull(str, "{developer}", developer);
-				str = replaceAllowNull(str, "{publisher}", publisher);
-				str = replaceAllowNull(str, "{genre}", genre);
-				str = replaceAllowNull(str, "{players}", players);
+				String str = TEMPLATE_GAME;
+				if(isInAFolder)
+				{
+					str = replaceAllowNull(str, "{name}", "Start {name}");
+				}
 				
+				str = fillTemplate(str, game, 2);
 				out.write(str + "\n");
+				
+				// end game
+				out.write(QDUtils.tabulate(QDUtils.makeTagclosed(GAMELIST_GAME_TAGNAME), 1) + "\n");
 			}
 			
-			// end game
-			out.write(QDUtils.tabulate(QDUtils.makeTagclosed(GAMELIST_GAME_TAGNAME), 1) + "\n");
 		}
 		
 		// end

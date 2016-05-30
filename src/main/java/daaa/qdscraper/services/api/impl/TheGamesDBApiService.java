@@ -3,6 +3,7 @@ package daaa.qdscraper.services.api.impl;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class TheGamesDBApiService extends ApiService
 	private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyy");
 	private static final String THEGAMESDB_API_ID = "TheGamesDB";
 	private static final String IMAGES_FOLDER = Props.get("images.folder");
+	private static final float SEARCH_SCORE_THRESHOLD = Float.valueOf(Props.get("thegamesdb.score.threshold"));
 	
 	
 	
@@ -92,14 +94,15 @@ public class TheGamesDBApiService extends ApiService
 	
 	/**
 	 * Builds a unique filename for an image
-	 * @param name name of the game
+	 * @param rom relative path to the rom
 	 * @param matchIndex index of the match
 	 * @param imageType extension for the image (png/jpg)
 	 * @return a unique filename for this run
 	 */
-	private String buildImageFileName(String name, int matchIndex, String imageType)
+	private String buildImageFileName(String rom, int matchIndex, String imageType)
 	{
-		return QDUtils.sanitizeFilename(name) + "-" + THEGAMESDB_API_ID + "-" + matchIndex + (imageType == null ? "" : ("." + imageType));
+		String id = Paths.get(rom).getFileName().toString();
+		return QDUtils.sanitizeFilename(id) + "-" + THEGAMESDB_API_ID + "-" + matchIndex + (imageType == null ? "" : ("." + imageType));
 	}
 	
 	
@@ -230,7 +233,7 @@ public class TheGamesDBApiService extends ApiService
 			
 			games.add(game);
 			
-			setGameScore(game, translatedName, title);
+			setGameScores(game, translatedName, title);
 			if(game.isPerfectMatch())
 			{	
 				// 100% match on the name, we can stop
@@ -241,7 +244,12 @@ public class TheGamesDBApiService extends ApiService
 				
 				return games; // stop 
 			}
-			//TODO: also stop if score below a threshold
+			
+			//also stop if score below a threshold, below 0.6 seems good
+			if(SEARCH_SCORE_THRESHOLD > 0 && game.getScore() < SEARCH_SCORE_THRESHOLD)
+			{
+				break;
+			}
 		}
 		
 		if(games.size() >= 2) //because some ... were output

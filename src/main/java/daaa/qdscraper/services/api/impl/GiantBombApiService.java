@@ -3,6 +3,7 @@ package daaa.qdscraper.services.api.impl;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -253,14 +254,15 @@ public class GiantBombApiService extends ApiService
 	
 	/**
 	 * Builds a unique filename for an image
-	 * @param name name of the game
+	 * @param rom relative path to the rom
 	 * @param matchIndex index of the match
 	 * @param imageType extension for the image (png/jpg)
 	 * @return a unique filename for this run
 	 */
-	private String buildImageFileName(String name, int matchIndex, String imageType)
+	private String buildImageFileName(String rom, int matchIndex, String imageType)
 	{
-		return QDUtils.sanitizeFilename(name) + "-" + GIANTBOMB_API_ID + "-" + matchIndex + (imageType == null ? "" : ("." + imageType));
+		String id = Paths.get(rom).getFileName().toString();
+		return QDUtils.sanitizeFilename(id) + "-" + GIANTBOMB_API_ID + "-" + matchIndex + (imageType == null ? "" : ("." + imageType));
 	}
 	
 	/**
@@ -380,7 +382,7 @@ public class GiantBombApiService extends ApiService
 				if(game!=null)
 				{	
 					games.add(game);
-					setGameScore(game, translatedName, game.getTitle());
+					setGameScores(game, translatedName, game.getTitle());
 					if(game.isPerfectMatch())
 					{
 						// 100% match on the name, we can stop
