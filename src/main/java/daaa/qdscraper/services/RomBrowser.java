@@ -10,11 +10,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.xml.sax.SAXException;
 
 import daaa.qdscraper.Args;
 import daaa.qdscraper.Props;
+import daaa.qdscraper.model.Rom;
 import daaa.qdscraper.utils.QDUtils;
 
 
@@ -29,17 +34,55 @@ public class RomBrowser {
 	private RomBrowser(){} // do not instanciate
 	
 	/**
+	 * If args.arcade or args.platform == scummvm, translate the name
+	 * @param rom the rom to set the translated name to
+	 * @param args app's args
+	 * @throws SAXException 
+	 * @throws ParserConfigurationException 
+	 * @throws IOException 
+	 * @throws XPathExpressionException 
+	 */
+	private static void setTranslatedName(Rom rom, Args args) 
+	throws XPathExpressionException, IOException, ParserConfigurationException, SAXException
+	{
+		String file = rom.getRom();
+		String name = rom.getRom(); // for arcade/scumm, the name is our match in the DB, for the rest it's the rom => should we get rid of the possible relative path?
+		
+		
+		//if it's an arcade game, look in the arcade roms "DB"
+		if(args.arcade)
+		{
+			name = ArcadeRoms.getRomTitle(name); // can be null here => checked by app later
+			rom.setIsTranslated(true);
+		}
+		
+		// if it's a scummvm game, look in the scummvm roms "DB"
+		else if("scummvm".equals(args.platform))
+		{
+			name = ScummVMRoms.getRomTitle(file);  // can be null here => checked by app later
+			rom.setIsTranslated(true);
+		}
+		
+		rom.setTranslatedName(name);
+	}
+	
+	
+	
+	/**
 	 * Finds roms in a directory, non recursively
 	 * 
 	 * @param inFolder the folder to look for the roms
 	 * @param args app's args
 	 * @return the list of found roms
 	 * @throws IOException
+	 * @throws SAXException 
+	 * @throws ParserConfigurationException 
+	 * @throws XPathExpressionException 
 	 */
-	public static List<String> listRomsInFolder(String inFolder) 
-	throws IOException 
+	public static List<Rom> listRomsInFolder(String inFolder, Args args) 
+	throws IOException, XPathExpressionException, ParserConfigurationException, SAXException 
 	{
-		List<String> fileNames = new ArrayList<>();
+		List<Rom> roms = new ArrayList<>();
 		
 		DirectoryStream.Filter<Path> filter = new DirectoryStream.Filter<Path>() {
 	         public boolean accept(Path path) throws IOException {
@@ -74,63 +117,84 @@ public class RomBrowser {
         		
         for (Path path : directoryStream) 
         {
-            fileNames.add(path.getFileName().toString());
+        	String filename = path.getFileName().toString();
+        	Rom rom = new Rom();
+        	rom.setPath(path.toString());
+        	rom.setRom(filename);
+        	rom.setIsBios(isBios(filename));
+        	rom.setIsRealFile(true);
+        	setTranslatedName(rom, args);
+        	roms.add(rom);
         }
         
-        return fileNames;
+        return roms;
 	}
 	
 	/**
 	 * Lists roms given the args:
 	 * - if a rom file is given, list that
-	 * - if scummvm, find only .scummvm files in subdirectories
+	 * - if scummvm, find only .scummvm files in subdirectories 
 	 * - otherwise list files non recursively
 	 * @param args app's args
 	 * @return the list of roms
 	 * @throws IOException 
+	 * @throws SAXException 
+	 * @throws ParserConfigurationException 
+	 * @throws XPathExpressionException 
 	 */
-	public static List<String> listRoms(Args args) 
-	throws IOException
+	public static List<Rom> listRoms(Args args) 
+	throws IOException, XPathExpressionException, ParserConfigurationException, SAXException
 	{
 		if(!StringUtils.isEmpty(args.romFile))
 		{
-			return listRomsFromFile(args.romFile);
+			return listRomsFromFile(args.romFile, args);
 		}
 		
 		if("scummvm".equals(args.platform))
 		{
-			
+			//TODO: implement scummvm folders
 		}
 		
 		// else
-		return listRomsInFolder(args.romsDir);
+		return listRomsInFolder(args.romsDir, args);
 	}
 	
 	/**
 	 * Reads rom names from a file, each line should be a rom.
 	 * Lines starting with # are ignored as are blank lines
 	 * @param file the file to read the roms from
+	 * @param args app's args
 	 * @return the list of roms
 	 * @throws IOException
+	 * @throws SAXException 
+	 * @throws ParserConfigurationException 
+	 * @throws XPathExpressionException 
 	 */
-	public static List<String> listRomsFromFile(String file) 
-	throws IOException
+	public static List<Rom> listRomsFromFile(String file, Args args) 
+	throws IOException, XPathExpressionException, ParserConfigurationException, SAXException
 	{
 		String content = QDUtils.readFile(file);
-		String[] roms = content.split("[\n\r]");
-		List<String> res = new ArrayList<String>(roms.length);
+		String[] lines = content.split("[\n\r]");
+		List<Rom> roms = new ArrayList<Rom>(lines.length);
 		
-		for(String rom:roms)
+		for(String line:lines)
 		{
 			// remove # so we can have comments
 			// remove blanks so we can have empty lines
-			if(!rom.startsWith("#") && !StringUtils.isBlank(rom))
+			if(!line.startsWith("#") && !StringUtils.isBlank(line))
 			{
-				res.add(rom.trim());
+				line = line.trim();
+	        	Rom rom = new Rom();
+	        	rom.setPath(args.romsDir + line);
+	        	rom.setRom(line);
+	        	rom.setIsBios(isBios(line));
+	        	rom.setIsRealFile(false);
+	        	setTranslatedName(rom, args);
+	        	roms.add(rom);
 			}
 		}
 		
-		return res;
+		return roms;
 	}
 	
 	/**

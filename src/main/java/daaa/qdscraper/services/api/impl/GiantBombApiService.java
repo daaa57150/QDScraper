@@ -28,11 +28,12 @@ import org.xml.sax.SAXException;
 import daaa.qdscraper.Args;
 import daaa.qdscraper.Props;
 import daaa.qdscraper.model.Game;
+import daaa.qdscraper.model.Rom;
 import daaa.qdscraper.services.PlatformConverter;
 import daaa.qdscraper.services.api.ApiService;
 import daaa.qdscraper.utils.QDUtils;
-import daaa.qdscraper.utils.RomCleaner;
 import daaa.qdscraper.utils.QDUtils.HttpAnswer;
+import daaa.qdscraper.utils.RomCleaner;
 
 
 // http://www.giantbomb.com/api/search/?api_key=xxxx&query=Metal%20Slug%20-%20Super%20Vehicle-001&resources=game&field_list=deck,description,id,image,name,original_release_date,platforms,api_detail_url
@@ -341,7 +342,7 @@ public class GiantBombApiService extends ApiService
 	 * @return the first few matches
 	 */
 	@Override
-	public List<Game> search(String rom, String translatedName, Args args) 
+	public List<Game> search(Rom rom, Args args) 
 	{
 		if(args.giantBombApiKey == null)
 		{
@@ -350,7 +351,7 @@ public class GiantBombApiService extends ApiService
 		
 		// else we have a giant bomb api key 
 		
-		
+		String translatedName = rom.getTranslatedName();
 		String cleanName = RomCleaner.cleanRomName(translatedName, false);
 		
 		// we'll search for these platforms
@@ -375,7 +376,7 @@ public class GiantBombApiService extends ApiService
 			
 			// transform to game
 			try {
-				Game game = toGame(rom, translatedName, gameDocument, args, i+1);
+				Game game = toGame(rom.getRom(), translatedName, gameDocument, args, i+1);
 				if(game!=null)
 				{	
 					games.add(game);

@@ -18,6 +18,7 @@ import org.xml.sax.SAXException;
 
 import daaa.qdscraper.model.Game;
 import daaa.qdscraper.model.GamelistXML;
+import daaa.qdscraper.model.Rom;
 import daaa.qdscraper.services.ArcadeRoms;
 import daaa.qdscraper.services.RomBrowser;
 import daaa.qdscraper.services.ScummVMRoms;
@@ -53,18 +54,16 @@ public class App
 	private static final String NO_API_ID = "QDScrapper";
 	
 	/**
-	 * Get the list of roms from the filesystem 
+	 * Get the list of roms from the filesystem or from the provided text file 
 	 * @param args the app's arguments
 	 * @return the list of roms to process
 	 * @throws IOException 
+	 * @throws SAXException 
+	 * @throws ParserConfigurationException 
+	 * @throws XPathExpressionException 
 	 */
-	private static List<String> findRoms(Args args) 
-	throws IOException {
-		
-//		if(args.romFile != null) {
-//			return RomBrowser.listRomsFromFile(args.romFile);
-//		}
-//		//else
+	private static List<Rom> findRoms(Args args) 
+	throws IOException, XPathExpressionException, ParserConfigurationException, SAXException {
 		return RomBrowser.listRoms(args);
 	}
 	
@@ -129,42 +128,6 @@ public class App
 		return games;
 	}
 	
-	private static String getRealNameOfRom(String rom, Args args) 
-	throws IOException, XPathExpressionException, ParserConfigurationException, SAXException
-	{
-		String name = rom; // for arcade/scumm, the name is our match in the DB, for the rest it's the rom
-		
-		//if it's an arcade game, look in the arcade roms "DB"
-		if(args.arcade)
-		{
-			name = ArcadeRoms.getRomTitle(rom);
-			if(StringUtils.isEmpty(name))
-			{
-				//addEmptyGame(notFound, rom, name);
-				System.out.println("  => Nothing found for " + rom + " in the arcade rom files");
-				return null;
-			}
-			//else
-			System.out.println(rom + " is the arcade rom name of " + name);
-		}
-		
-		// if it's a scummvm game, look in the scummvm roms "DB"
-		if("scummvm".equals(args.platform))
-		{
-			name = ScummVMRoms.getRomTitle(rom);
-			if(StringUtils.isEmpty(name))
-			{
-				//addEmptyGame(notFound, rom, name);
-				System.out.println("  => Nothing found for " + rom + " in the scummvm rom files");
-				return null;
-			}
-			//else
-			System.out.println(rom + " is the scummvm rom name of " + name);
-		}
-		
-		return name;
-	}
-	
 	/**
 	 * Main!
 	 * 
@@ -191,36 +154,39 @@ public class App
 		
 		
 		// process roms
-		List<String> roms = findRoms(args);
-		for(String rom: roms)
+		List<Rom> roms = findRoms(args);
+		for(Rom rom: roms)
 		{
-			if(StringUtils.isEmpty(rom)) continue; // may happen if from a text file 
-			
-			System.out.println("# Processing " + rom + " ...");
+			System.out.println("# Processing " + rom.getRom() + " ...");
 			
 			// is it a bios?
-			if(RomBrowser.isBios(rom))
+			if(rom.isBios())
 			{
 				Game game = new Game(NO_API_ID);
-				game.setRom(rom);
+				game.setRom(rom.getRom());
 				game.setBios(true);
 				gameList.addGame(game);
 				System.out.println("  => This is a bios file, added as hidden");
 			}
 			else
 			{
-				String name = getRealNameOfRom(rom, args); // for arcade/scumm, the name is our match in the DB, for the rest it's the rom
-				if(name == null)
+				String name = rom.getTranslatedName(); // for arcade/scumm, the name is our match in the DB, for the rest it's the rom
+				if(name == null) // needed translation but wasn't found in our DB, highly unlikely
 				{
-					addEmptyGame(notFound, rom, "");
+					addEmptyGame(notFound, rom.getRom(), "");
+					System.out.println("  => Nothing found for " + rom.getRom() + " in our data files");
 					continue;
+				}
+				if(rom.isTranslated())
+				{
+					System.out.println(rom.getRom() + " is the rom file name of " + name);
 				}
 				
 				// ask the services
 				List<Game> games = new ArrayList<>();
 				for(ApiService service: apiServices)
 				{
-					List<Game> apiGames = service.search(rom, name, args);
+					List<Game> apiGames = service.search(rom, args);
 					if(!CollectionUtils.isEmpty(apiGames))
 					{
 						games.addAll(apiGames);
@@ -263,7 +229,7 @@ public class App
 					//dupes
 					if(games.size() > 1)
 					{
-						GamelistXML gameListDupes = new GamelistXML(args.dupesDir + DUPE_PREFIX + QDUtils.sanitizeFilename(rom) + ".xml", args.appendToName);
+						GamelistXML gameListDupes = new GamelistXML(args.dupesDir + DUPE_PREFIX + QDUtils.sanitizeFilename(rom.getRom()) + ".xml", args.appendToName);
 						for(Game dupe: games)
 						{
 							if(dupe != topResult) // it's really a dupe
@@ -289,7 +255,7 @@ public class App
 				}
 				else // not found
 				{
-					addEmptyGame(notFound, rom, name);
+					addEmptyGame(notFound, rom.getRom(), name);
 					String precision = null;
 					if(args.arcade || "scummvm".equals(args.platform))
 					{

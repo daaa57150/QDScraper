@@ -11,6 +11,7 @@ import org.apache.http.message.BasicHeader;
 import daaa.qdscraper.Args;
 import daaa.qdscraper.Props;
 import daaa.qdscraper.model.Game;
+import daaa.qdscraper.model.Rom;
 import daaa.qdscraper.services.api.ApiService;
 import daaa.qdscraper.utils.QDUtils;
 import daaa.qdscraper.utils.QDUtils.HttpAnswer;
@@ -96,9 +97,9 @@ public class IGDBApiService extends ApiService {
 	 * @throws Exception
 	 */
 	@Override
-	public List<Game> search(String rom, String translatedName, Args args) 
+	public List<Game> search(Rom rom, Args args) 
 	{
-		return null; //TODO: implement 
+		return null; //TODO: implement IGDB
 		// test git 2?
 	}
 

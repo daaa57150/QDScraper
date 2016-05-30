@@ -31,7 +31,8 @@ public class Game implements Comparable<Game>
 	
 	// 1 = perfect match, 0 = totally different
 	private double score = 0;
-
+	// set to true if the game was matched using a hash, ie 100% sure it's the same rom
+	private boolean md5Match = false;
 	// the api that retrieved this result
 	private String api;
 	private String legalText; //some apis request showing a legal text to the user
@@ -44,11 +45,12 @@ public class Game implements Comparable<Game>
 	
 
 	/**
-	 * Compares the quality of theis match with another game.
+	 * Compares the quality of this match with another game.
 	 * Most important thing is the score, then the description and the image, then the other metas that were filled.
 	 */
 	@Override
 	public int compareTo(Game o2) {
+		
 		// 1) score is important
 		if(getScore() != o2.getScore()) {
 			return ((Double)getScore()).compareTo(o2.getScore()) *-1; // *-1 because high scores are first
@@ -85,12 +87,27 @@ public class Game implements Comparable<Game>
 		return cs;
 	}
 	
+	
 	/**
 	 * Constructor with api, use this!
 	 * @param api
 	 */
 	public Game(String api){
 		this.api = api;
+	}
+	
+	/**
+	 * @return the md5Match
+	 */
+	public boolean isMd5Match() {
+		return md5Match;
+	}
+
+	/**
+	 * @param md5Match the md5Match to set
+	 */
+	public void setMd5Match(boolean md5Match) {
+		this.md5Match = md5Match;
 	}
 	
 	/**
@@ -295,9 +312,10 @@ public class Game implements Comparable<Game>
 	}
 	
 	/**
-	 * @return the match
+	 * @return the score; always 1 if md5Match is true
 	 */
 	public double getScore() {
+		if(md5Match) return 1.;
 		return score;
 	}
 	/**

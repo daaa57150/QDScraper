@@ -8,6 +8,7 @@ import com.ibm.icu.text.Normalizer2;
 
 import daaa.qdscraper.Args;
 import daaa.qdscraper.model.Game;
+import daaa.qdscraper.model.Rom;
 import daaa.qdscraper.utils.RomCleaner;
 
 public abstract class ApiService 
@@ -18,7 +19,7 @@ public abstract class ApiService
 	 * @param translatedName the name to use for searches, might be == rom or something else (arcade games)
 	 * @return the list of games found, first match should be the one
 	 */
-	public abstract List<Game> search(String rom, String translatedName, Args args);
+	public abstract List<Game> search(Rom rom, Args args);
 	
 	
 	

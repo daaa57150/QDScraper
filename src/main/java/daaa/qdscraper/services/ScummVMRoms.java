@@ -30,7 +30,7 @@ public class ScummVMRoms {
 	/**
 	 * Get the name of the game from the name of the rom
 	 * @param rom the name of the rom, with the .zip extension
-	 * @return the name of the game if it's known
+	 * @return the name of the game if it's known, null otherwise
 	 * @throws IOException
 	 */
 	public static String getRomTitle(String rom)

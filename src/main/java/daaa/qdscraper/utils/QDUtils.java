@@ -2,6 +2,7 @@ package daaa.qdscraper.utils;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -23,6 +24,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -163,6 +165,32 @@ public class QDUtils
 			return perfectMatches.get(0);
 		}
 		
+		return null;
+	}
+	
+	/**
+	 * Calculates the md5 hash of a file
+	 * @param path path to the file to process
+	 * @return the md5 hash of a file
+	 */
+	public static String getMD5(String path)
+	{
+		FileInputStream fis = null;
+		try
+		{
+			fis = new FileInputStream(new File("foo"));
+			String md5 = DigestUtils.md5Hex(fis);
+			return md5;
+		}
+		catch(Exception e)
+		{
+			System.err.println("Cannot compute md5 of file " + path);
+			e.printStackTrace();
+		}
+		finally
+		{
+			try{if(fis!=null)fis.close();}catch(IOException e){}
+		}
 		return null;
 	}
 	

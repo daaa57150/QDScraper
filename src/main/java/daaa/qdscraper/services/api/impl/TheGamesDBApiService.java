@@ -22,11 +22,12 @@ import org.w3c.dom.Document;
 import daaa.qdscraper.Args;
 import daaa.qdscraper.Props;
 import daaa.qdscraper.model.Game;
+import daaa.qdscraper.model.Rom;
 import daaa.qdscraper.services.PlatformConverter;
 import daaa.qdscraper.services.api.ApiService;
 import daaa.qdscraper.utils.QDUtils;
-import daaa.qdscraper.utils.RomCleaner;
 import daaa.qdscraper.utils.QDUtils.HttpAnswer;
+import daaa.qdscraper.utils.RomCleaner;
 
 /**
  * Utilities to query http://thegamesdb.net/ using its API
@@ -251,31 +252,6 @@ public class TheGamesDBApiService extends ApiService
 		return games;
 	}
 	
-	/* *
-	 * Moves an image from one folder to another
-	 * @param from
-	 * @param to
-	 * @param nameWithoutExtension
-	 * /
-	private void moveImage(String from, String to, String nameWithoutExtension)
-	{
-		File f = Paths.get(from, nameWithoutExtension + ".jpg").toFile();
-		String ext = "jpg";
-		if(!f.exists())
-		{
-			f = Paths.get(from, nameWithoutExtension + ".png").toFile();
-			ext = "png";
-		}
-		try
-		{
-			Files.move(Paths.get(f.getAbsolutePath()), Paths.get(to, nameWithoutExtension + "." + ext), StandardCopyOption.REPLACE_EXISTING);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace(); // should not happen
-		}
-	} */
-	
 	/**
 	 * Searches TheGamesDB
 	 * @param rom name of the rom to look for (file name)
@@ -284,8 +260,9 @@ public class TheGamesDBApiService extends ApiService
 	 * @throws Exception
 	 */
 	@Override
-	public List<Game> search(String rom, String translatedName, Args args) 
+	public List<Game> search(Rom rom, Args args) 
 	{
+		String translatedName = rom.getTranslatedName();
 		String cleanName = RomCleaner.cleanRomName(translatedName, false);
 			
 		String xml = null;
@@ -313,7 +290,7 @@ public class TheGamesDBApiService extends ApiService
 			// TODO: try to search and if nothing comes out, retry the search by cleaning more chars (-,!) etc..
 			try
 			{
-				List<Game> gamesThisPlatform = toGames(rom, translatedName, xml, args);
+				List<Game> gamesThisPlatform = toGames(rom.getRom(), translatedName, xml, args);
 				if(QDUtils.findBestPerfectMatch(gamesThisPlatform) != null)
 				{
 					return gamesThisPlatform;
