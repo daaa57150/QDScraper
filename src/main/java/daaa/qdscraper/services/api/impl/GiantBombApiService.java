@@ -53,6 +53,7 @@ public class GiantBombApiService extends ApiService
 	private static final int SEARCH_LIMIT = Integer.valueOf(Props.get("giantbomb.search.limit"));
 	private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private static final String IMAGES_FOLDER = Props.get("images.folder");
+	private static final String LEGAL_TEXT = Props.get("giantbomb.legalText");
 	
 	
 	/**
@@ -332,6 +333,7 @@ public class GiantBombApiService extends ApiService
 		game.setPublisher(publisher);
 		game.setId(id);
 		game.setTitle(title);
+		game.setLegalText(LEGAL_TEXT);
 		
 		return game;
 	}

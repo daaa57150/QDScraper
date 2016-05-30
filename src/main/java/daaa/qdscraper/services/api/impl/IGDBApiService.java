@@ -32,7 +32,7 @@ public class IGDBApiService extends ApiService {
 	private static final String URL_PARAM_FILTER_PLATFORM = "filters[platforms.id_in]"; //https://www.igdb.com/api/v1/games/search?q=Metal Slug - Super Vehicle-001&filters[platforms.id_in]=80,79,52
 	// search path: /games/search?q=
 	// game meta path: /games/{gameId}
-	
+	//TODO: legalText
 	
 	
 	/**
