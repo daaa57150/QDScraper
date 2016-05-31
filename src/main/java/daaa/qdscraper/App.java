@@ -63,7 +63,7 @@ public class App
 	 */
 	private static List<Rom> findRoms(Args args) 
 	throws IOException, XPathExpressionException, ParserConfigurationException, SAXException {
-		return RomBrowser.listRoms(args);
+		return RomBrowser.listRoms(args); //TODO: -append=true to treat only games not already in the xml file
 	}
 	
 	/**
@@ -143,14 +143,14 @@ public class App
 		
 		// services to use, in that order, to look for a perfect match
 		List<ApiService> apiServices = new ArrayList<>();
-		/*apiServices.add(new TheGamesDBApiService());
+		apiServices.add(new TheGamesDBApiService());
+		apiServices.add(new ScreenScraperApiService());
 		
 		if(args.giantBombApiKey != null)
 		{
 			//System.out.println("GiantBomb api key is present, we'll ask GiantBomb");
-			apiServices.add(new GiantBombApiService());
-		}*/
-		apiServices.add(new ScreenScraperApiService());
+			apiServices.add(new GiantBombApiService()); // TODO: ask giantbomb only if really needed, as the key will expire very fast
+		}
 		
 		
 		// process roms
@@ -194,7 +194,8 @@ public class App
 						if(perfectMatch != null)
 						{
 							//break; // yes there is a perfect match, we stop here => TODO: should we still ask other apis to perhaps find a best perfect match ?
-							// => TODO: if the score is perfect + has everything in the metas, stop; otherwise try to find a better perfect match
+							// => TODO: if the score is perfect + has everything in the metas, stop; otherwise try to find other perfect matches and merge them all?
+							// TODO: ask giantbomb and igdb only if really needed, as their keys will expire very fast
 						}
 					}
 				}

@@ -38,6 +38,38 @@ public abstract class ApiService
 	}
 	
 	/**
+	 * Get the name of the game that the user wants:
+	 * - the title from the api
+	 * - the raw rom name without the extension
+	 * - a cleaned rom name
+	 * @param rom name of the rom
+	 * @param translatedName the name of the rom file, or a converted name for arcade games
+	 * @param title title from thegamesdb
+	 * @param args app args
+	 * @return the desired name
+	 */
+	protected static String getUserDesiredFilename(String rom, String translatedName, String title, Args args)
+	{
+		String name = null;
+		if(args.useFilename || StringUtils.isEmpty(title))
+		{
+			if(!StringUtils.isEmpty(args.cleanFilename))
+			{
+				name = RomCleaner.cleanWithArgs(translatedName, args.cleanFilename);
+			}
+			else
+			{
+				name = RomCleaner.removeExtension(translatedName);
+			}
+		}
+		else
+		{
+			name = title;
+		}
+		return name;
+	}
+	
+	/**
 	 * compares the hard cleaned names of 2 roms 
 	 * @param rom1
 	 * @param rom2
@@ -81,6 +113,12 @@ public abstract class ApiService
 		return levenshtein;
 	}
 	
+	/**
+	 * Calculates the jarod winkler score and the Levenshtein distance and sets them
+	 * @param game
+	 * @param translatedName
+	 * @param apiTitle
+	 */
 	protected void setGameScores(Game game, String translatedName, String apiTitle)
 	{
 		double score = scoreComparison(translatedName, apiTitle);

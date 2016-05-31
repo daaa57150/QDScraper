@@ -185,7 +185,7 @@ public class TheGamesDBApiService extends ApiService
 			String title = xpath.evaluate("/Data/Game["+i+"]/GameTitle", document);
 			
 			// the user desired name
-			String name = RomCleaner.getUserDesiredFilename(rom, translatedName, title, args);
+			String name = getUserDesiredFilename(rom, translatedName, title, args);
 			
 			// genre
 			String genre = "";

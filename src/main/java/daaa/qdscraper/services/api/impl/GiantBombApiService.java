@@ -208,7 +208,7 @@ public class GiantBombApiService extends ApiService
 	 * @param args app's args
 	 * @return the parsed document
 	 */
-	private Document parseGame(String url, Args args)
+	private Document parseGame(String url, Args args) //TODO: implement some local cache mechanism so that users launching many commands don't run out of api requests
 	{
 		try
 		{
@@ -293,7 +293,7 @@ public class GiantBombApiService extends ApiService
 		String title = xpath.evaluate("response/results/name", gameDocument);
 		
 		// the user desired name
-		String name = RomCleaner.getUserDesiredFilename(rom, translatedName, title, args);
+		String name = getUserDesiredFilename(rom, translatedName, title, args);
 		
 		// genre
 		String genre = "";

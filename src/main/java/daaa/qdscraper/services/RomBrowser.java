@@ -96,7 +96,13 @@ public class RomBrowser {
 	   	if(file.isHidden()) return false;
 	   	
 	   	// remove extensions we know are not roms and may be there
-	   	if(ext.toLowerCase().matches("xml|txt|jpg|png|htm|html|doc|docx|ini|xls")) return false;
+	   	String[] extensions = {
+	   		// common files
+	   		"xml","txt","jpg","png","gif","htm","html","doc","docx","ini","xls","dat",
+	   		// built by fba
+	   		"nv","fs"
+	   	};
+	   	if(ext.toLowerCase().matches(StringUtils.join(extensions, "|"))) return false;
 	   	 
 	   	 
 	   	return true;

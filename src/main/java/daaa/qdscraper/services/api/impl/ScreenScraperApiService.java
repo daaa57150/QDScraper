@@ -1,17 +1,25 @@
 package daaa.qdscraper.services.api.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
+import javax.xml.xpath.XPath;
+
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.utils.URIBuilder;
+import org.w3c.dom.Document;
 
 import daaa.qdscraper.Args;
 import daaa.qdscraper.Props;
@@ -32,13 +40,17 @@ import daaa.qdscraper.utils.QDUtils.HttpAnswer;
 public class ScreenScraperApiService extends ApiService 
 {
 	/** Translates the genres FR->EN and drops some */
-	private Properties genres;
+	private Properties genresTranslation;
 	
 	private String devid;
 	private String devpassword;
 	private static final String URL_SCREENSCRAPER_API = Props.get("screenscraper.url");
 	private static final String GET_GAME = "jeuInfos.php";
 	private static final String SOFTNAME = Props.get("screenscraper.softname");
+	private static final String SCREENSCRAPER_API_ID = "ScreenScraper";
+	private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd");
+	private static final String IMAGES_FOLDER = Props.get("images.folder");
+	
 	
 	/**
 	 * Constructor
@@ -48,7 +60,7 @@ public class ScreenScraperApiService extends ApiService
 	public ScreenScraperApiService() 
 	throws GeneralSecurityException, IOException 
 	{
-		genres = QDUtils.loadClasspathProperties("screenscraper_genres.properties");
+		genresTranslation = QDUtils.loadClasspathProperties("screenscraper_genres.properties");
 		devid  = CryptoUtils.decrypt(Props.get("screenscraper.devid"));
 		devpassword = CryptoUtils.decrypt(Props.get("screenscraper.devpassword"));
 	}
@@ -134,9 +146,12 @@ public class ScreenScraperApiService extends ApiService
 			
 			if(answer.getContent().startsWith("Erreur"))
 			{
-				System.err.println("Error querying ScreenScraper: "+answer.getContent()); // don't print the url with the password
+				// removed sysout as it's printed when no match
+				//System.err.println("Error querying ScreenScraper: "+answer.getContent()); // don't print the url with the password
 				return null;
 			}
+			
+			return answer.getContent();
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -145,12 +160,164 @@ public class ScreenScraperApiService extends ApiService
 		return null;
 	}
 	
+	/**
+	 * Builds a unique filename for an image
+	 * @param rom relative path to the rom
+	 * @param matchIndex index of the match
+	 * @param imageType extension for the image (png/jpg)
+	 * @return a unique filename for this game
+	 */
+	private String buildImageFileName(String rom, String imageType)
+	{
+		String id = Paths.get(rom).getFileName().toString();
+		return QDUtils.sanitizeFilename(id) + "-" + SCREENSCRAPER_API_ID + "-" + 1 + (imageType == null ? "" : ("." + imageType));
+	}
 	
 	/**
-	 * Searches ScreenScraper
+	 * Parses a date in yyyy-MM-dd format
+	 * @param input
+	 * @return
+	 */
+	private Date parseDate(String input)
+	{
+		try
+		{
+			return SDF.parse(input);
+		}
+		catch(ParseException pe)
+		{
+			try
+			{
+				// sometimes they only have the year
+				int year = Integer.valueOf(input);
+				Calendar cal = Calendar.getInstance();
+				cal.set(Calendar.YEAR, year);
+				cal.set(Calendar.MONTH, 0);
+				cal.set(Calendar.DAY_OF_MONTH, 1);
+				return cal.getTime();
+			}
+			catch(Exception e)
+			{
+				return null;
+			}
+		}
+	}
+	
+	
+	private Game toGame(String rom, String translatedName, String xml, Args args) 
+	throws Exception
+	{
+		// xml parsing stuff
+		Document document = QDUtils.parseXML(xml);
+		XPath xpath = QDUtils.getXPath();
+		
+		// there should be a result, but just in case...
+		String id = xpath.evaluate("Data/jeu[1]/id", document);
+		if(!StringUtils.isEmpty(id))
+		{
+		
+			Game game = new Game(SCREENSCRAPER_API_ID);
+			String desc = xpath.evaluate("Data/jeu[1]/synopsis/synopsis_us", document);
+			String rating = xpath.evaluate("Data/jeu[1]/note", document); // on 20
+			String developer = xpath.evaluate("Data/jeu[1]/developpeur", document);
+			String publisher = xpath.evaluate("Data/jeu[1]/editeur", document);
+			String title = xpath.evaluate("Data/jeu[1]/nom", document);
+			String players = xpath.evaluate("Data/jeu[1]/joueurs", document); //remove "Players"
+			
+			// the user desired name
+			String name = getUserDesiredFilename(rom, translatedName, title, args);
+			
+			// genres
+			String genre = "";
+			List<String> genres = new ArrayList<>();
+			for(int g=1; ; g++)
+			{
+				genre = xpath.evaluate("Data/jeu/genres/genre["+g+"]", document);
+				if(StringUtils.isEmpty(genre))
+				{
+					break; //stop
+				}
+				else
+				{
+					String translatedGenre = genresTranslation.getProperty(genre.trim());
+					if(!StringUtils.isEmpty(translatedGenre))
+					{
+						genres.add(translatedGenre);
+					}
+				}
+			}
+			
+			// date, we'll get these regions in order of preference
+			String[] regions = {"world", "usa", "japan", "france"};
+			String releasedate = null; // 1992-11-20
+			for(String region: regions)
+			{
+				releasedate = xpath.evaluate("Data/jeu[1]/dates/"+region, document);
+				if(!StringUtils.isEmpty(releasedate)) break; // found one
+			}
+			
+			//image 
+			/*
+			 	In this order:
+			 	medias/
+			 		media_boxs/
+			 			media_boxs2d/
+			 				media_box2d_us
+			 				media_box2d_eu
+			 				media_box2d_jp
+			 		media_screenshot
+			 		media_fanart
+			*/
+			String imageUrl = null;
+			String image = null;
+			String[] medias = {
+				"medias/media_boxs/media_boxs2d/media_box2d_us",
+				"medias/media_boxs/media_boxs2d/media_box2d_eu",
+				"medias/media_boxs/media_boxs2d/media_box2d_jp",
+				"medias/media_screenshot",
+				"medias/media_fanart",
+			};
+			for(String media: medias)
+			{
+				imageUrl = xpath.evaluate("Data/jeu[1]/"+media, document);
+				if(!StringUtils.isEmpty(imageUrl)) break; // found one
+			}
+			if(!StringUtils.isEmpty(imageUrl))
+			{
+				String filename = buildImageFileName(rom, null);
+				String path = args.romsDir + IMAGES_FOLDER + File.separatorChar + filename;
+				path = QDUtils.downloadImage(imageUrl, path, args);
+				String pathExt = FilenameUtils.getExtension(path);
+				image = StringUtils.isEmpty(pathExt) ? filename : (filename + "." + pathExt);
+			}
+			
+			game.setName(name);
+			game.setDesc(desc);
+			game.setDeveloper(developer);
+			game.setGenres(genres);
+			game.setImage(image);
+			game.setRating(StringUtils.isEmpty(rating) ? 0 : Float.valueOf(rating) / 20.f);
+			game.setReleasedate(StringUtils.isEmpty(releasedate) ? null : parseDate(releasedate));
+			game.setFile(rom);
+			game.setPlayers(players);
+			game.setPublisher(publisher);
+			game.setId(id);
+			game.setTitle(title);
+			
+			setGameScores(game, translatedName, title);
+			
+			return game;
+		}
+		
+		return null;
+	}
+	
+	
+	/**
+	 * Searches ScreenScraper, returns a unique game
 	 * @param rom name of the rom to look for (file name)
 	 * @param translatedName the name to use for searches, might be == rom or something else (arcade games)
-	 * @return the list of games found
+	 * @return the list of games found (only one in this case)
 	 * @throws Exception
 	 */
 	@Override
@@ -178,7 +345,19 @@ public class ScreenScraperApiService extends ApiService
 				
 				if(xml != null)
 				{
-					// TOGAME!
+					try
+					{
+						Game game = toGame(rom.getFile(), rom.getTranslatedName(), xml, args);
+						games.add(game);
+					}
+					catch(Exception e)
+					{
+						System.err.println("Error parsing xml from ScreenScraper!");
+						e.printStackTrace();
+						System.err.println("XML content:");
+						System.err.println(xml);
+						System.exit(22);
+					}
 				}
 			}
 		}
@@ -194,7 +373,7 @@ public class ScreenScraperApiService extends ApiService
 //pour chaque platforme (systemeid obligatoire, mame/75 pour arcade)
 // 1) req avec md5
 // 2) req avec nom-rom
-// 3) peut-être rechercher avec leur formulaire le nom du jeu
+// 3) peut-être rechercher avec leur formulaire le nom du jeu ?
 
 
 
