@@ -29,6 +29,7 @@ import org.xml.sax.SAXException;
 import daaa.qdscraper.Args;
 import daaa.qdscraper.Props;
 import daaa.qdscraper.model.Game;
+import daaa.qdscraper.model.MatchingType;
 import daaa.qdscraper.model.Rom;
 import daaa.qdscraper.services.PlatformConverter;
 import daaa.qdscraper.services.api.ApiService;
@@ -344,6 +345,7 @@ public class GiantBombApiService extends ApiService
 		game.setId(id);
 		game.setTitle(title);
 		game.setLegalText(LEGAL_TEXT);
+		game.setMatchingType(MatchingType.SEARCH);
 		
 		return game;
 	}

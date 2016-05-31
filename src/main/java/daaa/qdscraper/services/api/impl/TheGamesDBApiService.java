@@ -23,6 +23,7 @@ import org.w3c.dom.Document;
 import daaa.qdscraper.Args;
 import daaa.qdscraper.Props;
 import daaa.qdscraper.model.Game;
+import daaa.qdscraper.model.MatchingType;
 import daaa.qdscraper.model.Rom;
 import daaa.qdscraper.services.PlatformConverter;
 import daaa.qdscraper.services.api.ApiService;
@@ -154,7 +155,7 @@ public class TheGamesDBApiService extends ApiService
 	throws Exception
 	{
 		// xml parsing stuff
-		Document document = QDUtils.parseXML(xml);
+		Document document = QDUtils.parseXML(xml); //TODO: don't break on exception
 		XPath xpath = QDUtils.getXPath();
 		
 		List<Game> games = new ArrayList<>();
@@ -233,6 +234,7 @@ public class TheGamesDBApiService extends ApiService
 			game.setPublisher(publisher);
 			game.setId(id);
 			game.setTitle(title);
+			game.setMatchingType(MatchingType.SEARCH);
 			
 			games.add(game);
 			
@@ -291,7 +293,7 @@ public class TheGamesDBApiService extends ApiService
 			try
 			{
 				xml = searchXml(cleanName, wantedPlatform, args); 
-				// TODO: I got this once:
+				// TODO: I got this once, add a 1 minute wait ?:
 				/*
 				 	<?xml version="1.0" encoding="UTF-8" ?>
 					Could not connect: Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (2)

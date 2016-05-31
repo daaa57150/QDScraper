@@ -95,16 +95,23 @@ public class GamelistXML
 		String gameId = game.getId();
 		String apiGameTitle = StringEscapeUtils.escapeXml10(game.getTitle());
 		
-		DecimalFormat df = new DecimalFormat("0", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
-		//df.setMaximumFractionDigits(340); //340 = DecimalFormat.DOUBLE_FRACTION_DIGITS
-		df.setMaximumFractionDigits(4);
-		String score = df.format(game.getScore());
-		 
 		Map<String, String> attrs = new HashMap<String, String>();
 		attrs.put("id", gameId);
 		attrs.put("source", api);
 		attrs.put("api-title", apiGameTitle);
-		attrs.put("score", score);
+		if(game.getScore() != 0) {
+			DecimalFormat df = new DecimalFormat("0", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+			//df.setMaximumFractionDigits(340); //340 = DecimalFormat.DOUBLE_FRACTION_DIGITS
+			df.setMaximumFractionDigits(4);
+			String score = df.format(game.getScore());
+			attrs.put("score", score);
+		}
+		if(game.getDistance() != 0) {
+			attrs.put("distance", ""+game.getDistance());
+		}
+		if(game.getMatchingType() != null) {
+			attrs.put("matching-type", game.getMatchingType().name().toLowerCase());
+		}
 		return QDUtils.makeTagOpen(tag, attrs);
 	}
 	

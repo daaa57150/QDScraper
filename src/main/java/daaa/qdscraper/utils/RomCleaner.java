@@ -6,8 +6,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import daaa.qdscraper.Args;
-
 
 /**
  * Utilities to clean rom names 

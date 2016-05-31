@@ -24,6 +24,7 @@ import org.w3c.dom.Document;
 import daaa.qdscraper.Args;
 import daaa.qdscraper.Props;
 import daaa.qdscraper.model.Game;
+import daaa.qdscraper.model.MatchingType;
 import daaa.qdscraper.model.Rom;
 import daaa.qdscraper.services.PlatformConverter;
 import daaa.qdscraper.services.api.ApiService;
@@ -203,7 +204,15 @@ public class ScreenScraperApiService extends ApiService
 		}
 	}
 	
-	
+	/**
+	 * Parses the xml sent by ScreenScraper to retrieve our infos
+	 * @param rom the rom to process
+	 * @param translatedName the cleaned name of the rom
+	 * @param xml the xml to parse
+	 * @param args app's args
+	 * @return the parsed game
+	 * @throws Exception
+	 */
 	private Game toGame(String rom, String translatedName, String xml, Args args) 
 	throws Exception
 	{
@@ -348,10 +357,12 @@ public class ScreenScraperApiService extends ApiService
 			{
 				String url = buildUrlMd5(rom, wantedPlatform, args);
 				String xml = readUrl(url, args);
+				MatchingType matchingType = MatchingType.MD5;
 				if(xml == null)
 				{
 					url = buildUrlRomNom(rom, wantedPlatform, args);
 					xml = readUrl(url, args);
+					matchingType = MatchingType.FILENAME;
 				}
 				
 				if(xml != null)
@@ -359,6 +370,7 @@ public class ScreenScraperApiService extends ApiService
 					try
 					{
 						Game game = toGame(rom.getFile(), rom.getTranslatedName(), xml, args);
+						game.setMatchingType(matchingType);
 						games.add(game);
 					}
 					catch(Exception e)

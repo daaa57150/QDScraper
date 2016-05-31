@@ -33,9 +33,11 @@ public class Game implements Comparable<Game>
 	private double score = 0; // jarod-winkler
 	// levenstein
 	private int distance = Integer.MAX_VALUE; // levenshtein
-	
+	// the type of matching that was used to retrieve this game
+	private MatchingType matchingType;
 	// set to true if the game was matched using a hash, ie 100% sure it's the same rom
-	private boolean md5Match = false;
+	//private boolean md5Match = false;
+	
 	// the api that retrieved this result
 	private String api;
 	//some apis request showing a legal text to the user
@@ -104,19 +106,19 @@ public class Game implements Comparable<Game>
 		this.api = api;
 	}
 	
-	/**
+	/* *
 	 * @return the md5Match
-	 */
+	 * /
 	public boolean isMd5Match() {
 		return md5Match;
 	}
 
-	/**
+	/* *
 	 * @param md5Match the md5Match to set
-	 */
+	 * /
 	public void setMd5Match(boolean md5Match) {
 		this.md5Match = md5Match;
-	}
+	}*/
 	
 	/**
 	 * is bios?
@@ -334,10 +336,11 @@ public class Game implements Comparable<Game>
 	}
 	
 	/**
-	 * @return the score; always 1 if md5Match is true
+	 * @return the score; always 1 if matched by md5 of filename
 	 */
 	public double getScore() {
-		if(md5Match) return 1.;
+		if(matchingType == MatchingType.MD5) return 1.;
+		if(matchingType == MatchingType.FILENAME) return 1.; // not sure if we should do that? works well with mame roms at least
 		return score;
 	}
 	/**
@@ -369,6 +372,20 @@ public class Game implements Comparable<Game>
 	}
 
 	
+
+	/**
+	 * @return the matchingType
+	 */
+	public MatchingType getMatchingType() {
+		return matchingType;
+	}
+
+	/**
+	 * @param matchingType the matchingType to set
+	 */
+	public void setMatchingType(MatchingType matchingType) {
+		this.matchingType = matchingType;
+	}
 
 	/**
 	 * {@inheritDoc}
