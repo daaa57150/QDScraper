@@ -81,7 +81,7 @@ public class GamelistXML
 	 */
 	public void addGame(Game game)
 	{
-		games.add(game);
+		games.add(game); // TODO: perform writing
 	};
 	
 	/**

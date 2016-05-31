@@ -214,8 +214,11 @@ public class TheGamesDBApiService extends ApiService
 				String filename = buildImageFileName(rom, i, null);
 				String path = args.romsDir + IMAGES_FOLDER + File.separatorChar + filename;
 				path = QDUtils.downloadImage(imageBaseUrl+imageUrl, path, args);
-				String pathExt = FilenameUtils.getExtension(path);
-				image = StringUtils.isEmpty(pathExt) ? filename : (filename + "." + pathExt);
+				if(path != null)
+				{
+					String pathExt = FilenameUtils.getExtension(path);
+					image = StringUtils.isEmpty(pathExt) ? filename : (filename + "." + pathExt);
+				}
 			}
 			
 			game.setName(name);
@@ -246,7 +249,7 @@ public class TheGamesDBApiService extends ApiService
 			}
 			
 			//also stop if score below a threshold, below 0.6 seems good
-			if(SEARCH_SCORE_THRESHOLD > 0 && game.getScore() < SEARCH_SCORE_THRESHOLD)
+			if(SEARCH_SCORE_THRESHOLD > 0.f && game.getScore() < SEARCH_SCORE_THRESHOLD)
 			{
 				break;
 			}
@@ -287,7 +290,12 @@ public class TheGamesDBApiService extends ApiService
 		{
 			try
 			{
-				xml = searchXml(cleanName, wantedPlatform, args);
+				xml = searchXml(cleanName, wantedPlatform, args); 
+				// TODO: I got this once:
+				/*
+				 	<?xml version="1.0" encoding="UTF-8" ?>
+					Could not connect: Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (2)
+				*/
 			}
 			catch(IOException | URISyntaxException e)
 			{

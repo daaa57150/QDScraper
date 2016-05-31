@@ -35,6 +35,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -131,6 +132,8 @@ public class QDUtils
 		try
 		{
 			srcImage = ImageIO.read(in);
+			if(srcImage == null) return null; // happened once with GiantBomb
+			
 			if(srcImage.getWidth() < MAX_WIDTH)
 			{
 				return srcImage;
@@ -510,19 +513,46 @@ public class QDUtils
 				httpGet.setHeader(header);
 			}
 		}
-		HttpResponse response1 = httpclient.execute(httpGet);
-		HttpEntity entity1 = null;
+		
+		int maxTries = 3;
+	    String content = null; 
+	    String reason = null;
+	    HttpResponse response1 = null;
+	    HttpEntity entity1 = null;
+	    int code = 0; 
+		for(int currentTry = 0; currentTry<maxTries; currentTry++)
+		{
+			response1 = httpclient.execute(httpGet);
+			entity1 = null;
+			
+			code = response1.getStatusLine().getStatusCode();
+		    if(code == 522) // TheGamesDB is down sometimes and throws this
+		    {
+		    	try {
+		    		long sleepSec = (currentTry+1);
+					System.out.println("Need to sleep " + sleepSec + " seconds because of error 522...");
+					Thread.sleep(1000 * sleepSec);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+		    	continue;
+		    }
+		    
+			// else 
+		    break;
+		}
+		
 		try {
 		    entity1 = response1.getEntity();
-		    String content = IOUtils.toString(entity1.getContent(), Charset.forName("UTF-8"));
-		    int code = response1.getStatusLine().getStatusCode();
-		    String reason = response1.getStatusLine().getReasonPhrase();
-		    return new HttpAnswer(code, content, reason);
+		    content = IOUtils.toString(entity1.getContent(), Charset.forName("UTF-8"));
+		    reason = response1.getStatusLine().getReasonPhrase();
 		} finally {
 		    if(entity1 != null) {
 		    	EntityUtils.consume(entity1);
 		    }
 		}
+		
+	    return new HttpAnswer(code, content, reason);
 	}
 	
 	
@@ -541,9 +571,34 @@ public class QDUtils
 		{
 			HttpClient httpclient = getHttpClient(args);
 			HttpGet httpGet = new HttpGet(imageUrl);
-			HttpResponse response1 = httpclient.execute(httpGet);
 			
-		    //System.out.println(response1.getStatusLine());
+			int code = 0;
+			int maxTries = 3;
+			HttpResponse response1 = null;
+			for(int currentTry = 0; currentTry<maxTries; currentTry++)
+			{
+				response1 = httpclient.execute(httpGet);
+				code = response1.getStatusLine().getStatusCode();
+				if(code == 522) // TheGamesDB is down sometimes and throws this
+				{
+					try {
+						long sleepSec = (currentTry+1);
+						System.out.println("Need to sleep " + sleepSec + " seconds because of error 522...");
+						Thread.sleep(1000 * sleepSec);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+			    	continue;
+				}
+				break;
+			}
+			
+			if(code != HttpStatus.SC_OK)
+			{
+				System.err.println("Downloading image " + imageUrl + " gave a status of " + code + " => " + response1.getStatusLine().getReasonPhrase());
+				return null;
+			}
+			
 		    HttpEntity entity1 = null;
 		    InputStream in = null;
 		    BufferedImage image = null;
@@ -573,6 +628,12 @@ public class QDUtils
 			    
 			    in = entity1.getContent();
 			    image = QDUtils.resizeImage(in);
+			    
+			    // giantbomb pb once
+			    if(in == null || image == null) {
+			    	System.err.println("Could not download/resize image " + imageUrl);
+			    	return null; 
+			    }
 			    
 			    String path = savePathNoExt + "." + imageType;
 			    File f = new File(path);

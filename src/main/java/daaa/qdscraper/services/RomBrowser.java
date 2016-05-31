@@ -11,6 +11,8 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -143,6 +145,16 @@ public class RomBrowser {
         	setTranslatedName(rom, args);
         	roms.add(rom);
         }
+        
+        // alphabetical order:
+        Collections.sort(roms, new Comparator<Rom>(){
+
+			@Override
+			public int compare(Rom o1, Rom o2) {
+				return FilenameUtils.getName(o1.getFile()).compareTo(FilenameUtils.getName(o2.getFile()));
+			}
+        	
+        });
         
         return roms;
 	}

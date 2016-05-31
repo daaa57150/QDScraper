@@ -312,16 +312,26 @@ public class GiantBombApiService extends ApiService
 		}
 		
 		// image
-		String imageUrl = xpath.evaluate("response/results/image/super_url", gameDocument);
+		String[] imageXPaths = {"super_url", "medium_url", "small_url"}; 
 		String image = null;
-		if(!StringUtils.isEmpty(imageUrl))
+		for(String imageXPath: imageXPaths)
 		{
-			String filename = buildImageFileName(rom, index, null);
-			String path = args.romsDir + IMAGES_FOLDER + File.separatorChar + filename;
-		    String imagePath = QDUtils.downloadImage(imageUrl, path, args);
-		    String pathExt = FilenameUtils.getExtension(imagePath);
-			image = StringUtils.isEmpty(pathExt) ? filename : (filename + "." + pathExt);
+			String imageUrl = xpath.evaluate("response/results/image/" + imageXPath, gameDocument);
+			if(!StringUtils.isEmpty(imageUrl))
+			{
+				String filename = buildImageFileName(rom, index, null);
+				String path = args.romsDir + IMAGES_FOLDER + File.separatorChar + filename;
+			    String imagePath = QDUtils.downloadImage(imageUrl, path, args);
+			    if(imagePath != null)
+			    {
+			    	String pathExt = FilenameUtils.getExtension(imagePath);
+			    	image = StringUtils.isEmpty(pathExt) ? filename : (filename + "." + pathExt);
+				    
+				    break; // we found one, it's good
+			    }
+			}
 		}
+		
 	    // put everything together
 	    game.setName(name);
 		game.setDesc(desc);

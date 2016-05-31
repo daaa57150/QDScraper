@@ -222,7 +222,11 @@ public class ScreenScraperApiService extends ApiService
 			String developer = xpath.evaluate("Data/jeu[1]/developpeur", document);
 			String publisher = xpath.evaluate("Data/jeu[1]/editeur", document);
 			String title = xpath.evaluate("Data/jeu[1]/nom", document);
-			String players = xpath.evaluate("Data/jeu[1]/joueurs", document); //remove "Players"
+			String players = xpath.evaluate("Data/jeu[1]/joueurs", document);
+			if(!StringUtils.isEmpty(players))
+			{
+				players = players.replaceAll("[P|p]layers?", "").trim();
+			}
 			
 			// the user desired name
 			String name = getUserDesiredFilename(rom, translatedName, title, args);
@@ -287,8 +291,11 @@ public class ScreenScraperApiService extends ApiService
 				String filename = buildImageFileName(rom, null);
 				String path = args.romsDir + IMAGES_FOLDER + File.separatorChar + filename;
 				path = QDUtils.downloadImage(imageUrl, path, args);
-				String pathExt = FilenameUtils.getExtension(path);
-				image = StringUtils.isEmpty(pathExt) ? filename : (filename + "." + pathExt);
+				if(path != null)
+				{
+					String pathExt = FilenameUtils.getExtension(path);
+					image = StringUtils.isEmpty(pathExt) ? filename : (filename + "." + pathExt);
+				}
 			}
 			
 			game.setName(name);
@@ -304,7 +311,11 @@ public class ScreenScraperApiService extends ApiService
 			game.setId(id);
 			game.setTitle(title);
 			
-			setGameScores(game, translatedName, title);
+			// should be 100% since ScreenScraper uses a very strict matching based on hash or rom name
+			// setGameScores(game, translatedName, title);
+			game.setScore(1);
+			game.setDistance(0);
+			
 			
 			return game;
 		}

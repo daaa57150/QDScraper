@@ -140,6 +140,7 @@ public class App
 		
 		GamelistXML gameList = new GamelistXML(args.romsDir + "gamelist.xml", args.appendToName);
 		GamelistXML notFound = new GamelistXML(args.romsDir + "NOT_FOUND.xml", args.appendToName);
+		GamelistXML gameListDupes = null;
 		
 		// services to use, in that order, to look for a perfect match
 		List<ApiService> apiServices = new ArrayList<>();
@@ -153,134 +154,144 @@ public class App
 		}
 		
 		
-		// process roms
-		List<Rom> roms = findRoms(args);
-		for(Rom rom: roms)
+		try
 		{
-			System.out.println("# Processing " + rom.getFile() + " ...");
-			
-			// is it a bios?
-			if(rom.isBios())
+			// process roms
+			List<Rom> roms = findRoms(args);
+			for(Rom rom: roms)
 			{
-				Game game = new Game(NO_API_ID);
-				game.setFile(rom.getFile());
-				game.setBios(true);
-				gameList.addGame(game);
-				System.out.println("  => This is a bios file, added as hidden");
-			}
-			else
-			{
-				String name = rom.getTranslatedName(); // for arcade/scumm, the name is our match in the DB, for the rest it's the rom
-				if(name == null) // needed translation but wasn't found in our DB, highly unlikely
-				{
-					addEmptyGame(notFound, rom.getFile(), "");
-					System.out.println("  => Nothing found for " + rom.getFile() + " in our data files");
-					continue;
-				}
-				if(rom.isTranslated())
-				{
-					System.out.println(rom.getFile() + " is the rom file name of " + name);
-				}
+				System.out.println("# Processing " + rom.getFile() + " ...");
 				
-				// ask the services
-				List<Game> games = new ArrayList<>();
-				for(ApiService service: apiServices)
+				// is it a bios?
+				if(rom.isBios())
 				{
-					List<Game> apiGames = service.search(rom, args);
-					if(!CollectionUtils.isEmpty(apiGames))
-					{
-						games.addAll(apiGames);
-						Game perfectMatch = QDUtils.findBestPerfectMatch(apiGames);
-						if(perfectMatch != null)
-						{
-							//break; // yes there is a perfect match, we stop here => TODO: should we still ask other apis to perhaps find a best perfect match ?
-							// => TODO: if the score is perfect + has everything in the metas, stop; otherwise try to find other perfect matches and merge them all?
-							// TODO: ask giantbomb and igdb only if really needed, as their keys will expire very fast
-						}
-					}
+					Game game = new Game(NO_API_ID);
+					game.setFile(rom.getFile());
+					game.setBios(true);
+					gameList.addGame(game); //TODO: write it on the filesystem now
+					System.out.println("  => This is a bios file, added as hidden");
 				}
-				
-				
-				// now we have found games TODO: option to merge games with score = 1
-				if(CollectionUtils.isNotEmpty(games))
+				else
 				{
-					Game topResult = QDUtils.findBestPerfectMatch(games);
-					if(topResult != null) // perfect match found
+					String name = rom.getTranslatedName(); // for arcade/scumm, the name is our match in the DB, for the rest it's the rom
+					if(name == null) // needed translation but wasn't found in our DB, highly unlikely
 					{
-						System.out.println("  => Found a perfect match: " + formatGameForSysout(topResult));
-						gameList.addGame(topResult);
+						addEmptyGame(notFound, rom.getFile(), "");
+						System.out.println("  => Nothing found for " + rom.getFile() + " in our data files");
+						continue;
 					}
-					else
+					if(rom.isTranslated())
 					{
-						// sort by best match
-						sortByBestMatch(games);
-						topResult = games.get(0);
-						gameList.addGame(topResult);
-						if(games.size() == 1) // only one match
-						{
-							System.out.println("  => Found a match: " + formatGameForSysout(topResult));
-						}
-						else // many results found
-						{
-							System.out.println("  => Found "+ games.size() +" matches:");
-							System.out.println("\t- "+ formatGameForSysout(topResult));
-						}
+						System.out.println(rom.getFile() + " is the rom file name of " + name);
 					}
-
-						
-					//dupes
-					if(games.size() > 1)
+					
+					// ask the services
+					List<Game> games = new ArrayList<>();
+					for(ApiService service: apiServices)
 					{
-						String file = Paths.get(rom.getFile()).getFileName().toString();
-						GamelistXML gameListDupes = new GamelistXML(args.dupesDir + DUPE_PREFIX + QDUtils.sanitizeFilename(file) + ".xml", args.appendToName);
-						for(Game dupe: games)
+						List<Game> apiGames = service.search(rom, args);
+						if(!CollectionUtils.isEmpty(apiGames))
 						{
-							if(dupe != topResult) // it's really a dupe
+							games.addAll(apiGames);
+							Game perfectMatch = QDUtils.findBestPerfectMatch(apiGames);
+							if(perfectMatch != null)
 							{
-								// if perfect match, the user is not interested in dupes
-								if(!topResult.isPerfectMatch())
-								{
-									System.out.println("\t- "+ formatGameForSysout(dupe));
-								}
-								
-								gameListDupes.addGame(dupe);
-								if(!StringUtils.isEmpty(dupe.getImage()))
-								{
-									// move the image to the dupe images directory
-									String from = args.romsDir + File.separatorChar + IMAGES_FOLDER + File.separatorChar + dupe.getImage();
-									String to = args.dupesDir + File.separatorChar + DUPE_IMAGES_FOLDER + File.separatorChar + dupe.getImage();
-									moveFile(from, to);
-								}
+								//break; // yes there is a perfect match, we stop here => TODO: should we still ask other apis to perhaps find a best perfect match ?
+								// => TODO: if the score is perfect + has everything in the metas, stop; otherwise try to find other perfect matches and merge them all?
+								// TODO: ask giantbomb and igdb only if really needed, as their keys will expire very fast
 							}
 						}
-						gameListDupes.writeFile();
 					}
-				}
-				else // not found
-				{
-					addEmptyGame(notFound, rom.getFile(), name);
-					String precision = null;
-					if(args.arcade || "scummvm".equals(args.platform))
+					
+					
+					// now we have found games TODO: option to merge games with score = 1
+					if(CollectionUtils.isNotEmpty(games))
 					{
-						precision = "(" + RomCleaner.cleanRomName(name, false) + ")";
+						Game topResult = QDUtils.findBestPerfectMatch(games);
+						if(topResult != null) // perfect match found
+						{
+							System.out.println("  => Found a perfect match: " + formatGameForSysout(topResult));
+							gameList.addGame(topResult);
+						}
+						else
+						{
+							// sort by best match
+							sortByBestMatch(games);
+							topResult = games.get(0);
+							gameList.addGame(topResult);
+							if(games.size() == 1) // only one match
+							{
+								System.out.println("  => Found a match: " + formatGameForSysout(topResult));
+							}
+							else // many results found
+							{
+								System.out.println("  => Found "+ games.size() +" matches:");
+								System.out.println("\t- "+ formatGameForSysout(topResult));
+							}
+						}
+	
+							
+						//dupes
+						if(games.size() > 1)
+						{
+							String file = Paths.get(rom.getFile()).getFileName().toString();
+							gameListDupes = new GamelistXML(args.dupesDir + DUPE_PREFIX + QDUtils.sanitizeFilename(file) + ".xml", args.appendToName);
+							for(Game dupe: games)
+							{
+								if(dupe != topResult) // it's really a dupe
+								{
+									// if perfect match, the user is not interested in dupes
+									if(!topResult.isPerfectMatch())
+									{
+										System.out.println("\t- "+ formatGameForSysout(dupe));
+									}
+									
+									gameListDupes.addGame(dupe);
+									if(!StringUtils.isEmpty(dupe.getImage()))
+									{
+										// move the image to the dupe images directory
+										String from = args.romsDir + File.separatorChar + IMAGES_FOLDER + File.separatorChar + dupe.getImage();
+										String to = args.dupesDir + File.separatorChar + DUPE_IMAGES_FOLDER + File.separatorChar + dupe.getImage();
+										moveFile(from, to);
+									}
+								}
+							}
+							gameListDupes.writeFile(); //TODO: .close();
+						}
 					}
-					System.out.println("  => Nothing found for " + rom + (precision == null ? "" : precision));
+					else // not found
+					{
+						addEmptyGame(notFound, rom.getFile(), name);
+						String precision = null;
+						if(args.arcade || "scummvm".equals(args.platform))
+						{
+							precision = "(" + RomCleaner.cleanRomName(name, false) + ")";
+						}
+						System.out.println("  => Nothing found for " + rom + (precision == null ? "" : precision));
+					}
 				}
+				
+				System.out.println();
 			}
 			
-			System.out.println();
+			
+			
+			String gamelistXmlFile = gameList.writeFile();
+			System.out.println("Processed " + (roms.size() - notFound.getNbGames()) +" roms into file " + gamelistXmlFile);
+	
+			// write the not found list
+			if(notFound.getNbGames() > 0)
+			{
+				String notFoundXmlFile = notFound.writeFile();
+				System.out.println(notFound.getNbGames() + " game(s) were not found, see " + notFoundXmlFile);
+			}
 		}
-		
-		
-		
-		String gamelistXmlFile = gameList.writeFile();
-		System.out.println("Processed " + (roms.size() - notFound.getNbGames()) +" roms into file " + gamelistXmlFile);
-
-		// write the not found list
-		if(notFound.getNbGames() > 0)
+		finally
 		{
-			String notFoundXmlFile = notFound.writeFile();
-			System.out.println(notFound.getNbGames() + " game(s) were not found, see " + notFoundXmlFile);
+			// TODO:
+			// gameList.close();
+			// notFound.close();
+			// if(gameListDupes != null) close();
 		}
 	}
 
