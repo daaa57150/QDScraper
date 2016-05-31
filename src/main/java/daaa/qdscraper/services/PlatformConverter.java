@@ -48,7 +48,7 @@ public class PlatformConverter
 	}
 	
 	/**
-	 * Input the ES name, get the GamesDB name
+	 * Input the ES name, get the GiantBomb name
 	 * @param esName name of the ES platform (snes, nes, ngpc...)
 	 * @return
 	 */ // TODO: return List<Platform>
@@ -56,6 +56,21 @@ public class PlatformConverter
 	{
 		if(esName == null) return null;
 		String property = PLATFORMS.getProperty(esName + ".giantbomb");
+		if(property != null) {
+			return property.split(",");
+		}
+		return null;
+	}
+	
+	/**
+	 * Input the ES name, get the ScreenScraper name
+	 * @param esName name of the ES platform (snes, nes, ngpc...)
+	 * @return
+	 */ // TODO: return List<Platform>
+	public static String[] asScreenScraper(String esName)
+	{
+		if(esName == null) return null;
+		String property = PLATFORMS.getProperty(esName + ".screenscraper");
 		if(property != null) {
 			return property.split(",");
 		}

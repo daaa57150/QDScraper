@@ -178,7 +178,7 @@ public class QDUtils
 		FileInputStream fis = null;
 		try
 		{
-			fis = new FileInputStream(new File("foo"));
+			fis = new FileInputStream(new File(path));
 			String md5 = DigestUtils.md5Hex(fis);
 			return md5;
 		}
@@ -207,7 +207,7 @@ public class QDUtils
 	{
 		URL url = QDUtils.class.getClassLoader().getResource(name);
 		try {
-			return IOUtils.toString(url);
+			return IOUtils.toString(url, Charset.forName("utf-8"));
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(8);

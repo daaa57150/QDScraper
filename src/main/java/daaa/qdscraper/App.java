@@ -22,6 +22,7 @@ import daaa.qdscraper.model.Rom;
 import daaa.qdscraper.services.RomBrowser;
 import daaa.qdscraper.services.api.ApiService;
 import daaa.qdscraper.services.api.impl.GiantBombApiService;
+import daaa.qdscraper.services.api.impl.ScreenScraperApiService;
 import daaa.qdscraper.services.api.impl.TheGamesDBApiService;
 import daaa.qdscraper.utils.QDUtils;
 import daaa.qdscraper.utils.RomCleaner;
@@ -142,13 +143,14 @@ public class App
 		
 		// services to use, in that order, to look for a perfect match
 		List<ApiService> apiServices = new ArrayList<>();
-		apiServices.add(new TheGamesDBApiService());
+		/*apiServices.add(new TheGamesDBApiService());
 		
 		if(args.giantBombApiKey != null)
 		{
 			//System.out.println("GiantBomb api key is present, we'll ask GiantBomb");
 			apiServices.add(new GiantBombApiService());
-		}
+		}*/
+		apiServices.add(new ScreenScraperApiService());
 		
 		
 		// process roms
@@ -198,7 +200,7 @@ public class App
 				}
 				
 				
-				// now we have found games
+				// now we have found games TODO: option to merge games with score = 1
 				if(CollectionUtils.isNotEmpty(games))
 				{
 					Game topResult = QDUtils.findBestPerfectMatch(games);
@@ -228,7 +230,8 @@ public class App
 					//dupes
 					if(games.size() > 1)
 					{
-						GamelistXML gameListDupes = new GamelistXML(args.dupesDir + DUPE_PREFIX + QDUtils.sanitizeFilename(rom.getFile()) + ".xml", args.appendToName);
+						String file = Paths.get(rom.getFile()).getFileName().toString();
+						GamelistXML gameListDupes = new GamelistXML(args.dupesDir + DUPE_PREFIX + QDUtils.sanitizeFilename(file) + ".xml", args.appendToName);
 						for(Game dupe: games)
 						{
 							if(dupe != topResult) // it's really a dupe

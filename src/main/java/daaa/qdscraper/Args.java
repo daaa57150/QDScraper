@@ -123,7 +123,7 @@ public class Args
 		// now if the user has a custom properties file, it's set
 		dupesDir = romsDir + Props.get("dupes.folder") + File.separatorChar;
 		
-		if(arcade)
+		if(arcade) //TODO: assume 'arcade' if fba, mame, neogeo, fba_libretro
 		{
 			platform = PlatformConverter.ARCADE;
 		}
