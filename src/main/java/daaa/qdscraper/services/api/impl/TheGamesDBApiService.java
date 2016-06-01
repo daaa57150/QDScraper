@@ -99,13 +99,13 @@ public class TheGamesDBApiService extends ApiService
 	 * Builds a unique filename for an image
 	 * @param rom relative path to the rom
 	 * @param matchIndex index of the match
-	 * @param imageType extension for the image (png/jpg)
+	 * @param gameId identifier of the game
 	 * @return a unique filename for this run
 	 */
-	private String buildImageFileName(String rom, int matchIndex, String imageType)
+	private String buildImageFileName(String rom, int matchIndex, String gameId)
 	{
 		String id = Paths.get(rom).getFileName().toString();
-		return QDUtils.sanitizeFilename(id) + "-" + THEGAMESDB_API_ID + "-" + matchIndex + (imageType == null ? "" : ("." + imageType));
+		return QDUtils.sanitizeFilename(id) + "-" + THEGAMESDB_API_ID  + "-" + gameId+ "-" + matchIndex;
 	}
 	
 	
@@ -207,7 +207,7 @@ public class TheGamesDBApiService extends ApiService
 			String image = null;
 			if(!StringUtils.isEmpty(imageUrl))
 			{
-				String filename = buildImageFileName(rom, i, null);
+				String filename = buildImageFileName(rom, i, id);
 				String path = args.romsDir + IMAGES_FOLDER + File.separatorChar + filename;
 				path = QDUtils.downloadImage(imageBaseUrl+imageUrl, path, args);
 				if(path != null)
@@ -259,9 +259,7 @@ public class TheGamesDBApiService extends ApiService
 	 */
 	@Override
 	public GameCollection search(Rom rom, Args args) 
-	{
-		//super.startProgress();
-		
+	{	
 		// will contain our matches
 		GameCollection games = new GameCollection();
 		
@@ -313,12 +311,13 @@ public class TheGamesDBApiService extends ApiService
 				try
 				{
 					GameCollection gamesThisPlatform = toGames(rom.getFile(), translatedName, xml, args);
+					games.addAll(gamesThisPlatform);
+					
 					if(gamesThisPlatform.getBestPerfectMatch() != null)
 					{
-						return gamesThisPlatform;
+						return games;
 					}
 					// else continue searching
-					games.addAll(gamesThisPlatform);
 				}
 				catch(Exception e)
 				{

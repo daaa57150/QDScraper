@@ -167,13 +167,13 @@ public class ScreenScraperApiService extends ApiService
 	 * Builds a unique filename for an image
 	 * @param rom relative path to the rom
 	 * @param matchIndex index of the match
-	 * @param imageType extension for the image (png/jpg)
+	 * @param gameId the game unique identifier
 	 * @return a unique filename for this game
 	 */
-	private String buildImageFileName(String rom, String imageType)
+	private String buildImageFileName(String rom, String gameId)
 	{
 		String id = Paths.get(rom).getFileName().toString();
-		return QDUtils.sanitizeFilename(id) + "-" + SCREENSCRAPER_API_ID + "-" + 1 + (imageType == null ? "" : ("." + imageType));
+		return QDUtils.sanitizeFilename(id) + "-" + SCREENSCRAPER_API_ID  + "-" + gameId;
 	}
 	
 	/**
@@ -299,7 +299,7 @@ public class ScreenScraperApiService extends ApiService
 			}
 			if(!StringUtils.isEmpty(imageUrl))
 			{
-				String filename = buildImageFileName(rom, null);
+				String filename = buildImageFileName(rom, id);
 				String path = args.romsDir + IMAGES_FOLDER + File.separatorChar + filename;
 				path = QDUtils.downloadImage(imageUrl, path, args);
 				if(path != null)

@@ -251,8 +251,8 @@ public class App
 									if(!StringUtils.isEmpty(dupe.getImage()))
 									{
 										// move the image to the dupe images directory
-										String from = args.romsDir + File.separatorChar + IMAGES_FOLDER + File.separatorChar + dupe.getImage();
-										String to = args.dupesDir + File.separatorChar + DUPE_IMAGES_FOLDER + File.separatorChar + dupe.getImage();
+										String from = args.romsDir + IMAGES_FOLDER + File.separatorChar + dupe.getImage();
+										String to = args.dupesDir + DUPE_IMAGES_FOLDER + File.separatorChar + dupe.getImage();
 										moveFile(from, to);
 									}
 								}
