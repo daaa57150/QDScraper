@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -17,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.SAXException;
 
 import daaa.qdscraper.model.Game;
+import daaa.qdscraper.model.GameCollection;
 import daaa.qdscraper.model.GamelistXML;
 import daaa.qdscraper.model.Rom;
 import daaa.qdscraper.services.RomBrowser;
@@ -106,25 +106,15 @@ public class App
 	 * @param notFound
 	 * @param rom
 	 * @param name
+	 * @throws IOException 
 	 */
-	private static void addEmptyGame(GamelistXML notFound, String rom, String name)
+	private static void addEmptyGame(GamelistXML notFound, String rom, String name) 
+	throws IOException
 	{
 		Game empty = new Game(NO_API_ID);
 		empty.setFile(rom);
 		empty.setName(name);
 		notFound.addGame(empty);
-	}
-	
-	// TODO: List<Game> should be a class by itself
-	/**
-	 * Sorts the game by best match
-	 * @param games
-	 * @return
-	 */
-	private static List<Game>sortByBestMatch(List<Game> games)
-	{
-		Collections.sort(games);
-		return games;
 	}
 	
 	/**
@@ -150,14 +140,13 @@ public class App
 		if(args.giantBombApiKey != null)
 		{
 			//System.out.println("GiantBomb api key is present, we'll ask GiantBomb");
-			apiServices.add(new GiantBombApiService()); // TODO: ask giantbomb only if really needed, as the key will expire very fast
+			apiServices.add(new GiantBombApiService());
 		}
 		
-		
+		List<Rom> roms = findRoms(args);
 		try
 		{
 			// process roms
-			List<Rom> roms = findRoms(args);
 			for(Rom rom: roms)
 			{
 				System.out.println("# Processing " + rom.getFile() + " ...");
@@ -186,37 +175,49 @@ public class App
 					}
 					
 					// ask the services
-					List<Game> games = new ArrayList<>();
-					for(ApiService service: apiServices)
+					ApiService.startProgress();
+					GameCollection games = new GameCollection();
+					try
 					{
-						List<Game> apiGames = service.search(rom, args);
-						if(!CollectionUtils.isEmpty(apiGames))
+						for(ApiService service: apiServices)
 						{
-							games.addAll(apiGames);
-							Game perfectMatch = QDUtils.findBestPerfectMatch(apiGames);
-							if(perfectMatch != null)
+							GameCollection apiGames = service.search(rom, args);
+							if(!CollectionUtils.isEmpty(apiGames))
 							{
-								//break; // yes there is a perfect match, we stop here => TODO: should we still ask other apis to perhaps find a best perfect match ?
-								// => TODO: if the score is perfect + has everything in the metas, stop; otherwise try to find other perfect matches and merge them all?
-								// TODO: ask giantbomb and igdb only if really needed, as their keys will expire very fast
+								games.addAll(apiGames);
+								if(games.countPerfectMatches() >= 2)
+								{
+									//we already have 2 great matches, so we can stop 
+									//ask giantbomb and igdb only if really needed, as their keys will expire very fast
+									break; 
+								}
 							}
 						}
+					}
+					finally
+					{
+						ApiService.stopProgress();
 					}
 					
 					
 					// now we have found games TODO: option to merge games with score = 1
 					if(CollectionUtils.isNotEmpty(games))
 					{
-						Game topResult = QDUtils.findBestPerfectMatch(games);
+						Game topResult = games.getBestPerfectMatch();
 						if(topResult != null) // perfect match found
 						{
 							System.out.println("  => Found a perfect match: " + formatGameForSysout(topResult));
 							gameList.addGame(topResult);
+							
+							if(games.size() > 1)
+							{
+								System.out.println("  => Also found dupes:");
+							}
 						}
 						else
 						{
 							// sort by best match
-							sortByBestMatch(games);
+							games.sortByBestMatch();
 							topResult = games.get(0);
 							gameList.addGame(topResult);
 							if(games.size() == 1) // only one match
@@ -240,11 +241,11 @@ public class App
 							{
 								if(dupe != topResult) // it's really a dupe
 								{
-									// if perfect match, the user is not interested in dupes
-									if(!topResult.isPerfectMatch())
-									{
+									// if perfect match, the user is not interested in dupes?
+									//if(!topResult.isPerfectMatch())
+									//{
 										System.out.println("\t- "+ formatGameForSysout(dupe));
-									}
+									//}
 									
 									gameListDupes.addGame(dupe);
 									if(!StringUtils.isEmpty(dupe.getImage()))
@@ -256,7 +257,7 @@ public class App
 									}
 								}
 							}
-							gameListDupes.writeFile(); //TODO: .close();
+							gameListDupes.close();
 						}
 					}
 					else // not found
@@ -273,28 +274,26 @@ public class App
 				
 				System.out.println();
 			}
-			
-			
-			
-			String gamelistXmlFile = gameList.writeFile();
-			System.out.println("Processed " + (roms.size() - notFound.getNbGames()) +" roms into file " + gamelistXmlFile);
-	
-			// write the not found list
-			if(notFound.getNbGames() > 0)
-			{
-				String notFoundXmlFile = notFound.writeFile();
-				System.out.println(notFound.getNbGames() + " game(s) were not found, see " + notFoundXmlFile);
-			}
 		}
 		finally
-		{
-			// TODO:
-			// gameList.close();
-			// notFound.close();
-			// if(gameListDupes != null) close();
+		{	
+			// close the main gamelist
+			gameList.close();
+			System.out.println("Processed " + (roms.size() - notFound.getNbGames()) +" roms into file " + gameList.getPath());
+			
+			// close the not found list
+			if(notFound.getNbGames() > 0)
+			{
+				notFound.close();
+				System.out.println(notFound.getNbGames() + " game(s) were not found, see " + notFound.getPath());
+			}
+			
+			// if in error, maybe a dupe is still open
+			if(gameListDupes != null && !gameListDupes.isClosed() && gameListDupes.isOpen()) {
+				gameListDupes.close();
+			}
 		}
 	}
-
 }
 
 

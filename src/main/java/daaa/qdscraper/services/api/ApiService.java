@@ -8,6 +8,7 @@ import com.ibm.icu.text.Normalizer2;
 
 import daaa.qdscraper.Args;
 import daaa.qdscraper.model.Game;
+import daaa.qdscraper.model.GameCollection;
 import daaa.qdscraper.model.Rom;
 import daaa.qdscraper.utils.RomCleaner;
 
@@ -19,7 +20,7 @@ public abstract class ApiService
 	 * @param translatedName the name to use for searches, might be == rom or something else (arcade games)
 	 * @return the list of games found, first match should be the one
 	 */
-	public abstract List<Game> search(Rom rom, Args args);
+	public abstract GameCollection search(Rom rom, Args args);
 	
 	
 	
@@ -133,7 +134,26 @@ public abstract class ApiService
 		return null;
 	}
 	
-	// TODO: add some progress info (... from TGDB)
+	// progression
+	private static int nbResultsProcessed = 0;
+	public static void startProgress() {
+		nbResultsProcessed = 0;
+	}
+	public static void doProgress() {
+		nbResultsProcessed ++;
+		if(nbResultsProcessed == 2) { 
+			System.out.print("..");
+		} else if(nbResultsProcessed > 2) {
+			System.out.print(".");
+		}
+	}
+	public static void stopProgress() {
+		if(nbResultsProcessed >= 2) {
+			System.out.println();
+		}
+	}
+	
+	
 }
 
 

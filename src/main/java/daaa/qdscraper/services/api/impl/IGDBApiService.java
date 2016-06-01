@@ -1,7 +1,6 @@
 package daaa.qdscraper.services.api.impl;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.apache.http.Header;
 import org.apache.http.HttpStatus;
@@ -10,7 +9,7 @@ import org.apache.http.message.BasicHeader;
 
 import daaa.qdscraper.Args;
 import daaa.qdscraper.Props;
-import daaa.qdscraper.model.Game;
+import daaa.qdscraper.model.GameCollection;
 import daaa.qdscraper.model.Rom;
 import daaa.qdscraper.services.api.ApiService;
 import daaa.qdscraper.utils.QDUtils;
@@ -97,7 +96,7 @@ public class IGDBApiService extends ApiService {
 	 * @throws Exception
 	 */
 	@Override
-	public List<Game> search(Rom rom, Args args) 
+	public GameCollection search(Rom rom, Args args) 
 	{
 		return null; //TODO: implement IGDB
 		// test git 2?

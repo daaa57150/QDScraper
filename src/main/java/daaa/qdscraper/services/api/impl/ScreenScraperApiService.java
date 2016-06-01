@@ -24,6 +24,7 @@ import org.w3c.dom.Document;
 import daaa.qdscraper.Args;
 import daaa.qdscraper.Props;
 import daaa.qdscraper.model.Game;
+import daaa.qdscraper.model.GameCollection;
 import daaa.qdscraper.model.MatchingType;
 import daaa.qdscraper.model.Rom;
 import daaa.qdscraper.services.PlatformConverter;
@@ -341,50 +342,61 @@ public class ScreenScraperApiService extends ApiService
 	 * @throws Exception
 	 */
 	@Override
-	public List<Game> search(Rom rom, Args args) 
+	public GameCollection search(Rom rom, Args args) 
 	{
+		//super.startProgress();
+		
 		// will contain our matches
-		List<Game> games = new ArrayList<>();
+		GameCollection games = new GameCollection();
 		
-		// we'll search for these platforms
-		String[] wantedPlatforms = PlatformConverter.asScreenScraper(args.platform); // if args.arcade, platform is already 'arcade'
-		
-		// search
-		for(String wantedPlatform: wantedPlatforms)
+		try
 		{
-			// 1) req with md5 if possible
-			if(rom.isRealFile() && !"scummvm".equals(args.platform)) //no scummvm on screenscraper anyway
+		
+			// we'll search for these platforms
+			String[] wantedPlatforms = PlatformConverter.asScreenScraper(args.platform); // if args.arcade, platform is already 'arcade'
+			
+			// search
+			for(String wantedPlatform: wantedPlatforms)
 			{
-				String url = buildUrlMd5(rom, wantedPlatform, args);
-				String xml = readUrl(url, args);
-				MatchingType matchingType = MatchingType.MD5;
-				if(xml == null)
+				// 1) req with md5 if possible
+				if(rom.isRealFile() && !"scummvm".equals(args.platform)) //no scummvm on screenscraper anyway
 				{
-					url = buildUrlRomNom(rom, wantedPlatform, args);
-					xml = readUrl(url, args);
-					matchingType = MatchingType.FILENAME;
-				}
-				
-				if(xml != null)
-				{
-					try
+					String url = buildUrlMd5(rom, wantedPlatform, args);
+					String xml = readUrl(url, args);
+					super.doProgress();
+					MatchingType matchingType = MatchingType.MD5;
+					if(xml == null)
 					{
-						Game game = toGame(rom.getFile(), rom.getTranslatedName(), xml, args);
-						game.setMatchingType(matchingType);
-						games.add(game);
+						url = buildUrlRomNom(rom, wantedPlatform, args);
+						xml = readUrl(url, args);
+						super.doProgress();
+						matchingType = MatchingType.FILENAME;
 					}
-					catch(Exception e)
+					
+					if(xml != null)
 					{
-						System.err.println("Error parsing xml from ScreenScraper!");
-						e.printStackTrace();
-						System.err.println("XML content:");
-						System.err.println(xml);
-						System.exit(22);
+						try
+						{
+							Game game = toGame(rom.getFile(), rom.getTranslatedName(), xml, args);
+							game.setMatchingType(matchingType);
+							games.add(game);
+						}
+						catch(Exception e)
+						{
+							System.err.println("Error parsing xml from ScreenScraper!");
+							e.printStackTrace();
+							System.err.println("XML content:");
+							System.err.println(xml);
+							System.exit(22);
+						}
 					}
 				}
 			}
 		}
-		
+		finally
+		{
+			//super.stopProgress();
+		}
 		
 		
 		return games;

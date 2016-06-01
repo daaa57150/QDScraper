@@ -10,10 +10,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -56,7 +53,6 @@ import org.xml.sax.SAXException;
 
 import daaa.qdscraper.Args;
 import daaa.qdscraper.Props;
-import daaa.qdscraper.model.Game;
 
 /**
  * All-purposes utils that had no place anywhere else
@@ -148,28 +144,6 @@ public class QDUtils
 		}
 	}
 	
-	
-	/**
-	 * Finds the best perfect match in the list of games
-	 * @param games
-	 * @return
-	 */
-	public static Game findBestPerfectMatch(List<Game> games)
-	{
-		List<Game> perfectMatches = new ArrayList<Game>();
-		for(Game game: games)
-		{
-			if(game.getScore() == 1.0 && !StringUtils.isEmpty(game.getImage())) perfectMatches.add(game);
-		}
-		
-		if(perfectMatches.size() > 0)
-		{
-			Collections.sort(perfectMatches);
-			return perfectMatches.get(0);
-		}
-		
-		return null;
-	}
 	
 	/**
 	 * Calculates the md5 hash of a file

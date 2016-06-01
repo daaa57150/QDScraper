@@ -29,6 +29,7 @@ import org.xml.sax.SAXException;
 import daaa.qdscraper.Args;
 import daaa.qdscraper.Props;
 import daaa.qdscraper.model.Game;
+import daaa.qdscraper.model.GameCollection;
 import daaa.qdscraper.model.MatchingType;
 import daaa.qdscraper.model.Rom;
 import daaa.qdscraper.services.PlatformConverter;
@@ -358,60 +359,70 @@ public class GiantBombApiService extends ApiService
 	 * @return the first few matches
 	 */
 	@Override
-	public List<Game> search(Rom rom, Args args) 
+	public GameCollection search(Rom rom, Args args) 
 	{
 		if(args.giantBombApiKey == null)
 		{
 			return null;
 		}
-		
 		// else we have a giant bomb api key 
 		
-		String translatedName = rom.getTranslatedName();
-		String cleanName = RomCleaner.cleanRomName(translatedName, false);
+		// will contain our results
+		GameCollection games = new GameCollection();
 		
-		// we'll search for these platforms
-		String[] wantedPlatforms = PlatformConverter.asGiantBomb(args.platform); // if args.arcade, platform is already 'arcade'
-		
-		// search
-		Document searchDocument = search(cleanName, args);
-		if(searchDocument == null) return null; // bail out
-		
-		// get the urls to the games from the search in the limit set in the properties
-		List<String> urlsToGames = getUrlOfFirstGamesForPlatforms(searchDocument, wantedPlatforms);
-		
-		// for each url, we'll get the games
-		List<Game> games = new ArrayList<>(urlsToGames.size());
-		for(int i=0; i<urlsToGames.size(); i++)
+		//super.startProgress();
+		try
 		{
-			String urlToGame = urlsToGames.get(i);
+			String translatedName = rom.getTranslatedName();
+			String cleanName = RomCleaner.cleanRomName(translatedName, false);
 			
-			// ask for the game details
-			Document gameDocument = parseGame(urlToGame, args);
-			if(gameDocument == null) continue; // bail out of this match
+			// we'll search for these platforms
+			String[] wantedPlatforms = PlatformConverter.asGiantBomb(args.platform); // if args.arcade, platform is already 'arcade'
 			
-			// transform to game
-			try {
-				Game game = toGame(rom.getFile(), translatedName, gameDocument, args, i+1);
-				if(game!=null)
-				{	
-					games.add(game);
-					setGameScores(game, translatedName, game.getTitle());
-					if(game.isPerfectMatch())
-					{
-						// 100% match on the name, we can stop
-						return games;
+			// search
+			super.doProgress();
+			Document searchDocument = search(cleanName, args);
+			if(searchDocument == null) return null; // bail out
+			
+			// get the urls to the games from the search in the limit set in the properties
+			List<String> urlsToGames = getUrlOfFirstGamesForPlatforms(searchDocument, wantedPlatforms);
+			
+			// for each url, we'll get the games
+			for(int i=0; i<urlsToGames.size(); i++)
+			{
+				String urlToGame = urlsToGames.get(i);
+				
+				// ask for the game details
+				super.doProgress();
+				Document gameDocument = parseGame(urlToGame, args);
+				if(gameDocument == null) continue; // bail out of this match
+				
+				// transform to game
+				try {
+					Game game = toGame(rom.getFile(), translatedName, gameDocument, args, i+1);
+					if(game!=null)
+					{	
+						games.add(game);
+						setGameScores(game, translatedName, game.getTitle());
+						if(game.isPerfectMatch())
+						{
+							// 100% match on the name, we can stop
+							return games;
+						}
+						//TODO: also stop if score below threshold 
 					}
-					//TODO: also stop if score below threshold 
+				} catch (Exception e) {
+					System.err.println("Error parsing xml from giantbomb!");
+					e.printStackTrace();
+					System.exit(15);
 				}
-			} catch (Exception e) {
-				System.err.println("Error parsing xml from giantbomb!");
-				e.printStackTrace();
-				System.exit(15);
+				
 			}
-			
 		}
-		
+		finally
+		{
+			//super.stopProgress();
+		}
 		return games;
 	}
 	

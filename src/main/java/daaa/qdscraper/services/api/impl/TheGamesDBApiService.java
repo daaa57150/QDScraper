@@ -23,6 +23,7 @@ import org.w3c.dom.Document;
 import daaa.qdscraper.Args;
 import daaa.qdscraper.Props;
 import daaa.qdscraper.model.Game;
+import daaa.qdscraper.model.GameCollection;
 import daaa.qdscraper.model.MatchingType;
 import daaa.qdscraper.model.Rom;
 import daaa.qdscraper.services.PlatformConverter;
@@ -151,16 +152,18 @@ public class TheGamesDBApiService extends ApiService
 	 * @return the list of games
 	 * @throws Exception
 	 */
-	private List<Game> toGames(String rom, String translatedName, String xml, Args args) 
+	private GameCollection toGames(String rom, String translatedName, String xml, Args args) 
 	throws Exception
 	{
 		// xml parsing stuff
 		Document document = QDUtils.parseXML(xml); //TODO: don't break on exception
 		XPath xpath = QDUtils.getXPath();
 		
-		List<Game> games = new ArrayList<>();
+		GameCollection games = new GameCollection();
 		for(int i=1; ; i++)
 		{
+			super.doProgress();
+			
 			String id = xpath.evaluate("/Data/Game["+i+"]/id", document);
 			if(StringUtils.isEmpty(id))
 			{
@@ -242,11 +245,6 @@ public class TheGamesDBApiService extends ApiService
 			if(game.isPerfectMatch())
 			{	
 				// 100% match on the name, we can stop
-				if(games.size() >= 2) //because some ... were output TODO: delegate to super class
-				{
-					System.out.println("");
-				}
-				
 				return games; // stop 
 			}
 			
@@ -255,11 +253,6 @@ public class TheGamesDBApiService extends ApiService
 			{
 				break;
 			}
-		}
-		
-		if(games.size() >= 2) //because some ... were output
-		{
-			System.out.println("");
 		}
 		
 		return games;
@@ -273,57 +266,85 @@ public class TheGamesDBApiService extends ApiService
 	 * @throws Exception
 	 */
 	@Override
-	public List<Game> search(Rom rom, Args args) 
+	public GameCollection search(Rom rom, Args args) 
 	{
-		String translatedName = rom.getTranslatedName();
-		String cleanName = RomCleaner.cleanRomName(translatedName, false);
-			
-		String xml = null;
-		
-		// we'll search for these platforms
-		String[] wantedPlatforms = PlatformConverter.asTheGamesDB(args.platform); // if args.arcade, platform is already 'arcade'
-		if(wantedPlatforms == null) wantedPlatforms = new String[]{null};
+		//super.startProgress();
 		
 		// will contain our matches
-		List<Game> games = new ArrayList<Game>();
+		GameCollection games = new GameCollection();
 		
-		// search
-		for(String wantedPlatform: wantedPlatforms)
+		try
 		{
-			try
+			String translatedName = rom.getTranslatedName();
+			String cleanName = RomCleaner.cleanRomName(translatedName, false);
+				
+			String xml = null;
+			
+			// we'll search for these platforms
+			String[] wantedPlatforms = PlatformConverter.asTheGamesDB(args.platform); // if args.arcade, platform is already 'arcade'
+			if(wantedPlatforms == null) wantedPlatforms = new String[]{null};
+			
+			// search
+			for(String wantedPlatform: wantedPlatforms)
 			{
-				xml = searchXml(cleanName, wantedPlatform, args); 
-				// TODO: I got this once, add a 1 minute wait ?:
-				/*
-				 	<?xml version="1.0" encoding="UTF-8" ?>
-					Could not connect: Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (2)
-				*/
-			}
-			catch(IOException | URISyntaxException e)
-			{
-				System.out.println("This error should not happen...");
-				e.printStackTrace();
-				System.exit(11);
-			}
-			// TODO: try to search and if nothing comes out, retry the search by cleaning more chars (-,!) etc..
-			try
-			{
-				List<Game> gamesThisPlatform = toGames(rom.getFile(), translatedName, xml, args);
-				if(QDUtils.findBestPerfectMatch(gamesThisPlatform) != null)
+				try
 				{
-					return gamesThisPlatform;
+					// I got this once, add a 1 minute wait :
+					/*
+					 	<?xml version="1.0" encoding="UTF-8" ?>
+						Could not connect: Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (2)
+					*/
+					
+					int maxTries = 3;
+					for(int currentTry = 0; currentTry < maxTries; currentTry ++)
+					{
+						xml = searchXml(cleanName, wantedPlatform, args); 
+						
+						if(xml == null || xml.substring(0, Math.min(140, xml.length()-1)).contains("Could not connect")) {
+							System.out.println("TheGamesDB is down (happens regularly), waiting a minute...");
+							try {
+								Thread.sleep(60000);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+						else
+						{
+							break; //we're good
+						}
+					}
+					
 				}
-				// else continue searching
-				games.addAll(gamesThisPlatform);
+				catch(IOException | URISyntaxException e)
+				{
+					System.out.println("This error should not happen...");
+					e.printStackTrace();
+					System.exit(11);
+				}
+
+				try
+				{
+					GameCollection gamesThisPlatform = toGames(rom.getFile(), translatedName, xml, args);
+					if(gamesThisPlatform.getBestPerfectMatch() != null)
+					{
+						return gamesThisPlatform;
+					}
+					// else continue searching
+					games.addAll(gamesThisPlatform);
+				}
+				catch(Exception e)
+				{
+					System.err.println("Error parsing xml from TheGamesDB!");
+					e.printStackTrace();
+					System.err.println("XML content:");
+					System.err.println(xml);
+					System.exit(12);
+				};
 			}
-			catch(Exception e)
-			{
-				System.err.println("Error parsing xml from TheGamesDB!");
-				e.printStackTrace();
-				System.err.println("XML content:");
-				System.err.println(xml);
-				System.exit(12);
-			};
+		}
+		finally
+		{
+			//super.stopProgress();
 		}
 		 
 		return games;
