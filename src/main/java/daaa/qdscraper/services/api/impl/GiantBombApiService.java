@@ -32,6 +32,7 @@ import daaa.qdscraper.model.Game;
 import daaa.qdscraper.model.GameCollection;
 import daaa.qdscraper.model.MatchingType;
 import daaa.qdscraper.model.Rom;
+import daaa.qdscraper.services.Console;
 import daaa.qdscraper.services.PlatformConverter;
 import daaa.qdscraper.services.api.ApiService;
 import daaa.qdscraper.utils.QDUtils;
@@ -111,11 +112,11 @@ public class GiantBombApiService extends ApiService
 			if("1".equals(statusCode)) return true;
 			
 			String errorMessage = xpath.evaluate("response/error", document);
-			System.err.println("Error querying GiantBomb: " + errorMessage);
+			Console.printErr("Error querying GiantBomb: " + errorMessage);
 		}
 		catch(XPathExpressionException e)
 		{
-			e.printStackTrace(); 
+			Console.printErr(e);
 		}
 			
 		return false;
@@ -143,7 +144,7 @@ public class GiantBombApiService extends ApiService
 			
 			if(searchAnswer.getCode() != HttpStatus.SC_OK)
 			{
-				System.err.println("Error querying GiantBomb (code "+searchAnswer.getCode()+") with url " + url);
+				Console.printErr("Error querying GiantBomb (code "+searchAnswer.getCode()+") with url " + url);
 				return null;
 			}
 			
@@ -156,7 +157,7 @@ public class GiantBombApiService extends ApiService
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			Console.printErr(e);
 			return null;
 		}
 	}
@@ -185,7 +186,7 @@ public class GiantBombApiService extends ApiService
 				{
 					Element platform = (Element)platforms.getChildNodes().item(j);
 					String platformName = platform.getElementsByTagName("name").item(0).getTextContent().trim();
-					//System.out.println(platformName);
+					//Console.println(platformName);
 					
 					// if platform is not supported, just return it
 					if(wantedPlatforms == null || wpList.contains(platformName.trim()))
@@ -197,7 +198,7 @@ public class GiantBombApiService extends ApiService
 				}
 			}
 		} catch (XPathExpressionException e) {
-			e.printStackTrace();
+			Console.printErr(e);
 			return null;
 		}
 		
@@ -220,7 +221,7 @@ public class GiantBombApiService extends ApiService
 			
 			if(gameAnswer.getCode() != HttpStatus.SC_OK)
 			{
-				System.err.println("Error querying GiantBomb (code "+gameAnswer.getCode()+") with url " + url);
+				Console.printErr("Error querying GiantBomb (code "+gameAnswer.getCode()+") with url " + url);
 				return null;
 			}
 			
@@ -233,7 +234,7 @@ public class GiantBombApiService extends ApiService
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			Console.printErr(e);
 			return null;
 		}
 	}
@@ -380,7 +381,7 @@ public class GiantBombApiService extends ApiService
 			String[] wantedPlatforms = PlatformConverter.asGiantBomb(args.platform); // if args.arcade, platform is already 'arcade'
 			
 			// search
-			super.doProgress();
+			Console.doProgress();
 			Document searchDocument = search(cleanName, args);
 			if(searchDocument == null) return null; // bail out
 			
@@ -393,7 +394,7 @@ public class GiantBombApiService extends ApiService
 				String urlToGame = urlsToGames.get(i);
 				
 				// ask for the game details
-				super.doProgress();
+				Console.doProgress();
 				Document gameDocument = parseGame(urlToGame, args);
 				if(gameDocument == null) continue; // bail out of this match
 				
@@ -412,8 +413,8 @@ public class GiantBombApiService extends ApiService
 						//TODO: also stop if score below threshold 
 					}
 				} catch (Exception e) {
-					System.err.println("Error parsing xml from giantbomb!");
-					e.printStackTrace();
+					Console.printErr("Error parsing xml from giantbomb!");
+					Console.printErr(e);
 					System.exit(15);
 				}
 				

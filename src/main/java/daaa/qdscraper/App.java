@@ -19,6 +19,7 @@ import daaa.qdscraper.model.Game;
 import daaa.qdscraper.model.GameCollection;
 import daaa.qdscraper.model.GamelistXML;
 import daaa.qdscraper.model.Rom;
+import daaa.qdscraper.services.Console;
 import daaa.qdscraper.services.RomBrowser;
 import daaa.qdscraper.services.api.ApiService;
 import daaa.qdscraper.services.api.impl.GiantBombApiService;
@@ -73,7 +74,7 @@ public class App
 	 */
 	private static String formatGameForSysout(Game game)
 	{
-		String str = game.getTitle() + " (" + game.getApi() + " " + game.getId() + " / " + (game.getScore() * 100) + "%["+game.getDistance()+"])";
+		String str = game.getTitle() + " (" + game.getApi() + " " + game.getId() + " / " + game.getScoreInPercent() + " ["+game.getDistance()+"])";
 		String legal = game.getLegalText();
 		if(!StringUtils.isEmpty(legal))
 		{
@@ -139,7 +140,7 @@ public class App
 		
 		if(args.giantBombApiKey != null)
 		{
-			//System.out.println("GiantBomb api key is present, we'll ask GiantBomb");
+			//Console.println("GiantBomb api key is present, we'll ask GiantBomb");
 			apiServices.add(new GiantBombApiService());
 		}
 		
@@ -149,7 +150,7 @@ public class App
 			// process roms
 			for(Rom rom: roms)
 			{
-				System.out.println("# Processing " + rom.getFile() + " ...");
+				Console.println("# Processing " + rom.getFile() + " ...");
 				
 				// is it a bios?
 				if(rom.isBios())
@@ -158,7 +159,7 @@ public class App
 					game.setFile(rom.getFile());
 					game.setBios(true);
 					gameList.addGame(game); //TODO: write it on the filesystem now
-					System.out.println("  => This is a bios file, added as hidden");
+					Console.println("  => This is a bios file, added as hidden");
 				}
 				else
 				{
@@ -166,16 +167,15 @@ public class App
 					if(name == null) // needed translation but wasn't found in our DB, highly unlikely
 					{
 						addEmptyGame(notFound, rom.getFile(), "");
-						System.out.println("  => Nothing found for " + rom.getFile() + " in our data files");
+						Console.println("  => Nothing found for " + rom.getFile() + " in our data files");
 						continue;
 					}
 					if(rom.isTranslated())
 					{
-						System.out.println(rom.getFile() + " is the rom file name of " + name);
+						Console.println(rom.getFile() + " is the rom file name of " + name);
 					}
 					
 					// ask the services
-					ApiService.startProgress();
 					GameCollection games = new GameCollection();
 					try
 					{
@@ -196,38 +196,38 @@ public class App
 					}
 					finally
 					{
-						ApiService.stopProgress();
+						//ApiService.stopProgress();
 					}
 					
 					
 					// now we have found games TODO: option to merge games with score = 1
 					if(CollectionUtils.isNotEmpty(games))
 					{
+						games.sortByBestMatch();
 						Game topResult = games.getBestPerfectMatch();
 						if(topResult != null) // perfect match found
 						{
-							System.out.println("  => Found a perfect match: " + formatGameForSysout(topResult));
+							Console.println("  => Found a perfect match: " + formatGameForSysout(topResult));
 							gameList.addGame(topResult);
 							
 							if(games.size() > 1)
 							{
-								System.out.println("  => Also found dupes:");
+								Console.println("  => Also found dupes:");
 							}
 						}
 						else
 						{
 							// sort by best match
-							games.sortByBestMatch();
 							topResult = games.get(0);
 							gameList.addGame(topResult);
 							if(games.size() == 1) // only one match
 							{
-								System.out.println("  => Found a match: " + formatGameForSysout(topResult));
+								Console.println("  => Found a match: " + formatGameForSysout(topResult));
 							}
 							else // many results found
 							{
-								System.out.println("  => Found "+ games.size() +" matches:");
-								System.out.println("\t- "+ formatGameForSysout(topResult));
+								Console.println("  => Found "+ games.size() +" matches:");
+								Console.println("\t- "+ formatGameForSysout(topResult));
 							}
 						}
 	
@@ -244,7 +244,7 @@ public class App
 									// if perfect match, the user is not interested in dupes?
 									//if(!topResult.isPerfectMatch())
 									//{
-										System.out.println("\t- "+ formatGameForSysout(dupe));
+									Console.println("\t- "+ formatGameForSysout(dupe));
 									//}
 									
 									gameListDupes.addGame(dupe);
@@ -268,24 +268,24 @@ public class App
 						{
 							precision = "(" + RomCleaner.cleanRomName(name, false) + ")";
 						}
-						System.out.println("  => Nothing found for " + rom + (precision == null ? "" : precision));
+						Console.println("  => Nothing found for " + rom + (precision == null ? "" : precision));
 					}
 				}
 				
-				System.out.println();
+				Console.println();
 			}
 		}
 		finally
 		{	
 			// close the main gamelist
 			gameList.close();
-			System.out.println("Processed " + (roms.size() - notFound.getNbGames()) +" roms into file " + gameList.getPath());
+			Console.println("Processed " + (roms.size() - notFound.getNbGames()) +" roms into file " + gameList.getPath());
 			
 			// close the not found list
 			if(notFound.getNbGames() > 0)
 			{
 				notFound.close();
-				System.out.println(notFound.getNbGames() + " game(s) were not found, see " + notFound.getPath());
+				Console.println(notFound.getNbGames() + " game(s) were not found, see " + notFound.getPath());
 			}
 			
 			// if in error, maybe a dupe is still open

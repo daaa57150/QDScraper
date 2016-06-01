@@ -11,6 +11,7 @@ import daaa.qdscraper.Args;
 import daaa.qdscraper.Props;
 import daaa.qdscraper.model.GameCollection;
 import daaa.qdscraper.model.Rom;
+import daaa.qdscraper.services.Console;
 import daaa.qdscraper.services.api.ApiService;
 import daaa.qdscraper.utils.QDUtils;
 import daaa.qdscraper.utils.QDUtils.HttpAnswer;
@@ -72,7 +73,7 @@ public class IGDBApiService extends ApiService {
 						message = "Unknown error";
 					}
 				}
-				System.err.println("Error querying IGDB: '" + message + "' for url " + url);
+				Console.printErr("Error querying IGDB: '" + message + "' for url " + url);
 				return null;
 			}
 			
@@ -80,8 +81,8 @@ public class IGDBApiService extends ApiService {
 		}
 		catch(Exception e)
 		{
-			System.err.println("Error querying IGDB: '" + e.getMessage() + "' for url " + url);
-			e.printStackTrace();
+			Console.printErr("Error querying IGDB: '" + e.getMessage() + "' for url " + url);
+			Console.printErr(e);
 		}
 		return null;
 	}

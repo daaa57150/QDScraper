@@ -1,8 +1,13 @@
 package daaa.qdscraper.model;
 
+import java.io.File;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import daaa.qdscraper.Props;
+import daaa.qdscraper.services.Console;
 import daaa.qdscraper.utils.QDUtils;
 
 /**
@@ -17,6 +22,8 @@ public class Rom {
 	private String path;
 	// md5 hash if possible
 	private String md5;
+	// file size in bytes
+	private long size = -1L;
 	// match against our bios list
 	private boolean isBios;
 	// if arcade or scummvm we get the match from our DB files
@@ -26,6 +33,8 @@ public class Rom {
 	// true if arcade or scummvm and not a bios
 	private boolean isTranslated = false;
 	
+	
+	private static final long MAX_SIZE_FOR_MD5 = Long.valueOf(Props.get("md5.size.max")); 
 	
 	/**
 	 * @return the file
@@ -69,7 +78,14 @@ public class Rom {
 	public String getMd5() {
 		if(isRealFile && md5 == null)
 		{
-			md5 = QDUtils.getMD5(path);
+			if(getSize() > MAX_SIZE_FOR_MD5)
+			{
+				Console.println("Rom " + file + " is too big to process md5 (" +getSize()+ " bytes)");
+			}
+			else
+			{
+				md5 = QDUtils.getMD5(path);
+			}
 		}
 		return md5;
 	}
@@ -78,6 +94,22 @@ public class Rom {
 	 */
 	public void setMd5(String md5) {
 		this.md5 = md5;
+	}
+	/**
+	 * @return the size
+	 */
+	public long getSize() {
+		if(isRealFile && size == -1L)
+		{
+			size = FileUtils.sizeOf(new File(path));
+		}
+		return size;
+	}
+	/**
+	 * @param size the size to set
+	 */
+	public void setSize(long size) {
+		this.size = size;
 	}
 	/**
 	 * @return the isBios

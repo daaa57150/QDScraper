@@ -26,6 +26,7 @@ import daaa.qdscraper.model.Game;
 import daaa.qdscraper.model.GameCollection;
 import daaa.qdscraper.model.MatchingType;
 import daaa.qdscraper.model.Rom;
+import daaa.qdscraper.services.Console;
 import daaa.qdscraper.services.PlatformConverter;
 import daaa.qdscraper.services.api.ApiService;
 import daaa.qdscraper.utils.QDUtils;
@@ -86,7 +87,7 @@ public class TheGamesDBApiService extends ApiService
 		HttpAnswer answer = QDUtils.httpGet(args, url);
 		if(answer.getCode() != HttpStatus.SC_OK)
 		{
-			System.err.println("Error querying TheGamesDB (code "+answer.getCode()+": '"+answer.getReason()+"') with url " + url);
+			Console.printErr("Error querying TheGamesDB (code "+answer.getCode()+": '"+answer.getReason()+"') with url " + url);
 			return null;
 		}
 		return answer.getContent();
@@ -155,28 +156,19 @@ public class TheGamesDBApiService extends ApiService
 	private GameCollection toGames(String rom, String translatedName, String xml, Args args) 
 	throws Exception
 	{
-		// xml parsing stuff
-		Document document = QDUtils.parseXML(xml); //TODO: don't break on exception
+		// xml parsing stuff //TODO: don't break on exception
+		Document document = QDUtils.parseXML(xml); 
 		XPath xpath = QDUtils.getXPath();
 		
 		GameCollection games = new GameCollection();
 		for(int i=1; ; i++)
 		{
-			super.doProgress();
+			Console.doProgress();
 			
 			String id = xpath.evaluate("/Data/Game["+i+"]/id", document);
 			if(StringUtils.isEmpty(id))
 			{
 				break; // stop
-			}
-			
-			if(i == 2)
-			{
-				System.out.print("\t...");
-			}
-			else if(i>2)
-			{
-				System.out.print(".");
 			}
 			
 			// the game
@@ -301,12 +293,8 @@ public class TheGamesDBApiService extends ApiService
 						xml = searchXml(cleanName, wantedPlatform, args); 
 						
 						if(xml == null || xml.substring(0, Math.min(140, xml.length()-1)).contains("Could not connect")) {
-							System.out.println("TheGamesDB is down (happens regularly), waiting a minute...");
-							try {
-								Thread.sleep(60000);
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
+							Console.println("TheGamesDB is down (happens regularly), waiting a minute...");
+							QDUtils.sleep(60000, "TheGamesDB is down (happens regularly)");
 						}
 						else
 						{
@@ -317,8 +305,8 @@ public class TheGamesDBApiService extends ApiService
 				}
 				catch(IOException | URISyntaxException e)
 				{
-					System.out.println("This error should not happen...");
-					e.printStackTrace();
+					Console.printErr("This error should not happen...");
+					Console.printErr(e);
 					System.exit(11);
 				}
 
@@ -334,10 +322,10 @@ public class TheGamesDBApiService extends ApiService
 				}
 				catch(Exception e)
 				{
-					System.err.println("Error parsing xml from TheGamesDB!");
-					e.printStackTrace();
-					System.err.println("XML content:");
-					System.err.println(xml);
+					Console.printErr("Error parsing xml from TheGamesDB!");
+					Console.printErr(e);
+					Console.printErr("XML content:");
+					Console.printErr(xml);
 					System.exit(12);
 				};
 			}

@@ -7,13 +7,10 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -24,6 +21,7 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import daaa.qdscraper.Props;
+import daaa.qdscraper.services.Console;
 import daaa.qdscraper.utils.QDUtils;
 
 
@@ -88,8 +86,6 @@ public class GamelistXML
 		Files.deleteIfExists(file.toPath()); // TODO: add option to load if the file already exists
 		String parentFolder = file.getParent();
 		Files.createDirectories(Paths.get(parentFolder));
-		
-		out = Files.newBufferedWriter(Paths.get(path), Charset.forName("UTF-8"));
 	}
 
 	/**
@@ -104,6 +100,7 @@ public class GamelistXML
 		if(!open)
 		{
 			// start
+			out = Files.newBufferedWriter(Paths.get(path), Charset.forName("UTF-8"));
 			out.write(QDUtils.makeTagOpen(GAMELIST_ROOT_TAGNAME) + "\n");
 			open = true;
 		}
@@ -168,6 +165,8 @@ public class GamelistXML
 			// end game
 			out.write(QDUtils.tabulate(QDUtils.makeTagclosed(GAMELIST_GAME_TAGNAME), 1) + "\n");
 		}
+
+		out.flush();
 	};
 	
 	/**
@@ -179,7 +178,7 @@ public class GamelistXML
 	{
 		if(closed)
 		{
-			System.err.println("File " + path + " already closed");
+			Console.printErr("File " + path + " already closed");
 			return;
 		}
 		if(open /*&& !closed*/)
@@ -209,11 +208,7 @@ public class GamelistXML
 		attrs.put("source", api);
 		attrs.put("api-title", apiGameTitle);
 		if(game.getScore() != 0) {
-			DecimalFormat df = new DecimalFormat("0", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
-			//df.setMaximumFractionDigits(340); //340 = DecimalFormat.DOUBLE_FRACTION_DIGITS
-			df.setMaximumFractionDigits(4);
-			String score = df.format(game.getScore());
-			attrs.put("score", score);
+			attrs.put("score", game.getScoreInPercent());
 		}
 		if(game.getDistance() != 0) {
 			attrs.put("distance", ""+game.getDistance());

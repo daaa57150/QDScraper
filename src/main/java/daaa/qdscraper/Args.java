@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.apache.commons.lang3.StringUtils;
 
+import daaa.qdscraper.services.Console;
 import daaa.qdscraper.services.PlatformConverter;
 
 /**
@@ -105,18 +106,18 @@ public class Args
 				
 				
 				case "-help": {
-					System.out.println("TODO: print help");
+					Console.println("TODO: print help");
 					System.exit(0);
 				}
 				default: {
-					System.out.println("unknown parameter: " + key+", use -help to get help");
+					Console.println("unknown parameter: " + key+", use -help to get help");
 					System.exit(1);
 				}
 			}
 		}
 		
 		if(StringUtils.isEmpty(romsDir)) {
-			System.out.println("Where are the roms and where do we output everything? use -dir");
+			Console.println("Where are the roms and where do we output everything? use -dir");
 			System.exit(15);
 		}
 		
@@ -131,24 +132,24 @@ public class Args
 		{
 			/*if(!Platform.isSupported(platform))
 			{
-				System.out.println("Platform '" + platform + "' not supported, will make queries without specifying it");
-				System.out.println("Supported platforms: " + StringUtils.join(Platform.getSupportedPlatforms(), ", "));
+				Console.println("Platform '" + platform + "' not supported, will make queries without specifying it");
+				Console.println("Supported platforms: " + StringUtils.join(Platform.getSupportedPlatforms(), ", "));
 			}*/
 		}
 		
 		// TODO: list of error numbers?
 		if(StringUtils.isNotEmpty(proxyHost) && proxyPort < 0) {
-			System.out.println("A proxy host needs a proxy port");
+			Console.println("A proxy host needs a proxy port");
 			System.exit(3);
 		}
 		
 		if(StringUtils.isNotEmpty(proxyHost) && StringUtils.isEmpty(proxyHost)) {
-			System.out.println("I only know how to login on a proxy, so give me a proxy with -proxyHost");
+			Console.println("I only know how to login on a proxy, so give me a proxy with -proxyHost");
 			System.exit(4);
 		}
 		
 		if(StringUtils.isEmpty(platform)) {
-			System.out.println("Set a platform with -platform, it's the folder with the roms in recalbox");
+			Console.println("Set a platform with -platform, it's the folder with the roms in recalbox");
 			System.exit(5);
 		}
 		
@@ -156,14 +157,14 @@ public class Args
 		
 		
 		// messages 
-		System.out.println("Working in rom directory " + this.romsDir);
+		Console.println("Working in rom directory " + this.romsDir);
 		if(romFile != null)
 		{
-			System.out.println("Using rom file " + romFile + " as the list of roms");
+			Console.println("Using rom file " + romFile + " as the list of roms");
 		}
 		if(StringUtils.isEmpty(platform)) {
-			System.out.println("No platform specified, will make queries without specifying it");
+			Console.println("No platform specified, will make queries without specifying it");
 		}
-		System.out.println("");
+		Console.println();
 	}
 }

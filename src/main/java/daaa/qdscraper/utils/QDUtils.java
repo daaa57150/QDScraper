@@ -39,9 +39,13 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.config.SocketConfig;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.imgscalr.Scalr;
@@ -53,6 +57,7 @@ import org.xml.sax.SAXException;
 
 import daaa.qdscraper.Args;
 import daaa.qdscraper.Props;
+import daaa.qdscraper.services.Console;
 
 /**
  * All-purposes utils that had no place anywhere else
@@ -161,8 +166,8 @@ public class QDUtils
 		}
 		catch(Exception e)
 		{
-			System.err.println("Cannot compute md5 of file " + path);
-			e.printStackTrace();
+			Console.printErr("Cannot compute md5 of file " + path);
+			Console.printErr(e);
 		}
 		finally
 		{
@@ -186,7 +191,7 @@ public class QDUtils
 		try {
 			return IOUtils.toString(url, Charset.forName("utf-8"));
 		} catch (IOException e) {
-			e.printStackTrace();
+			Console.printErr(e);
 			System.exit(8);
 		}
 		return null;
@@ -241,7 +246,7 @@ public class QDUtils
 			}
 			catch(IOException e)
 			{
-				e.printStackTrace();
+				Console.printErr(e);
 				System.exit(9);
 			}
 		}
@@ -284,7 +289,7 @@ public class QDUtils
 			Document document = db.parse(source);
 			return document;
 		/*} catch (ParserConfigurationException | SAXException | IOException e) {
-			e.printStackTrace();
+			Console.printErr(e);
 			System.exit(10);
 		}*/
 		//return null;
@@ -364,6 +369,26 @@ public class QDUtils
 	}
 	
 	
+	/**
+	 * Thread.sleep with a message out
+	 * @param ms ms to sleep
+	 * @param cause a cause message, null or empty to not sysout the cause
+	 */
+	public static void sleep(long ms, String cause)
+	{
+		try {
+			String message = "Need to sleep " + ms + "ms";
+			if(!StringUtils.isEmpty(cause))
+			{
+				message = ", cause: " + cause;
+			}
+			Console.println(message);
+			Thread.sleep(ms);
+		} catch (InterruptedException e) {
+			Console.printErr(e);
+		}
+	}
+	
 	
 	/* ---------------------------------------------------- */
 	/*							HTTP						*/
@@ -384,7 +409,27 @@ public class QDUtils
 	{		
 		if(HTTP_CLIENT == null)
 		{
-			HttpClientBuilder builder = HttpClientBuilder.create();
+			//TODO: add a configurable timeout
+			int timeout = 30000; //ms
+			
+			PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
+			connManager.setMaxTotal(1);
+			connManager.setDefaultMaxPerRoute(1);
+			SocketConfig sc = SocketConfig.custom()
+				    .setSoTimeout(timeout)
+				    .build();
+
+			connManager.setDefaultSocketConfig(sc);
+
+			// configure the timeouts (socket and connection) for the request
+			RequestConfig.Builder config = RequestConfig.copy(RequestConfig.DEFAULT);
+			config.setConnectionRequestTimeout(timeout);
+			config.setSocketTimeout(timeout);
+			
+			HttpClientBuilder builder = HttpClients.custom()
+					.setConnectionManager(connManager)
+		            .setConnectionManagerShared(false);
+			
 			if(!StringUtils.isEmpty(args.proxyHost))
 			{
 				HttpHost proxy = new HttpHost(args.proxyHost, args.proxyPort);
@@ -401,15 +446,15 @@ public class QDUtils
 			}
 			
 			// giantbomb wants a user agent absolutely
-			builder.setUserAgent(Props.get("http.user-agent")); // "https://github.com/daaa57150/QDScrapper"
+			builder.setUserAgent(Props.get("http.user-agent")); // "https://github.com/daaa57150/QDScraper"
 			
-			/*RequestConfig config = RequestConfig.custom()
-				    .setSocketTimeout(10 * 1000)
-				    .setConnectTimeout(10 * 1000)
-				    .build();
-			builder.setDefaultRequestConfig(config);*/
+//			RequestConfig config = RequestConfig.custom()
+//				    .setSocketTimeout(30 * 1000)
+//				    .setConnectTimeout(30 * 1000)
+//				    .build();
+//			builder.setDefaultRequestConfig(config);
 			
-			//TODO: add a configurable timeout
+			
 			
 			HTTP_CLIENT = builder.build();
 			
@@ -478,55 +523,59 @@ public class QDUtils
 	public static HttpAnswer httpGet(Args args, String url, Header[] headers)
 	throws ClientProtocolException, IOException
 	{
-		HttpClient httpclient = getHttpClient(args);
-		HttpGet httpGet = new HttpGet(url);
-		if(headers != null)
-		{
-			for(Header header:headers)
-			{
-				httpGet.setHeader(header);
-			}
-		}
-		
-		int maxTries = 3;
-	    String content = null; 
-	    String reason = null;
 	    HttpResponse response1 = null;
 	    HttpEntity entity1 = null;
-	    int code = 0; 
-		for(int currentTry = 0; currentTry<maxTries; currentTry++)
-		{
-			response1 = httpclient.execute(httpGet);
-			entity1 = null;
-			
-			code = response1.getStatusLine().getStatusCode();
-		    if(code == 522) // TheGamesDB is down sometimes and throws this
-		    {
-		    	try {
-		    		long sleepSec = (currentTry+1);
-					System.out.println("Need to sleep " + sleepSec + " seconds because of error 522...");
-					Thread.sleep(1000 * sleepSec);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+	    InputStream in = null;
+	    
+	    try
+	    {
+			HttpClient httpclient = getHttpClient(args);
+			HttpGet httpGet = new HttpGet(url);
+			if(headers != null)
+			{
+				for(Header header:headers)
+				{
+					httpGet.setHeader(header);
 				}
-		    	continue;
-		    }
-		    
-			// else 
-		    break;
-		}
+			}
+			
+			int maxTries = 3;
+		    String content = null; 
+		    String reason = null;
+		    int code = 0; 
+			for(int currentTry = 0; currentTry<maxTries; currentTry++)
+			{
+				// close if we're looping
+				if(entity1 != null) try { EntityUtils.consume(entity1); } finally{}
+				
+				response1 = httpclient.execute(httpGet);
+				entity1 = response1.getEntity();
+				code = response1.getStatusLine().getStatusCode();
+			    if(code == 522) // TheGamesDB is down sometimes and throws this
+			    {
+			    	long sleepSec = (currentTry+1);
+			    	sleep(sleepSec * 1000, "error 522");
+			    	continue;
+			    }
+			    
+				// else 
+			    break;
+			}
 		
-		try {
-		    entity1 = response1.getEntity();
-		    content = IOUtils.toString(entity1.getContent(), Charset.forName("UTF-8"));
+			if(entity1 != null)
+			{
+				in = entity1.getContent();
+				content = IOUtils.toString(in, Charset.forName("UTF-8"));
+			}
 		    reason = response1.getStatusLine().getReasonPhrase();
-		} finally {
-		    if(entity1 != null) {
-		    	EntityUtils.consume(entity1);
-		    }
+		    
+		    return new HttpAnswer(code, content, reason);
 		}
-		
-	    return new HttpAnswer(code, content, reason);
+		finally
+		{
+			if(entity1 != null) 	try { EntityUtils.consume(entity1); } finally{}
+	    	if(in != null) 			try { in.close(); 					} finally{}
+		}
 	}
 	
 	
@@ -541,6 +590,11 @@ public class QDUtils
 	public static String downloadImage(String imageUrl, String savePathNoExt, Args args) 
 	throws Exception
 	{
+		HttpEntity entity1 = null;
+	    InputStream in = null;
+	    BufferedImage image = null;
+		HttpResponse response1 = null;
+		
 		try
 		{
 			HttpClient httpclient = getHttpClient(args);
@@ -548,20 +602,18 @@ public class QDUtils
 			
 			int code = 0;
 			int maxTries = 3;
-			HttpResponse response1 = null;
 			for(int currentTry = 0; currentTry<maxTries; currentTry++)
 			{
+				// close if we're looping
+				if(entity1 != null) try { EntityUtils.consume(entity1); } finally{}
+				
 				response1 = httpclient.execute(httpGet);
 				code = response1.getStatusLine().getStatusCode();
+				entity1 = response1.getEntity();
 				if(code == 522) // TheGamesDB is down sometimes and throws this
 				{
-					try {
-						long sleepSec = (currentTry+1);
-						System.out.println("Need to sleep " + sleepSec + " seconds because of error 522...");
-						Thread.sleep(1000 * sleepSec);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+					long sleepSec = (currentTry+1);
+					sleep(sleepSec * 1000, "error 522");
 			    	continue;
 				}
 				break;
@@ -569,66 +621,60 @@ public class QDUtils
 			
 			if(code != HttpStatus.SC_OK)
 			{
-				System.err.println("Downloading image " + imageUrl + " gave a status of " + code + " => " + response1.getStatusLine().getReasonPhrase());
+				Console.printErr("Downloading image " + imageUrl + " gave a status of " + code + " => " + response1.getStatusLine().getReasonPhrase());
 				return null;
 			}
 			
-		    HttpEntity entity1 = null;
-		    InputStream in = null;
-		    BufferedImage image = null;
-		    try {
-			    entity1 = response1.getEntity();
-				String contentType = entity1.getContentType().getValue();
-				String imageType = "";
-				if("image/png".equals(contentType))
+			String contentType = entity1.getContentType().getValue();
+			String imageType = "";
+			if("image/png".equals(contentType))
+			{
+				imageType = "png";
+			}
+			else if("image/jpeg".equals(contentType))
+			{
+				imageType = "jpg";
+			}
+			else
+			{
+				// giantbomb sends application/octetstream for some images
+				//throw new Exception("Image type " + contentType + " not supported");
+				imageType = FilenameUtils.getExtension(imageUrl);
+				if(!"jpg".equals(imageType) && !"png".equals(imageType))
 				{
-					imageType = "png";
+					// back to default png, might be externalizable
+					imageType="png";
 				}
-				else if("image/jpeg".equals(contentType))
-				{
-					imageType = "jpg";
-				}
-				else
-				{
-					// giantbomb sends application/octetstream for some images
-					//throw new Exception("Image type " + contentType + " not supported");
-					imageType = FilenameUtils.getExtension(imageUrl);
-					if(!"jpg".equals(imageType) && !"png".equals(imageType))
-					{
-						// back to default png, might be externalizable
-						imageType="png";
-					}
-				}
-			    
-			    in = entity1.getContent();
-			    image = QDUtils.resizeImage(in);
-			    
-			    // giantbomb pb once
-			    if(in == null || image == null) {
-			    	System.err.println("Could not download/resize image " + imageUrl);
-			    	return null; 
-			    }
-			    
-			    String path = savePathNoExt + "." + imageType;
-			    File f = new File(path);
-				Files.deleteIfExists(f.toPath());
-			    Files.createDirectories(Paths.get(f.getParent()));
-				
-			    ImageIO.write(image, imageType, f);
-			    image.flush();
-			    return path;
+			}
+		    
+		    in = entity1.getContent();
+		    image = QDUtils.resizeImage(in);
+		    
+		    // giantbomb pb once
+		    if(in == null || image == null) {
+		    	Console.printErr("Could not download/resize image " + imageUrl);
+		    	return null; 
 		    }
-		    finally {
-		    	if(entity1 != null) 	try { EntityUtils.consume(entity1); } finally{}
-		    	if(in != null) 			try { in.close(); 					} finally{}
-		    	if(image != null) 		try { image.flush(); 				} finally{}
-		    }
+		    
+		    String path = savePathNoExt + "." + imageType;
+		    File f = new File(path);
+			Files.deleteIfExists(f.toPath());
+		    Files.createDirectories(Paths.get(f.getParent()));
+			
+		    ImageIO.write(image, imageType, f);
+		    image.flush();
+		    return path;
 		}
 		catch(Exception e)
 		{
-			System.err.println("Error downloading image " + imageUrl);
+			Console.printErr("Error downloading image " + imageUrl);
 			throw e;
 		}
+		finally {
+	    	if(entity1 != null) 	try { EntityUtils.consume(entity1); } finally{}
+	    	if(in != null) 			try { in.close(); 					} finally{}
+	    	if(image != null) 		try { image.flush(); 				} finally{}
+	    }
 	}
 	
 }

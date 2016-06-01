@@ -86,7 +86,7 @@ public class ArcadeRoms {
 				}
 				catch(Exception e) // for nullPointers, temporary
 				{
-					e.printStackTrace();
+					Console.printErr(e);
 					return null;
 				}
 			}

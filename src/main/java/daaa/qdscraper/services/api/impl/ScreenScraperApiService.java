@@ -27,6 +27,7 @@ import daaa.qdscraper.model.Game;
 import daaa.qdscraper.model.GameCollection;
 import daaa.qdscraper.model.MatchingType;
 import daaa.qdscraper.model.Rom;
+import daaa.qdscraper.services.Console;
 import daaa.qdscraper.services.PlatformConverter;
 import daaa.qdscraper.services.api.ApiService;
 import daaa.qdscraper.utils.CryptoUtils;
@@ -100,7 +101,7 @@ public class ScreenScraperApiService extends ApiService
 		}
 		catch(URISyntaxException e)
 		{
-			e.printStackTrace(); // should not happen
+			Console.printErr(e); // should not happen
 		}
 		return null;
 	}
@@ -125,7 +126,7 @@ public class ScreenScraperApiService extends ApiService
 		}
 		catch(URISyntaxException e)
 		{
-			e.printStackTrace(); // should not happen
+			Console.printErr(e); // should not happen
 		}
 		return null;
 	}
@@ -142,21 +143,21 @@ public class ScreenScraperApiService extends ApiService
 			HttpAnswer answer = QDUtils.httpGet(args, url);
 			if(answer.getCode() != HttpStatus.SC_OK)
 			{
-				System.err.println("Error querying ScreenScraper (code "+answer.getCode()+": '"+answer.getReason()+"')"); // don't print the url with the password
+				Console.printErr("Error querying ScreenScraper (code "+answer.getCode()+": '"+answer.getReason()+"')"); // don't print the url with the password
 				return null;
 			}
 			
 			if(answer.getContent().startsWith("Erreur"))
 			{
 				// removed sysout as it's printed when no match
-				//System.err.println("Error querying ScreenScraper: "+answer.getContent()); // don't print the url with the password
+				//Console.printErr("Error querying ScreenScraper: "+answer.getContent()); // don't print the url with the password
 				return null;
 			}
 			
 			return answer.getContent();
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			Console.printErr(e);
 		}
 		
 		return null;
@@ -362,14 +363,19 @@ public class ScreenScraperApiService extends ApiService
 				if(rom.isRealFile() && !"scummvm".equals(args.platform)) //no scummvm on screenscraper anyway
 				{
 					String url = buildUrlMd5(rom, wantedPlatform, args);
-					String xml = readUrl(url, args);
-					super.doProgress();
+					String xml = null;
+					if(url != null)
+					{
+						Console.doProgress();
+						xml = readUrl(url, args);
+					}
+					
 					MatchingType matchingType = MatchingType.MD5;
 					if(xml == null)
 					{
 						url = buildUrlRomNom(rom, wantedPlatform, args);
+						Console.doProgress();
 						xml = readUrl(url, args);
-						super.doProgress();
 						matchingType = MatchingType.FILENAME;
 					}
 					
@@ -383,10 +389,10 @@ public class ScreenScraperApiService extends ApiService
 						}
 						catch(Exception e)
 						{
-							System.err.println("Error parsing xml from ScreenScraper!");
-							e.printStackTrace();
-							System.err.println("XML content:");
-							System.err.println(xml);
+							Console.printErr("Error parsing xml from ScreenScraper!");
+							Console.printErr(e);
+							Console.printErr("XML content:");
+							Console.printErr(xml);
 							System.exit(22);
 						}
 					}

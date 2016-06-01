@@ -134,24 +134,6 @@ public abstract class ApiService
 		return null;
 	}
 	
-	// progression
-	private static int nbResultsProcessed = 0;
-	public static void startProgress() {
-		nbResultsProcessed = 0;
-	}
-	public static void doProgress() {
-		nbResultsProcessed ++;
-		if(nbResultsProcessed == 2) { 
-			System.out.print("..");
-		} else if(nbResultsProcessed > 2) {
-			System.out.print(".");
-		}
-	}
-	public static void stopProgress() {
-		if(nbResultsProcessed >= 2) {
-			System.out.println();
-		}
-	}
 	
 	
 }

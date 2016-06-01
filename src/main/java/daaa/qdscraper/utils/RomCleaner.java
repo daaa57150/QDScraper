@@ -36,9 +36,11 @@ public class RomCleaner
 	 */
 	public static String cleanRomName(String rom, boolean hard)
 	{
-		String cleanRom = removeExtension(rom);
+		String cleanRom = rom;
 		cleanRom = cleanRom.replaceAll("\\([^\\)]*\\)", "");
 		cleanRom = cleanRom.replaceAll("\\[[^\\]]*\\]", "");
+		cleanRom = removeExtension(rom);
+		
 		
 		if(hard)
 		{
@@ -62,7 +64,12 @@ public class RomCleaner
 		String clean = filename;
 		if(filename.lastIndexOf(".") >= filename.length()-8)
 		{
-			clean = FilenameUtils.removeExtension(filename);			
+			clean = FilenameUtils.removeExtension(filename);
+			String ext = filename.substring(clean.length());
+			if(!StringUtils.isEmpty(ext) && ext.contains(" ")) // not a real ext if it contains a space
+			{
+				clean = clean + ext;
+			}
 		}
 		return clean;
 	}

@@ -5,6 +5,7 @@ import java.io.StringReader;
 import java.security.GeneralSecurityException;
 import java.util.Properties;
 
+import daaa.qdscraper.services.Console;
 import daaa.qdscraper.utils.CryptoUtils;
 import daaa.qdscraper.utils.QDUtils;
 
@@ -58,8 +59,8 @@ public class Props {
 					reader = new StringReader(QDUtils.readFile(FILE));
 					PROPS.load(reader);
 				} catch (IOException e) {
-					System.err.println("Error when reading properties file " + FILE);
-					e.printStackTrace();
+					Console.printErr("Error when reading properties file " + FILE);
+					Console.printErr(e);
 					System.exit(14);
 				}
 				
@@ -68,7 +69,7 @@ public class Props {
 		String prop = PROPS.getProperty(key);
 		if(prop == null)
 		{
-			System.err.println("Property " + key + " is mandatory");
+			Console.printErr("Property " + key + " is mandatory");
 			System.exit(13);
 		}
 		return prop;
@@ -85,7 +86,7 @@ public class Props {
 		try {
 			return CryptoUtils.decrypt(prop);
 		} catch (GeneralSecurityException | IOException e) {
-			e.printStackTrace();
+			Console.printErr(e);
 			System.exit(20);
 		}
 		return null;

@@ -1,8 +1,11 @@
 package daaa.qdscraper.model;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
@@ -42,6 +45,13 @@ public class Game implements Comparable<Game>
 	private String api;
 	//some apis request showing a legal text to the user
 	private String legalText; 
+	
+	private static DecimalFormat df = new DecimalFormat("0", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+	static {
+		//df.setMaximumFractionDigits(340); //340 = DecimalFormat.DOUBLE_FRACTION_DIGITS
+		df.setMaximumFractionDigits(2);
+	}
+	
 	
 	/* *
 	 * Default constructor
@@ -333,6 +343,24 @@ public class Game implements Comparable<Game>
 	public void setId(String id)
 	{
 		this.id = id;
+	}
+	
+	/**
+	 * The score in percentage with 2 decimals
+	 * @return
+	 */
+	public String getScoreInPercent()
+	{
+		return df.format(getScore() * 100) + "%";
+	}
+	
+	/**
+	 * The score between [0,1] with 2 decimals
+	 * @return
+	 */
+	public String getScoreString()
+	{
+		return df.format(getScore());
 	}
 	
 	/**
