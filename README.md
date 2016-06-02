@@ -1,5 +1,5 @@
 # QDScraper
-This is a rom scraper for [RecalBo](recalbox).  
+This is a rom scraper for [RecalBox](recalbox).  
 Complements [sselph's scraper](sslelph) which uses rom hashes to find matches, I use mainly the name of the rom.  
 It started as a "Quick and Dirty" program for me (hence the name), but I found interest in making it clean and sharing it, 
 so all in all it's not bad.
@@ -127,7 +127,7 @@ Should print something similar to this list
 ## Issues
 ### It's super slow
 - Maybe it's due to [TheGamesDB](thegamesdb), sometimes it's down or just slow
-- Maybe md5 hashing is slow on your machine, only files lighter than 45Mb are processed but maybe that's already too much? 
+- Maybe md5 hashing is slow on your machine, only files smaller than 45MB are processed but maybe that's already too much? 
 You can overwrite this with the **-properties** option 
 - Each rom needs many http requests (4 to 15+), downloads a few images and resizes them 
 - Maybe I made some mistakes ;)
