@@ -173,7 +173,7 @@ public class ScreenScraperApiService extends ApiService
 	private String buildImageFileName(String rom, String gameId)
 	{
 		String id = Paths.get(rom).getFileName().toString();
-		return QDUtils.sanitizeFilename(id) + "-" + SCREENSCRAPER_API_ID  + "-" + gameId;
+		return QDUtils.sanitizeFilename(id) + "-" + SCREENSCRAPER_API_ID  + "-" + gameId + "-" + QDUtils.nextInt();
 	}
 	
 	/**

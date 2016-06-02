@@ -2,7 +2,9 @@ package daaa.qdscraper.model;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,12 +15,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import daaa.qdscraper.Props;
 import daaa.qdscraper.services.Console;
@@ -69,6 +82,11 @@ public class GamelistXML
 	
 	// the file we're writing
 	private BufferedWriter out = null;
+	
+	// the existing content of the gamelist.xml file if any
+	private String existingContent = "";
+	// the existing games names, so we can check before searching
+	private List<String> existingGames = new ArrayList<String>();
 
 	/**
 	 * Constructor
@@ -76,7 +94,7 @@ public class GamelistXML
 	 * @param addToName if something needs to be appended to the name of the game
 	 * @throws IOException 
 	 */
-	public GamelistXML(String path, String addToName) 
+	public GamelistXML(String path, String addToName, boolean overwrite) 
 	throws IOException
 	{
 		super();
@@ -85,9 +103,27 @@ public class GamelistXML
 		
 		// folder structure
 		File file = new File(path);
-		Files.deleteIfExists(file.toPath()); // TODO: add option to load if the file already exists
-		String parentFolder = file.getParent();
-		Files.createDirectories(Paths.get(parentFolder));
+		if(overwrite) {
+			if(file.exists()) {
+				Console.println("Overwriting file " + path);
+				Files.deleteIfExists(file.toPath());
+			}
+			else {
+				// Console.println("File " + path + "does not exist");
+				String parentFolder = file.getParent();
+				Files.createDirectories(Paths.get(parentFolder));
+			}
+		}
+		else { // don't overwrite
+			if(file.exists()) {
+				Console.println("Reading existing file " + path + " ...");
+				parseExisting(path);
+			}
+			else {
+				String parentFolder = file.getParent();
+				Files.createDirectories(Paths.get(parentFolder));
+			}
+		}	
 	}
 
 	/**
@@ -104,6 +140,7 @@ public class GamelistXML
 			// start
 			out = Files.newBufferedWriter(Paths.get(path), Charset.forName("UTF-8"));
 			out.write(QDUtils.makeTagOpen(GAMELIST_ROOT_TAGNAME) + "\n");
+			out.write(existingContent);
 			open = true;
 		}
 		else if(closed)
@@ -128,7 +165,7 @@ public class GamelistXML
 			
 			// add to the template
 			str = replaceAllowNull(str, "{path}", romPath);
-			str = replaceAllowNull(str, "{name}", "BIOS " + filename);
+			str = replaceAllowNull(str, "{name}", filename);
 			str = replaceAllowNull(str, "{desc}", game.isBios() ? DESC_BIOS : DESC_AUXILIARY);
 			
 			out.write(str + "\n");
@@ -223,7 +260,7 @@ public class GamelistXML
 		if(game.getScore() != 0) {
 			attrs.put("score", game.getScoreInPercent());
 		}
-		if(game.getDistance() != Integer.MAX_VALUE) {
+		if(game.getDistance() != Integer.MAX_VALUE && game.getDistance() != 0) {
 			attrs.put("distance", ""+game.getDistance());
 		}
 		if(game.getMatchingType() != null) {
@@ -271,7 +308,7 @@ public class GamelistXML
 		String name = StringEscapeUtils.escapeXml10(game.getName() + addToName);
 		String desc = StringEscapeUtils.escapeXml10(game.getDesc()); //TODO: add the legal text? let's see if igdb says something
 		String image = StringUtils.isEmpty(game.getImage()) ? "" : StringEscapeUtils.escapeXml10(IMAGE_PATH + game.getImage()); //must be slashes in recalbox
-		String rating = game.getRating() == 0 ? "" : "" + (game.getRating() / 10.0f);
+		String rating = game.getRating() == 0 ? "" : "" + game.getRating();
 		String releasedate = game.getReleasedate() == null ? "" : SDF.format(game.getReleasedate());
 		String developer = StringUtils.isEmpty(game.getDeveloper()) ? "" : StringEscapeUtils.escapeXml10(game.getDeveloper());
 		String publisher = StringUtils.isEmpty(game.getPublisher()) ? "" : StringEscapeUtils.escapeXml10(game.getPublisher());
@@ -295,6 +332,187 @@ public class GamelistXML
 		
 		return str;
 	}
+	
+	/**
+	 * Saves the existing content of the gameList tag in a gamelist.xml file; this will be output in the resulting file.
+	 * @param filepath the gamelist.xml file to parse
+	 */
+	public void parseExisting(String filepath)
+	{
+		File file = new File(filepath);
+		if(!file.exists()) {
+			Console.println("The gamelist.xml file does not exist: " + filepath);
+			return;
+		}
+		
+		try
+		{
+			InputStream in = new FileInputStream(file);
+			String xml = IOUtils.toString(in);
+			Document doc = QDUtils.parseXML(xml);
+			XPath xpath = QDUtils.getXPath();
+			
+			// saving the xml as is
+			xml = xml.replace("<gameList>", "");
+			xml = xml.replace("</gameList>", "");
+			if(xml.startsWith("\n")) {
+				xml = xml.substring(1);
+			}
+//			if(xml.endsWith("\n")) {
+//				xml = xml.substring(0, xml.length() - 1);
+//			}
+			existingContent = xml;
+			
+			// parsing just the names of the files
+			int i;
+			for(i=1; ; i++)
+			{
+				Object gameO = xpath.evaluate("gameList/game["+i+"]", doc, XPathConstants.NODE);
+				if(gameO == null) break;
+				
+				Element gameE = (Element)gameO;
+				NodeList paths = gameE.getElementsByTagName("path");
+				Node pathO = paths.item(0);
+				String game = pathO.getTextContent();
+				game = FilenameUtils.getName(game);  // does work on / or \ whatever the system it runs on
+				existingGames.add(game);
+			}
+			Console.println("The existing gamelist.xml file already contains " + (i-1) + " games");
+		}
+		catch(IOException | ParserConfigurationException | SAXException | XPathExpressionException e)
+		{
+			Console.printErr("Exception when parsing file " + filepath);
+			Console.printErr(e);
+		}
+	}
+	
+	/**
+	 * Tells if this gamelist already contains a file.
+	 * This has the limitation has it doesn't care if the rom is in a folder or not
+	 * @param rom
+	 * @return
+	 */
+	public boolean contains(Rom rom) {
+		String name = FilenameUtils.getName(rom.getFile());
+		return existingGames.contains(name);
+	}
+	
+//	public GameCollection parse(String filepath)
+//	{
+//		File file = new File(filepath);
+//		if(!file.exists()) {
+//			Console.println("The gamelist.xml file does not exist: " + filepath);
+//			return null;
+//		}
+//		
+//		try
+//		{
+//			InputStream in = new FileInputStream(file);
+//			String xml = IOUtils.toString(in);
+//			Document doc = QDUtils.parseXML(xml);
+//			XPath xpath = QDUtils.getXPath();
+//			
+//			GameCollection games = new GameCollection();
+//			
+//			for(int i=1; ; i++)
+//			{
+//				Object gameO = xpath.evaluate("gameList/game["+i+"]", doc, XPathConstants.NODE);
+//				if(gameO == null) break;
+//				
+//				Element gameE = (Element)gameO;
+//				
+//				// attributes
+//				String id = gameE.getAttribute("id");
+//				String scraper = gameE.getAttribute("scraper");
+//				String source = gameE.getAttribute("source");
+//				String score = gameE.getAttribute("score");
+//				String apiTitle = StringEscapeUtils.unescapeXml(gameE.getAttribute("api-title"));
+//				String matchingType = gameE.getAttribute("matching-type");
+//				String distance = gameE.getAttribute("distance");
+//				
+//				// nodes
+//				String path = null;
+//				String name = null;
+//				String desc = null;
+//				String image = null;
+//				String rating = null;
+//				String releasedate = null;
+//				String developer = null;
+//				String publisher = null;
+//				String genre = null;
+//				String players = null;
+//				String hidden = null;
+//				
+//				NodeList nodes = gameE.getChildNodes();
+//				for(int n = 0; n<nodes.getLength(); n++)
+//				{
+//					Node node = nodes.item(n);
+//					switch(node.getNodeName()) {
+//						case "path": {
+//							path = node.getNodeValue();
+//							break;
+//						}
+//						case "name": {
+//							name = node.getNodeValue();
+//							break;
+//						}
+//						case "desc": {
+//							desc = node.getNodeValue();
+//							break;
+//						}
+//						case "image": {
+//							image = node.getNodeValue();
+//							break;
+//						}
+//						case "rating": {
+//							rating = node.getNodeValue();
+//							break;
+//						}
+//						case "releasedate": {
+//							releasedate = node.getNodeValue();
+//							break;
+//						}
+//						case "developer": {
+//							developer = node.getNodeValue();
+//							break;
+//						}
+//						case "publisher": {
+//							publisher = node.getNodeValue();
+//							break;
+//						}
+//						case "genre": {
+//							genre = node.getNodeValue();
+//							break;
+//						}
+//						case "players": {
+//							players = node.getNodeValue();
+//							break;
+//						}
+//						case "hidden": {
+//							hidden = node.getNodeValue();
+//							break;
+//						}
+//						default: {
+//							Console.println("Unknown tag " + node.getNodeName());
+//						}
+//					}
+//				}
+//				
+//				// now set everything
+//				Game game = new Game(source, scraper);
+//				game.set
+//			}
+//			
+//			return games;
+//		}
+//		catch(IOException | ParserConfigurationException | SAXException | XPathExpressionException e)
+//		{
+//			Console.printErr("Exception when parsing file " + filepath);
+//			Console.printErr(e);
+//		}
+//		
+//		return null;
+//	}
 	
 	/**
 	 * @return the path

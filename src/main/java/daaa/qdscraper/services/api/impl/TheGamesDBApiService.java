@@ -96,16 +96,15 @@ public class TheGamesDBApiService extends ApiService
 	
 	
 	/**
-	 * Builds a unique filename for an image
+	 * Builds a unique filename for an image, for this run
 	 * @param rom relative path to the rom
-	 * @param matchIndex index of the match
 	 * @param gameId identifier of the game
 	 * @return a unique filename for this run
 	 */
-	private String buildImageFileName(String rom, int matchIndex, String gameId)
+	private String buildImageFileName(String rom, String gameId)
 	{
 		String id = Paths.get(rom).getFileName().toString();
-		return QDUtils.sanitizeFilename(id) + "-" + THEGAMESDB_API_ID  + "-" + gameId+ "-" + matchIndex;
+		return QDUtils.sanitizeFilename(id) + "-" + THEGAMESDB_API_ID  + "-" + gameId+ "-" + QDUtils.nextInt();
 	}
 	
 	
@@ -174,7 +173,7 @@ public class TheGamesDBApiService extends ApiService
 			// the game
 			Game game = new Game(THEGAMESDB_API_ID);
 			String desc = xpath.evaluate("/Data/Game["+i+"]/Overview", document);
-			String rating = xpath.evaluate("/Data/Game["+i+"]/Rating", document);
+			String rating = xpath.evaluate("/Data/Game["+i+"]/Rating", document); // on 10
 			String releasedate = xpath.evaluate("/Data/Game["+i+"]/ReleaseDate", document);
 			String developer = xpath.evaluate("/Data/Game["+i+"]/Developer", document);
 			String publisher = xpath.evaluate("/Data/Game["+i+"]/Publisher", document);
@@ -207,7 +206,7 @@ public class TheGamesDBApiService extends ApiService
 			String image = null;
 			if(!StringUtils.isEmpty(imageUrl))
 			{
-				String filename = buildImageFileName(rom, i, id);
+				String filename = buildImageFileName(rom, id);
 				String path = args.romsDir + IMAGES_FOLDER + File.separatorChar + filename;
 				path = QDUtils.downloadImage(imageBaseUrl+imageUrl, path, args);
 				if(path != null)
@@ -222,7 +221,7 @@ public class TheGamesDBApiService extends ApiService
 			game.setDeveloper(developer);
 			game.setGenres(genres);
 			game.setImage(image);
-			game.setRating(StringUtils.isEmpty(rating) ? 0 : Float.valueOf(rating));
+			game.setRating(StringUtils.isEmpty(rating) ? 0 : Float.valueOf(rating) / 10.f);
 			game.setReleasedate(StringUtils.isEmpty(releasedate) ? null : parseDate(releasedate));
 			game.setFile(rom);
 			game.setPlayers(players);

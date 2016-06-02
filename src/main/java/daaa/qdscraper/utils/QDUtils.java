@@ -70,6 +70,16 @@ public class QDUtils
 {
 	private QDUtils() {} //do not instanciate
 	
+	private static int unique = 0;
+	/**
+	 * Generates a unique integer for a run, starting with 1
+	 * @return
+	 */
+	public static int nextInt() {
+		unique++;
+		return unique;
+	}
+	
 	/**
 	 * add tabulations before each line of the input string
 	 * @param in the input string to tabulate

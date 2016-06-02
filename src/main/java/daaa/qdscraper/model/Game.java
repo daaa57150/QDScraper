@@ -25,7 +25,7 @@ public class Game implements Comparable<Game>
 	private String id; //id from theGamesDB or other api
 	private String desc;
 	private String image;
-	private float rating = 0;
+	private float rating = 0; // between [0 - 1]
 	private Date releasedate;
 	private String developer;
 	private String publisher;
@@ -247,14 +247,14 @@ public class Game implements Comparable<Game>
 		this.image = image;
 	}
 	/**
-	 * @return the rating
+	 * @return the rating between [0 - 1]
 	 */
 	public float getRating()
 	{
 		return rating;
 	}
 	/**
-	 * @param rating the rating to set
+	 * @param rating the rating to set between [0 - 1]
 	 */
 	public void setRating(float rating)
 	{

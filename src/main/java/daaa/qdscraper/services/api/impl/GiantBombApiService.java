@@ -259,14 +259,13 @@ public class GiantBombApiService extends ApiService
 	/**
 	 * Builds a unique filename for an image
 	 * @param rom relative path to the rom
-	 * @param matchIndex index of the match
 	 * @param gameId identifier of the game
 	 * @return a unique filename for this run
 	 */
-	private String buildImageFileName(String rom, int matchIndex, String gameId)
+	private String buildImageFileName(String rom, String gameId)
 	{
 		String id = Paths.get(rom).getFileName().toString();
-		return QDUtils.sanitizeFilename(id) + "-" + GIANTBOMB_API_ID  + "-" + gameId+ "-" + matchIndex;
+		return QDUtils.sanitizeFilename(id) + "-" + GIANTBOMB_API_ID  + "-" + gameId+ "-" + QDUtils.nextInt();
 	}
 	
 	/**
@@ -322,7 +321,7 @@ public class GiantBombApiService extends ApiService
 			String imageUrl = xpath.evaluate("response/results/image/" + imageXPath, gameDocument);
 			if(!StringUtils.isEmpty(imageUrl))
 			{
-				String filename = buildImageFileName(rom, index, id);
+				String filename = buildImageFileName(rom, id);
 				String path = args.romsDir + IMAGES_FOLDER + File.separatorChar + filename;
 			    String imagePath = QDUtils.downloadImage(imageUrl, path, args);
 			    if(imagePath != null)

@@ -60,7 +60,7 @@ public class App
 	 */
 	private static List<Rom> findRoms(Args args) 
 	throws IOException, XPathExpressionException, ParserConfigurationException, SAXException {
-		return RomBrowser.listRoms(args); //TODO: -append=true to treat only games not already in the xml file
+		return RomBrowser.listRoms(args);
 	}
 	
 	/**
@@ -125,8 +125,8 @@ public class App
 	{
 		Args args = new Args(commands);
 		
-		GamelistXML gameList = new GamelistXML(args.romsDir + "gamelist.xml", args.appendToName);
-		GamelistXML notFound = new GamelistXML(args.romsDir + "NOT_FOUND.xml", args.appendToName);
+		GamelistXML gameList = new GamelistXML(args.romsDir + "gamelist.xml", args.appendToName, args.overwrite);
+		GamelistXML notFound = new GamelistXML(args.romsDir + "NOT_FOUND.xml", args.appendToName, true);
 		GamelistXML gameListDupes = null;
 		
 		// services to use, in that order, to look for a perfect match
@@ -140,6 +140,7 @@ public class App
 			apiServices.add(new GiantBombApiService());
 		}
 		
+		Console.println();
 		List<Rom> roms = findRoms(args);
 		try
 		{
@@ -148,8 +149,13 @@ public class App
 			{
 				Console.println("# Processing " + rom.getFile() + " ...");
 				
+				// is it already in the gamelist.xml (in the case we don't overwrite it) ?
+				if(gameList.contains(rom))
+				{
+					Console.println("The file " + rom.getFile() + " is already in gamelist.xml");
+				}
 				// is it a bios?
-				if(rom.isBios())
+				else if(rom.isBios())
 				{
 					Game game = new Game(QDConst.NO_API_ID);
 					game.setFile(rom.getFile());
@@ -157,6 +163,7 @@ public class App
 					gameList.addGame(game);
 					Console.println("  => This is a bios file, added as hidden");
 				}
+				// is it an auxiliary file (.bin, .img, .sub...) ?
 				else if(rom.isAuxiliary())
 				{
 					Game game = new Game(QDConst.NO_API_ID);
@@ -165,10 +172,11 @@ public class App
 					gameList.addGame(game);
 					Console.println("  => This is an auxiliary file, added as hidden");
 				}
+				// we have to process it
 				else
 				{
 					String name = rom.getTranslatedName(); // for arcade/scumm, the name is our match in the DB, for the rest it's the rom
-					if(name == null) // needed translation but wasn't found in our DB, highly unlikely
+					if(name == null) // needed a translation but wasn't found in our DB, highly unlikely
 					{
 						addEmptyGame(notFound, rom.getFile(), "");
 						Console.println("  => Nothing found for " + rom.getFile() + " in our data files");
@@ -240,7 +248,7 @@ public class App
 						if(games.size() > 1)
 						{
 							String file = Paths.get(rom.getFile()).getFileName().toString();
-							gameListDupes = new GamelistXML(args.dupesDir + DUPE_PREFIX + QDUtils.sanitizeFilename(file) + ".xml", args.appendToName);
+							gameListDupes = new GamelistXML(args.dupesDir + DUPE_PREFIX + QDUtils.sanitizeFilename(file) + ".xml", args.appendToName, true);
 							for(Game dupe: games)
 							{
 								if(dupe != topResult) // it's really a dupe

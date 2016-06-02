@@ -28,6 +28,7 @@ public class Args
 	public String romFile = null;		// instead of listing the romsDir, use the rom names in this file
 	public boolean arcade = false;		// we are processing arcade roms, they don't have pretty names
 	public String giantBombApiKey=null; // key for giantBomb's api, used as a last resort if nothing is found on theGamesDB
+	public boolean overwrite = false;	// should we overwrite the gamelist.xml if it already exists?	
 	
 	/**
 	 * Parses the arguments of the program
@@ -77,6 +78,10 @@ public class Args
 				}
 				case "-giantBombApiKey": {
 					giantBombApiKey = val;
+					break;
+				}
+				case "-overwrite": {
+					overwrite = true;
 					break;
 				}
 					
