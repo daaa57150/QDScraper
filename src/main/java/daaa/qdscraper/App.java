@@ -48,10 +48,6 @@ public class App
 	 * Images will go inside this folder
 	 */
 	private static final String IMAGES_FOLDER = Props.get("images.folder");
-	/**
-	 * Empty and bios games are marked with this api flag
-	 */
-	private static final String NO_API_ID = "QDScrapper";
 	
 	/**
 	 * Get the list of roms from the filesystem or from the provided text file 
@@ -112,7 +108,7 @@ public class App
 	private static void addEmptyGame(GamelistXML notFound, String rom, String name) 
 	throws IOException
 	{
-		Game empty = new Game(NO_API_ID);
+		Game empty = new Game(QDConst.NO_API_ID);
 		empty.setFile(rom);
 		empty.setName(name);
 		notFound.addGame(empty);
@@ -155,11 +151,19 @@ public class App
 				// is it a bios?
 				if(rom.isBios())
 				{
-					Game game = new Game(NO_API_ID);
+					Game game = new Game(QDConst.NO_API_ID);
 					game.setFile(rom.getFile());
 					game.setBios(true);
-					gameList.addGame(game); //TODO: write it on the filesystem now
+					gameList.addGame(game);
 					Console.println("  => This is a bios file, added as hidden");
+				}
+				else if(rom.isAuxiliary())
+				{
+					Game game = new Game(QDConst.NO_API_ID);
+					game.setFile(rom.getFile());
+					game.setAuxiliary(true);
+					gameList.addGame(game);
+					Console.println("  => This is an auxiliary file, added as hidden");
 				}
 				else
 				{

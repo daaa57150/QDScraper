@@ -32,9 +32,10 @@ public class Rom {
 	private boolean isRealFile;
 	// true if arcade or scummvm and not a bios
 	private boolean isTranslated = false;
+	// true for .bin files if they have a .cue, or .ccd and .sub
+	private boolean isAuxiliary = false;
 	
-	
-	private static final long MAX_SIZE_FOR_MD5 = Long.valueOf(Props.get("md5.size.max")); 
+	private static final long MAX_SIZE_FOR_MD5 = Long.valueOf(Props.get("md5.size.max")); //45Mo
 	
 	/**
 	 * @return the file
@@ -47,6 +48,18 @@ public class Rom {
 	 */
 	public void setFile(String file) {
 		this.file = file;
+	}
+	/**
+	 * @return the isAuxiliary
+	 */
+	public boolean isAuxiliary() {
+		return isAuxiliary;
+	}
+	/**
+	 * @param isAuxiliary the isAuxiliary to set
+	 */
+	public void setIsAuxiliary(boolean isAuxiliary) {
+		this.isAuxiliary = isAuxiliary;
 	}
 	/**
 	 * @return the isTranslated

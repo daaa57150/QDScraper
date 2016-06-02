@@ -18,6 +18,10 @@ import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
+import jwbroek.cuelib.CueParser;
+import jwbroek.cuelib.CueSheet;
+import jwbroek.cuelib.FileData;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.SAXException;
@@ -111,6 +115,78 @@ public class RomBrowser {
 	}
 	
 	/**
+	 * Finds the rom that has a specific name
+	 * @param roms the roms to search into
+	 * @param name the file name to find
+	 * @return the found rom, null if none was found
+	 */
+	private static Rom findRomWithName(List<Rom> roms, String name)
+	{
+		for(Rom rom: roms)
+		{
+			if(name.toLowerCase().equals(rom.getFile().toLowerCase())) return rom;
+		}
+		return null;
+	}
+	
+	/**
+	 * Flags duplicates, for example psx isos usually have a .cue and several .bin, all .bin are duplicates
+	 * @param roms the roms to flag
+	 */
+	// TODO: some games have no cuesheet and still have multiple .bin ?? Micro Maniacs Europe
+	private static void flagAuxiliaries(List<Rom> roms)
+	{
+		for(Rom rom: roms) {
+			String filename = rom.getFile(); // for scummvm, this also has a 1 folder path
+			String ext = FilenameUtils.getExtension(filename).toLowerCase();
+			String path = rom.getPath();
+			
+			// 1) cue sheets
+			if("cue".equals(ext))
+			{
+				try 
+				{
+					CueSheet cue = CueParser.parse(new File(path));
+					for(FileData fd: cue.getFileData())
+					{
+						String file = fd.getFile();
+						if(file != null) {
+							String name = FilenameUtils.getName(file);
+							Rom dupe = findRomWithName(roms, name);
+							if(dupe != null) {
+								dupe.setIsAuxiliary(true); // all files in the cuesheet are duplicates
+							}
+						}
+					}
+				} catch (IOException e) {
+					Console.printErr("Couldn't parse cuesheet " + path);
+					Console.printErr(e);
+				}
+			}
+			
+			// 2) clone cd .sub
+			else if("sub".equals(ext))
+			{
+				// is this correct?
+				rom.setIsAuxiliary(true);
+			}
+			
+			// 3) clone cd .ccd
+			else if("ccd".equals(ext))
+			{
+				// TODO: here I'm not sure it's ok
+				
+				// if there is a .cue, the .cue is the main; otherwise it's the .ccd
+				String filenameNoExt = filename.substring(0,filename.length() - ext.length() - 1);
+				Rom main = findRomWithName(roms, filenameNoExt + ".cue");
+				if(main != null) {
+					rom.setIsAuxiliary(true);
+				}
+			}
+		}
+	}
+	
+	/**
 	 * Finds roms/bioses in a directory, non recursively
 	 * 
 	 * @param inFolder the folder to look for the roms
@@ -155,6 +231,9 @@ public class RomBrowser {
 			}
         	
         });
+        
+        // cd images consisting of multiple files must have just 1 file not flagged as auxiliary
+        flagAuxiliaries(roms);
         
         return roms;
 	}

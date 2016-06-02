@@ -11,6 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import daaa.qdscraper.QDConst;
+
 /**
  * Represents a game
  * @author daaa
@@ -30,8 +32,10 @@ public class Game implements Comparable<Game>
 	private List<String> genres = new ArrayList<>();
 	private String players;
 	private boolean bios = false;
-	//private boolean perfectMatch = false;
+	private boolean auxiliary = false; // it's a duplicate (.bin is a duplicate of .cue if any for example) 
+	private String scraper; // the id of the scraper that scraped this game, we are "qd"
 	
+
 	// 1 = perfect match, 0 = totally different
 	private double score = 0; // jarod-winkler
 	// levenstein
@@ -110,26 +114,21 @@ public class Game implements Comparable<Game>
 	
 	/**
 	 * Constructor with api, use this!
-	 * @param api
+	 * @param api the api id
+	 * @param scraper the scraper id
+	 */
+	public Game(String api, String scraper){
+		this.api = api;
+		this.scraper = scraper;
+	}
+	/**
+	 * Constructor with api
+	 * @param api the api id
 	 */
 	public Game(String api){
 		this.api = api;
+		this.scraper = QDConst.SCRAPER_ID;
 	}
-	
-	/* *
-	 * @return the md5Match
-	 * /
-	public boolean isMd5Match() {
-		return md5Match;
-	}
-
-	/* *
-	 * @param md5Match the md5Match to set
-	 * /
-	public void setMd5Match(boolean md5Match) {
-		this.md5Match = md5Match;
-	}*/
-	
 	/**
 	 * is bios?
 	 * @return true if it is a bios
@@ -146,6 +145,34 @@ public class Game implements Comparable<Game>
 	{
 		this.bios = bios;
 	}
+	/**
+	 * @return the scraper
+	 */
+	public String getScraper() {
+		return scraper;
+	}
+
+	/**
+	 * @param scraper the scraper to set
+	 */
+	public void setScraper(String scraper) {
+		this.scraper = scraper;
+	}
+
+	/**
+	 * @return the auxiliary
+	 */
+	public boolean isAuxiliary() {
+		return auxiliary;
+	}
+
+	/**
+	 * @param auxiliary the auxiliary to set
+	 */
+	public void setAuxiliary(boolean auxiliary) {
+		this.auxiliary = auxiliary;
+	}
+
 	/**
 	 * @return the api
 	 */

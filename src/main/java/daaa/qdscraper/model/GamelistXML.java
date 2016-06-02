@@ -50,11 +50,13 @@ public class GamelistXML
 			+ "<publisher>{publisher}</publisher>\n"
 			+ "<genre>{genre}</genre>\n"
 			+ "<players>{players}</players>\n";
-	private static final String TEMPLATE_BIOS =
+	private static final String TEMPLATE_HIDDEN =
 			  "<path>{path}</path>\n"
 			+ "<name>{name}</name>\n"
-			+ "<desc>This is a bios file</desc>\n"
+			+ "<desc>{desc}</desc>\n"
 			+ "<hidden>true</hidden>";
+	private static final String DESC_BIOS = "This is a bios file";
+	private static final String DESC_AUXILIARY = "This is an auxiliary file";
 	
 	private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyyMMdd'T000000'");
 	
@@ -110,14 +112,14 @@ public class GamelistXML
 		}
 		
 		// add the game now
-		// is it a bios file?
-		if(game.isBios())
+		// is it an hidden file ?
+		if(game.isBios() || game.isAuxiliary())
 		{
 			// start game
 			out.write(QDUtils.tabulate(makeTagOpen(GAMELIST_GAME_TAGNAME, game), 1) + "\n");
 			
 			// template 
-			String str = QDUtils.tabulate(TEMPLATE_BIOS, 2);
+			String str = QDUtils.tabulate(TEMPLATE_HIDDEN, 2);
 		
 			// path to the rom in the recalbox
 			String romPath = ROM_PATH + game.getFile().replaceAll("\\\\", "/"); //in recalbox they must be slashes
@@ -127,6 +129,7 @@ public class GamelistXML
 			// add to the template
 			str = replaceAllowNull(str, "{path}", romPath);
 			str = replaceAllowNull(str, "{name}", "BIOS " + filename);
+			str = replaceAllowNull(str, "{desc}", game.isBios() ? DESC_BIOS : DESC_AUXILIARY);
 			
 			out.write(str + "\n");
 			
@@ -207,6 +210,7 @@ public class GamelistXML
 		attrs.put("id", gameId);
 		attrs.put("source", api);
 		attrs.put("api-title", apiGameTitle);
+		attrs.put("scraper", game.getScraper());
 		if(game.getScore() != 0) {
 			attrs.put("score", game.getScoreInPercent());
 		}
