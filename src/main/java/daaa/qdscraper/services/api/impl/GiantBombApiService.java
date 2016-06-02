@@ -384,7 +384,7 @@ public class GiantBombApiService extends ApiService
 			Document searchDocument = search(cleanName, args);
 			if(searchDocument == null) return null; // bail out
 			
-			// get the urls to the games from the search in the limit set in the properties
+			// get the urls to the games from the search in the limit set in the properties (2 urls max at the time of writing)
 			List<String> urlsToGames = getUrlOfFirstGamesForPlatforms(searchDocument, wantedPlatforms);
 			
 			// for each url, we'll get the games
@@ -409,7 +409,7 @@ public class GiantBombApiService extends ApiService
 							// 100% match on the name, we can stop
 							return games;
 						}
-						//TODO: also stop if score below threshold 
+						
 					}
 				} catch (Exception e) {
 					Console.printErr("Error parsing xml from giantbomb!");

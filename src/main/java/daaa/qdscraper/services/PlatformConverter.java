@@ -15,7 +15,7 @@ import daaa.qdscraper.utils.QDUtils;
  */
 public class PlatformConverter
 {
-	// TODO: each api has different supported platforms
+	// each api has different set of supported platforms
 	private static final Properties PLATFORMS = QDUtils.loadClasspathProperties("platform.properties");
 	/*private static Set<String> SUPPORTED_PLATFORMS;
 	static {

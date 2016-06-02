@@ -306,7 +306,7 @@ public class GamelistXML
 		
 		// format and escape everything
 		String name = StringEscapeUtils.escapeXml10(game.getName() + addToName);
-		String desc = StringEscapeUtils.escapeXml10(game.getDesc()); //TODO: add the legal text? let's see if igdb says something
+		String desc = StringEscapeUtils.escapeXml10(game.getDesc()); //add the legal text? let's see if igdb says something
 		String image = StringUtils.isEmpty(game.getImage()) ? "" : StringEscapeUtils.escapeXml10(IMAGE_PATH + game.getImage()); //must be slashes in recalbox
 		String rating = game.getRating() == 0 ? "" : "" + game.getRating();
 		String releasedate = game.getReleasedate() == null ? "" : SDF.format(game.getReleasedate());
