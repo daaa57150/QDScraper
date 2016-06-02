@@ -1,5 +1,5 @@
 # QDScraper
-This is a rom scraper for recalbox.  
+This is a rom scraper for [RecalBox](recalbox).  
 Complements [sselph's scraper](sslelph) which uses rom hashes to find matches, I use mainly the name of the rom.  
 It started as a "quick and dirty" program for me, but I found interest in making it clean and sharing it, so all in all it's not bad.
 
@@ -160,3 +160,4 @@ If something goes wrong, you can use the issue function here on GitHub, and if I
 [giantbomb]: http://www.giantbomb.com/
 [igdb]: https://www.igdb.com/
 [sselph]: https://github.com/sselph/scraper
+[recalbox]: http://www.recalbox.com/
