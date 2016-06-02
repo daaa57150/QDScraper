@@ -28,7 +28,7 @@ If you give another platform or if an API doesn't know about it, it will try to 
 Some platforms do more extensive searches:
 - wonderswan color will also look for wonderswan games
 - neogeo pocket color will also look for neogeo pocket games
-- the "-arcade" option also triggers a wider search
+- the **-arcade** option also triggers a wider search
 - maybe others, it also depends on the APIs....
 Beware that game boy color won't look for game boy games
 
