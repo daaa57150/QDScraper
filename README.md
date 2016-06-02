@@ -1,7 +1,8 @@
 # QDScraper
-This is a rom scraper for recalbox.  
+This is a rom scraper for [RecalBo](recalbox).  
 Complements [sselph's scraper](sslelph) which uses rom hashes to find matches, I use mainly the name of the rom.  
-It started as a "quick and dirty" program for me, but I found interest in making it clean and sharing it, so all in all it's not bad.
+It started as a "Quick and Dirty" program for me (hence the name), but I found interest in making it clean and sharing it, 
+so all in all it's not bad.
 
 ## What it does
 ### Steps
@@ -23,7 +24,7 @@ megadrive, msx, msx1, msx2, n64, neogeo, nes, ngp, ngpc, o2em, pcengine, pcengin
 supergrafx, vectrex, virtualboy, wswan, wswanc, zxspectrum, psp
 
 But there are some that I don't know much about, so I'd say it roughly works for them.
-If you give another platform or if an API doesn't know about it, it will try to search without specifying the platform.  
+If you input another platform or if an API doesn't know about it, it will try to search without specifying it.  
 
 Some platforms do more extensive searches:
 - wonderswan color will also look for wonderswan games
@@ -44,11 +45,12 @@ Beware that game boy color won't look for game boy games
 ## What it does not
 - It can't be right 100% of the time, you'll need to check if it found the right games, see [Some games are wrong](#some-games-are-wrong)
 - It doesn't scan subfolders, except for the particular case of scummvm games
+- It's not interactive, let it scan everything and then do your changes
 
 
 ## What do I need ?
-- Java 7 installed on your machine 
-- A GiantBomb API key if you want the program to also use this API
+- [Java 7](https://www.java.com/en/download/help/download_options.xml) (at least) installed on your machine 
+- A [GiantBomb](giantbomb) API key if you want the program to also use this API
 - Internet, roms, Recalbox ;)  
 
 ## Command:
@@ -57,17 +59,18 @@ TODO: main command
 
 ### Options
 **-platform**  
-This is the platform you want to search, it's the name of the folder you put your roms into, in recalbox. For example snes, segacd...
+This is the platform you want to search, it's the name of the folder you put your roms into, in recalbox. For example *snes* or *segacd*.
 	
 **-dir**  
-The directory to scan for roms. It doesn't limit each system for its known extensions like recalbox, it just filters some extensions that might
-be there and I'm sure they are not roms:  
+The directory to scan for roms and also where the *gamelist.xml* file is saved. 
+It doesn't limit each system for its known extensions like recalbox, it just filters some extensions that might
+be there and are not roms:  
 xml, txt, jpg, png, gif, htm, html, doc, docx, ini, xls, dat, nv, fs  
 If I should filter other things just open an issue.
 
 **-appendToName** 
 If you want the program to suffix all your roms by something, use this. I used it to add my patched roms, 
-so all of them are now suffixed by (JP patch EN). It will add a space before the suffix.
+so all of them are now suffixed by *(JP patch EN)*. It will add a space before the suffix.
  
 **-useFilename**
 Use this if you prefer the name of your rom instead of the name of the game from the API
@@ -87,15 +90,16 @@ Beware that this limits some searches based on md5 hash
 
 **-arcade**  
 Use this to look for arcade games, the rom name will be translated to the real name of the game. 
-**-platform** is overridden by this option, you don't need it in this case
+**-platform** is overridden by this option, you don't need it in this case.  
+I know I should infer this option based on the platform...
 
 **-giantBombApiKey**  
-Get your GiantBomb api key here: <http://www.giantbomb.com/api/>
+Get your [GiantBomb](giantbomb) api key here: <http://www.giantbomb.com/api/>
 This adds a place to look for games; more APIs = more chances to find that rare game!
 
 **-overwrite**  
 By default the new games found by the program are appended to the existing *gamelist.xml* file.
-Use that to override it and look for all found roms.
+Use that to override it perform a complete search.
 
 **-proxyHost**  
 If you're behind a proxy, set its host with this
@@ -124,27 +128,30 @@ Should print something similar to this list
 ### It's super slow
 - Maybe it's due to [TheGamesDB](thegamesdb), sometimes it's down or just slow
 - Maybe md5 hashing is slow on your machine, only files lighter than 45Mb are processed but maybe that's already too much? 
-You can overwrite this with the "-properties" option 
-- Maybe I made a mistake ;)
+You can overwrite this with the **-properties** option 
+- Each rom needs many http requests (4 to 15+), downloads a few images and resizes them 
+- Maybe I made some mistakes ;)
 
 ### Some games are wrong
 Yes I know, it's performing searches mainly based on the rom name. There are a few things you can do to make the results better:
-- Use [sselph's scraper](sselph) first, his results are 100% correct (except for arcade games maybe, I think my descriptions and images are better)
-- Use a known romset (NoIntro)
+- Use [sselph's scraper](sselph) first, his results are 100% correct (I prefer my scaper for arcade games though, 
+I think my descriptions and images are better in that case)
+- Use a known romset like NoIntro
 - Name your roms correctly, put every non-name parts in () or [] so it's not used during the search.
-	- Good example: "Bishi Bashi Special (E) [SLES-02537].bin" => will search for "Bishi Bashi Special"
-	- Bad example: "Bishi Bashi Special - Europe - SLES-02537.bin" => will search for "Bishi Bashi Special Europe SLES 02537"
+	- Good example: *Bishi Bashi Special (E) [SLES-02537].bin => will search for *Bishi Bashi Special*
+	- Bad example: *Bishi Bashi Special - Eu version - SLES-02537.bin* => will search for *Bishi Bashi Special Eu version SLES 02537*
 
-After all this, I'm sure sometimes there are still games that will be wrong, but hopefully everything is already one cut-and-paste command away.
-Look in the file named DUPES/DUPE-<your-rom>.xml, the other matches are there. Find the correct one and replace the entry in gamelist.xml with this one. 
-Also move the image it references.
+After all this, sometimes there are games that are still wrong, but hopefully everything is already a few cut-and-paste commands away.
+Look in the file named *DUPES/DUPE-<your-rom>.xml*, the other matches are there. Find the correct one and replace the entry in 
+*gamelist.xml* with it. Also move the image it references.
 
 ### What about RetroPie ?
 I don't know about RetroPie as I never used it, but if I understood it's basically the same thing, 
 so maybe this is also suited for RetroPie or any Emulation Station based front-end 
 
 ### Other issues
-If something goes wrong, you can use the issue function here on GitHub, and if I find some time I'll try to correct it. Always give me all the info so I can reproduce your bug.
+If something goes wrong, you can use the issue function here on GitHub, and if I find some time I'll try to correct it.
+Always give me all the info so I can reproduce your bug.
 
 
 
@@ -155,3 +162,4 @@ If something goes wrong, you can use the issue function here on GitHub, and if I
 [giantbomb]: http://www.giantbomb.com/
 [igdb]: https://www.igdb.com/
 [sselph]: https://github.com/sselph/scraper
+[recalbox]: http://www.recalbox.com/
