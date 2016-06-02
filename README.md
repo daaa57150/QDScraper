@@ -29,7 +29,7 @@ Some platforms do more extensive searches:
 - wonderswan color will also look for wonderswan games
 - neogeo pocket color will also look for neogeo pocket games
 - the **-arcade** option also triggers a wider search
-- maybe others, it also depends on the APIs....
+- maybe others, it also depends on the APIs...  
 Beware that game boy color won't look for game boy games
 
 
@@ -82,7 +82,7 @@ Use this to remove thing between () or [] in the name of your rom when it's used
 - Remove things between () and [] => -cleanFilename=()[]
 In fact I just look for the opening one so -cleanFilename=[( is perfectly fine
 
-**-romFile** 
+**-romFile**  
 You can use this to use a file containing rom names instead of scanning a directory. 
 One rom name per line.  
 Example: -romFile=C:/recalbox/roms.txt  
