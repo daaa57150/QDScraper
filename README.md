@@ -42,10 +42,7 @@ Beware that game boy color won't look for game boy games
 - Knows mame rom names => it will perform searches using the real name of the game
 
 ## What it does not
-- It can't be right 100% of the time, you'll need to check if it found the right games:  
-	- Look at the images
-	- Check the entry in the xml file there are clues, especially the name of the game on the API side
-
+- It can't be right 100% of the time, you'll need to check if it found the right games, see [Some games are wrong](#some-games-are-wrong)
 - It doesn't scan subfolders, except for the particular case of scummvm games
 
 
@@ -114,7 +111,7 @@ If you're behind a proxy that needs authentication, set your password with this
 
 **-properties**  
 The program uses a java .properties file where some advanced options are. 
-You can override this with your own if you feel like it, look at src/main/resources/scraper.properties for mine
+You can override this with your own if you feel like it, look at [scraper.properties](src/main/resources/scraper.properties) for mine
 
 **-help**  
 Should print something similar to this list
