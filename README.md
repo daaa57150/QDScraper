@@ -73,28 +73,28 @@ so all of them are now suffixed by (JP patch EN). It will add a space before the
 Use this if you prefer the name of your rom instead of the name of the game from the API
 
 **-cleanFilename**  
-Use this to remove thing between () or [] in the name of your rom when it's used as the name of the game with -useFilename.  
-- Remove things between () => -cleanFilename=()  
-- Remove things between [] => -cleanFilename=[]  
-- Remove things between () and [] => -cleanFilename=()[]
-In fact I just look for the opening one so -cleanFilename=[( is perfectly fine
+Use this to remove thing between () or [] in the name of your rom when it's used as the name of the game with **-useFilename**.  
+- Remove things between () => **-cleanFilename=()**  
+- Remove things between [] => **-cleanFilename=[]**  
+- Remove things between () and [] => **-cleanFilename=()[]**
+In fact I just look for the opening one so **-cleanFilename=[(** is perfectly fine
 
 **-romFile**  
 You can use this to use a file containing rom names instead of scanning a directory. 
 One rom name per line.  
-Example: -romFile=C:/recalbox/roms.txt  
+Example: **-romFile=C:/recalbox/roms.txt**  
 Beware that this limits some searches based on md5 hash
 
 **-arcade**  
 Use this to look for arcade games, the rom name will be translated to the real name of the game. 
--platform is overridden by this option, you don't need it in this case
+**-platform** is overridden by this option, you don't need it in this case
 
 **-giantBombApiKey**  
 Get your GiantBomb api key here: <http://www.giantbomb.com/api/>
 This adds a place to look for games; more APIs = more chances to find that rare game!
 
 **-overwrite**  
-By default the new games found by the program are appended to the existing gamelist.xml file.
+By default the new games found by the program are appended to the existing *gamelist.xml* file.
 Use that to override it and look for all found roms.
 
 **-proxyHost**  
