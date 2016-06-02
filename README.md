@@ -138,7 +138,7 @@ Yes I know, it's performing searches mainly based on the rom name. There are a f
 I think my descriptions and images are better in that case)
 - Use a known romset like NoIntro
 - Name your roms correctly, put every non-name parts in () or [] so it's not used during the search.
-	- Good example: *Bishi Bashi Special (E) [SLES-02537].bin => will search for *Bishi Bashi Special*
+	- Good example: *Bishi Bashi Special (E) [SLES-02537].bin* => will search for *Bishi Bashi Special*
 	- Bad example: *Bishi Bashi Special - Eu version - SLES-02537.bin* => will search for *Bishi Bashi Special Eu version SLES 02537*
 
 After all this, sometimes there are games that are still wrong, but hopefully everything is already a few cut-and-paste commands away.
