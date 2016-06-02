@@ -68,11 +68,11 @@ be there and are not roms:
 xml, txt, jpg, png, gif, htm, html, doc, docx, ini, xls, dat, nv, fs  
 If I should filter other things just open an issue.
 
-**-appendToName** 
+**-appendToName**  
 If you want the program to suffix all your roms by something, use this. I used it to add my patched roms, 
 so all of them are now suffixed by *(JP patch EN)*. It will add a space before the suffix.
  
-**-useFilename**
+**-useFilename**  
 Use this if you prefer the name of your rom instead of the name of the game from the API
 
 **-cleanFilename**  

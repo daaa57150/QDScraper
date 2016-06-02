@@ -1,0 +1,53 @@
+### Options ###
+
+-platform  
+    This is the platform you want to search, it's the name of the folder you put your roms into, in recalbox. For example snes.
+	
+-dir  
+    The directory to scan for roms and also where the gamelist.xml file is saved. 
+
+-appendToName 
+    If you want the program to suffix all your roms by something, use this. 
+    It will add a space before the suffix.
+ 
+-useFilename
+    Use this if you prefer the name of your rom instead of the name of the game from the API
+
+-cleanFilename  
+    Use this to remove thing between () or [] in the name of your rom when it's used as the name of the game with -useFilename.  
+        - Remove things between () => -cleanFilename=()  
+        - Remove things between [] => -cleanFilename=[]  
+        - Remove things between () and [] => -cleanFilename=([
+
+-romFile  
+    You can use this to use a file containing rom names instead of scanning a directory. 
+    One rom name per line.  
+
+-arcade  
+    Use this to look for arcade games, the rom name will be translated to the real name of the game. 
+    -platform is overridden by this option, you don't need it in this case.  
+
+-giantBombApiKey  
+    Your GiantBomb api key
+
+-overwrite  
+    Set to true to overwrite the existing gamelist.xml file
+
+-proxyHost  
+    If you're behind a proxy, set its host with this
+
+-proxyPort 
+    If you're behind a proxy, set its port with this
+
+-user  
+    If you're behind a proxy that needs authentication, set your username with this
+
+-password  
+    If you're behind a proxy that needs authentication, set your password with this
+
+-properties  
+    Override my propertie with your java style properties file for advanced options
+
+-help  
+    Print this message
+	

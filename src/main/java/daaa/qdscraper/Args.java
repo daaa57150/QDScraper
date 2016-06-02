@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import daaa.qdscraper.services.Console;
 import daaa.qdscraper.services.PlatformConverter;
+import daaa.qdscraper.utils.QDUtils;
 
 /**
  * Program arguments parsed and usable throughout the app
@@ -111,7 +112,8 @@ public class Args
 				
 				
 				case "-help": {
-					Console.println("TODO: print help");
+					String help = QDUtils.loadClasspathFile("help.txt");
+					System.out.println(help);
 					System.exit(0);
 				}
 				default: {
