@@ -99,7 +99,7 @@ This adds a place to look for games; more APIs = more chances to find that rare 
 
 **-overwrite**  
 By default the new games found by the program are appended to the existing *gamelist.xml* file.
-Use that to override it perform a complete search.
+Use that to override it and perform a complete search.
 
 **-proxyHost**  
 If you're behind a proxy, set its host with this
@@ -133,7 +133,7 @@ You can overwrite this with the **-properties** option
 - Maybe I made some mistakes ;)
 
 ### Some games are wrong
-Yes I know, it's performing searches mainly based on the rom name. There are a few things you can do to make the results better:
+Yes I know, it's performing searches mainly based on the rom name. There are a few things you can do to have better results:
 - Use [sselph's scraper](sselph) first, his results are 100% correct (I prefer my scaper for arcade games though, 
 I think my descriptions and images are better in that case)
 - Use a known romset like NoIntro
