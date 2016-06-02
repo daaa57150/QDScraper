@@ -39,7 +39,7 @@ public class RomCleaner
 		String cleanRom = rom;
 		cleanRom = cleanRom.replaceAll("\\([^\\)]*\\)", "");
 		cleanRom = cleanRom.replaceAll("\\[[^\\]]*\\]", "");
-		cleanRom = removeExtension(rom);
+		cleanRom = removeExtension(cleanRom);
 		
 		
 		if(hard)

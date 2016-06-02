@@ -205,16 +205,25 @@ public class GamelistXML
 		String api = game.getApi();
 		String gameId = game.getId();
 		String apiGameTitle = StringEscapeUtils.escapeXml10(game.getTitle());
+		String scraper = game.getScraper();
+		if(StringUtils.isEmpty(scraper)) {
+			scraper = "?"; // other scrapers should add their id
+		}
 		
 		Map<String, String> attrs = new HashMap<String, String>();
+		
 		attrs.put("id", gameId);
-		attrs.put("source", api);
 		attrs.put("api-title", apiGameTitle);
 		attrs.put("scraper", game.getScraper());
+		
+		
+		if(!StringUtils.isEmpty(api)) {
+			attrs.put("source", api);
+		}
 		if(game.getScore() != 0) {
 			attrs.put("score", game.getScoreInPercent());
 		}
-		if(game.getDistance() != 0) {
+		if(game.getDistance() != Integer.MAX_VALUE) {
 			attrs.put("distance", ""+game.getDistance());
 		}
 		if(game.getMatchingType() != null) {

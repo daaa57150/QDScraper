@@ -41,9 +41,7 @@ public class Game implements Comparable<Game>
 	// levenstein
 	private int distance = Integer.MAX_VALUE; // levenshtein
 	// the type of matching that was used to retrieve this game
-	private MatchingType matchingType;
-	// set to true if the game was matched using a hash, ie 100% sure it's the same rom
-	//private boolean md5Match = false;
+	private MatchingType matchingType;;
 	
 	// the api that retrieved this result
 	private String api;
@@ -55,13 +53,6 @@ public class Game implements Comparable<Game>
 		//df.setMaximumFractionDigits(340); //340 = DecimalFormat.DOUBLE_FRACTION_DIGITS
 		df.setMaximumFractionDigits(2);
 	}
-	
-	
-	/* *
-	 * Default constructor
-	 * / 
-	public Game(){}
-	*/
 	
 
 	/**
@@ -94,7 +85,7 @@ public class Game implements Comparable<Game>
 	{
 		int cs = 0;
 		if(!StringUtils.isEmpty(desc)) {
-			if(desc.length() >= 200) cs += 5;
+			if(desc.length() >= 200) cs += 5; // also < 1300 or something?
 			else cs += 3;
 		}
 		if(!StringUtils.isEmpty(image)) {

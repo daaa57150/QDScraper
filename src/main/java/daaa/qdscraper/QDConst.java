@@ -7,5 +7,5 @@ public class QDConst {
 	public static final String SCRAPER_ID = "qd";
 	
 	/** Empty games are marked with this api flag */
-	public static final String NO_API_ID = "QDScraper";
+	public static final String NO_API_ID = "";
 }
