@@ -76,7 +76,7 @@ so all of them are now suffixed by *(JP patch EN)*. It will add a space before t
 Use this if you prefer the name of your rom instead of the name of the game from the API
 
 **-cleanFilename**  
-Use this to remove thing between () or [] in the name of your rom when it's used as the name of the game with **-useFilename**.  
+Use this to remove things between () or [] in the name of your rom when it's used as the name of the game with **-useFilename**.  
 - Remove things between () => **-cleanFilename=()**  
 - Remove things between [] => **-cleanFilename=[]**  
 - Remove things between () and [] => **-cleanFilename=()[]**
@@ -85,7 +85,7 @@ In fact I just look for the opening one so **-cleanFilename=[(** is perfectly fi
 **-romFile**  
 You can use this to use a file containing rom names instead of scanning a directory. 
 One rom name per line.  
-Example: **-romFile=C:/recalbox/roms.txt**  
+Example: **-romFile=C:\recalbox\roms.txt**  
 Beware that this limits some searches based on md5 hash
 
 **-arcade**  
@@ -142,7 +142,7 @@ I think my descriptions and images are better in that case)
 	- Bad example: *Bishi Bashi Special - Eu version - SLES-02537.bin* => will search for *Bishi Bashi Special Eu version SLES 02537*
 
 After all this, sometimes there are games that are still wrong, but hopefully everything is already a few cut-and-paste commands away.
-Look in the file named *DUPES/DUPE-<your-rom>.xml*, the other matches are there. Find the correct one and replace the entry in 
+Look in the file named *DUPES/DUPE-&lt;your-rom&gt,.xml*, the other matches are there. Find the correct one and replace the entry in 
 *gamelist.xml* with it. Also move the image it references.
 
 ### What about RetroPie ?
