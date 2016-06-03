@@ -81,7 +81,7 @@ public class Args
 					giantBombApiKey = val;
 					break;
 				}
-				case "-overwrite": {
+				case "-overwrite": { //TODO: also delete the images in this case
 					overwrite = true;
 					break;
 				}

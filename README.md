@@ -14,7 +14,7 @@ so all in all it's not bad.
 ### APIs used
 - [TheGamesDB](thegamesdb)
 - [ScreenScraper](screenscraper)
-- [GiantBomb](giantbomb) => You'll need an api key
+- [GiantBomb](giantbomb) => You'll need an api key, ask for one [here](giantbomb-api)
 - [IGDB](igdb) is considered for futur versions, it also needs an API key
 
 ### Platforms supported
@@ -55,7 +55,8 @@ Beware that game boy color won't look for game boy games
 
 ## Command:
 ### Main
-TODO: main command  
+The main command is this:
+*java -jar path\to\QDScraper.jar &lt;options&gt;*  
 
 ### Options
 **-platform**  
@@ -121,8 +122,25 @@ You can override this with your own if you feel like it, look at [scraper.proper
 Should print something similar to this list
 
 ### Examples
-- todo
-- todo
+- Print help:  
+*java -jar QDScraper.jar -help*
+
+- Restart scanning your psx games, overwriting your existing *gamelist.xml* if any:  
+*java -jar QDScraper.jar -dir=C:\recalbox\roms\psx -platform=psx -overwrite*
+
+- Scan your EN patched snes games (notice the double quotes needed because of the space):  
+*java -jar QDScraper.jar -dir=C:\recalbox\roms\snes -platform=snes "-appendToName=(Patch EN)"*
+
+- Scan a list of wonderswan color roms you've put in a text file and use those names as the games titles:  
+*java -jar QDScraper.jar -dir=C:\recalbox\roms\wswanc -platform=wswanc -romFile=C:\recalbox\wswanc_roms.txt -useFilename*
+
+- Scan megadrive/genesis games and also use GiantBomb:  
+*java -jar QDScraper.jar -dir=C:\recalbox\roms\megadrive -platform=megadrive -giantBombApiKey=690acf6bd2dbe8ca8d11cce55f84c8e231f56a13*
+
+- Scan fba_libretro games and use the name from the internal DB, also use GiantBomb:  
+*java -jar QDScraper.jar -dir=C:\recalbox\roms\fba_libretro -cleanFilename=([ -useFilename -arcade -giantBombApiKey=690acf6bd2dbe8ca8d11cce55f84c8e231f56a13*
+
+**Note**: the giantBombApiKey here is not a real API key, use [you own](giantbomb-api).
 
 ## Issues
 ### It's super slow
@@ -142,7 +160,7 @@ I think my descriptions and images are better in that case)
 	- Bad example: *Bishi Bashi Special - Eu version - SLES-02537.bin* => will search for *Bishi Bashi Special Eu version SLES 02537*
 
 After all this, sometimes there are games that are still wrong, but hopefully everything is already a few cut-and-paste commands away.
-Look in the file named *DUPES/DUPE-&lt;your-rom&gt,.xml*, the other matches are there. Find the correct one and replace the entry in 
+Look in the file named *DUPES/DUPE-&lt;your-rom&gt;.xml*, the other matches are there. Find the correct one and replace the entry in 
 *gamelist.xml* with it. Also move the image it references.
 
 ### What about RetroPie ?
@@ -163,3 +181,4 @@ Always give me all the info so I can reproduce your bug.
 [igdb]: https://www.igdb.com/
 [sselph]: https://github.com/sselph/scraper
 [recalbox]: http://www.recalbox.com/
+[giantbomb-api]: http://www.giantbomb.com/api/

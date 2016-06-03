@@ -14,6 +14,7 @@ Sources used:
 	- http://thegamesdb.net/api/GetPlatformsList.php
 	- http://www.giantbomb.com/api/platforms/?api_key=xxx
 	- https://www.igdb.com/api/v1/platforms
+	- http://www.screenscraper.fr/ (search form's platform <select>)
 	- The recalbox share/roms folder over the network
 
 ## Arcade game names ##
@@ -47,7 +48,4 @@ http://www.mobygames.com/forums/dga,2/dgb,3/dgm,223636/
 https://www.igdb.com/api
 => https://www.igdb.com/api/v1/documentation
 => All we ask in return is that you state the following in a visible manner: Game information was freely provided by IGDB.com.
-=> api key: https://www.igdb.com/users/daaa57150/api_key: x2-XsIKkkmEFnAhj5oE33TtqPivfgs5hvfYbtV-Mpl8
-
-
 http://www.giantbomb.com/api/documentation#toc-0-15
