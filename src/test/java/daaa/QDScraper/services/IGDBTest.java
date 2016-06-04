@@ -1,4 +1,4 @@
-package daaa.QDScrapper.services;
+package daaa.QDScraper.services;
 
 import java.io.IOException;
 
