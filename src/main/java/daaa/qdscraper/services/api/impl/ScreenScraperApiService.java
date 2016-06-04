@@ -237,6 +237,7 @@ public class ScreenScraperApiService extends ApiService
 			if(!StringUtils.isEmpty(players))
 			{
 				players = players.replaceAll("[P|p]layers?", "").trim();
+				players = players.replaceAll("[J|j]oueurs?", "").trim();
 			}
 			
 			// the user desired name

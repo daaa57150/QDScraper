@@ -70,7 +70,7 @@ public class App
 	 */
 	private static String formatGameForSysout(Game game)
 	{
-		String str = game.getTitle() + " (" + game.getApi() + " " + game.getId() + " / " + game.getScoreInPercent() + " ["+game.getDistance()+"])";
+		String str = game.getTitle() + " (" + game.getApi() + " " + game.getId() + " / " + game.getScoreInPercent() + (game.getDistance() == 0 ? "" : (" ["+game.getDistance()+"]")) +")";
 		String legal = game.getLegalText();
 		if(!StringUtils.isEmpty(legal))
 		{
@@ -180,6 +180,7 @@ public class App
 					{
 						addEmptyGame(notFound, rom.getFile(), "");
 						Console.println("  => Nothing found for " + rom.getFile() + " in our data files");
+						Console.println();
 						continue;
 					}
 					if(rom.isTranslated())
@@ -280,7 +281,7 @@ public class App
 						{
 							precision = "(" + RomCleaner.cleanRomName(name, false) + ")";
 						}
-						Console.println("  => Nothing found for " + rom + (precision == null ? "" : precision));
+						Console.println("  => Nothing found for " + rom.getFile() + (precision == null ? "" : precision));
 					}
 				}
 				
