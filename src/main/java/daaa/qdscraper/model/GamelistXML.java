@@ -227,8 +227,11 @@ public class GamelistXML
 			out.write(QDUtils.makeTagclosed(GAMELIST_ROOT_TAGNAME) + "\n");
 		}
 		
-		out.flush();
-		out.close();
+		if(out != null)
+		{
+			out.flush();
+			out.close();
+		}
 		closed = true;
 	}
 	

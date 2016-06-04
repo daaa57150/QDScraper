@@ -3,4 +3,4 @@ Date: 2016-05-03
 
 
 ## Unreleased
-Unreleased features go here
+- Bugfix NullPointer when all games already in gamelist
