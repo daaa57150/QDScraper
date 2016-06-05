@@ -474,7 +474,7 @@ public class CueSheetToXmlSerializer
    * @param elementName The name for the element.
    * @param value The value for the element.
    * @return The element that was created, or null if no element was created.
-   */
+   * /
   private Element addElement(final Element parentElement, final String elementName, final int value)
   {
     CueSheetToXmlSerializer.logger.entering
@@ -494,7 +494,7 @@ public class CueSheetToXmlSerializer
     CueSheetToXmlSerializer.logger.exiting
       (CueSheetToXmlSerializer.class.getCanonicalName(), "addElement(Element,String,int)", newElement);
     return newElement;
-  }
+  }*/
 
   /**
    * Add an attribute to the document. The attribute is only added if the value is != null.

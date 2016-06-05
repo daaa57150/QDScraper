@@ -65,7 +65,7 @@ public class IGDBApiService extends ApiService {
 						break;
 					}
 					case 500: {
-						message = "Some server error";
+						message = "Some IGDB server error";
 						break;
 					}
 					default:

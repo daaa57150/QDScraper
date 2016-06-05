@@ -382,7 +382,8 @@ public class TrackCutterCommand
           public int handleOption(String [] options, int offset)
           {
             // Set frame length threshold for pregap handling.
-            Scanner scanner = new Scanner(options[offset+1]).useDelimiter(":");
+            Scanner scanner = new Scanner(options[offset+1]);
+            scanner.useDelimiter(":");
             Position thresholdPosition = new Position(scanner.nextInt(), scanner.nextInt(), scanner.nextInt());
             scanner.close();
             TrackCutterCommand.this.getConfiguration().setPregapFrameLengthThreshold(thresholdPosition.getTotalFrames());

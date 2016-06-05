@@ -112,7 +112,7 @@ public final class LogUtil
    * @return Whether or not the information that is logged at the specified Level to the specified Logger
    * will be handled by a Handler that is an instance of the specified class.
    */
-  public static boolean hasHandlerActive(final Logger logger, final Level level, final Class handlerClass)
+  public static boolean hasHandlerActive(final Logger logger, final Level level, final Class<?> handlerClass)
   {
     LogUtil.logger.entering
       ( LogUtil.class.getCanonicalName()
