@@ -35,6 +35,7 @@ import org.xml.sax.SAXException;
 
 import daaa.qdscraper.Props;
 import daaa.qdscraper.services.Console;
+import daaa.qdscraper.services.api.ApiService;
 import daaa.qdscraper.utils.QDUtils;
 
 
@@ -105,7 +106,7 @@ public class GamelistXML
 		File file = new File(path);
 		if(overwrite) {
 			if(file.exists()) {
-				Console.println("Overwriting file " + path);
+				//Console.println("Overwriting file " + path);
 				Files.deleteIfExists(file.toPath());
 			}
 			else {
@@ -315,7 +316,8 @@ public class GamelistXML
 		String releasedate = game.getReleasedate() == null ? "" : SDF.format(game.getReleasedate());
 		String developer = StringUtils.isEmpty(game.getDeveloper()) ? "" : StringEscapeUtils.escapeXml10(game.getDeveloper());
 		String publisher = StringUtils.isEmpty(game.getPublisher()) ? "" : StringEscapeUtils.escapeXml10(game.getPublisher());
-		String genre = CollectionUtils.isEmpty(game.getGenres()) ? "" : StringUtils.join(game.getGenres(), "/"); // TODO: shorten the genres, remove "Action" if many => see apiService?
+		List<String> genres = ApiService.cleanGenres(game.getGenres());
+		String genre = CollectionUtils.isEmpty(genres) ? "" : StringUtils.join(genres, "/"); 
 		genre = StringEscapeUtils.escapeXml10(genre);
 		String players = game.getPlayers();
 		

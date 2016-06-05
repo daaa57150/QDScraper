@@ -1,5 +1,6 @@
 package daaa.qdscraper.services.api;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -120,7 +121,7 @@ public abstract class ApiService
 	 * @param translatedName
 	 * @param apiTitle
 	 */
-	public static void setGameScores(Game game, String translatedName, String apiTitle)
+	protected void setGameScores(Game game, String translatedName, String apiTitle)
 	{
 		double score = scoreComparison(translatedName, apiTitle);
 		game.setScore(score);
@@ -128,10 +129,26 @@ public abstract class ApiService
 		game.setDistance(distance);
 	}
 	
-	// TODO: remove "Action" if there are other genres + use only 2 max
-	protected String cleanGenres(List<String> genres)
+	/**
+	 * Removes "Action" if there are other genres because all games are "action", it's just polluting 
+	 * @param genres
+	 * @return
+	 */
+	public static List<String> cleanGenres(List<String> genres)
 	{
-		return null;
+		if(genres.size() < 2) return genres;
+		
+		List<String> cleaned = new ArrayList<>(genres.size());
+		
+		for(String genre: genres)
+		{
+			if(!genre.equalsIgnoreCase("action"))
+			{
+				cleaned.add(genre);
+			}
+		}
+		
+		return cleaned;
 	}
 	
 	

@@ -15,8 +15,6 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class RomCleaner
 {
-	// TODO: precompile all regexes
-	
 	private RomCleaner() {} //do not instanciate
 	
 	/**
@@ -34,17 +32,19 @@ public class RomCleaner
 	 * @param hard
 	 * @return
 	 */
+	private static final Pattern BETWEEN_PARENTHESES = Pattern.compile("\\([^\\)]*\\)");
+	private static final Pattern BETWEEN_BRACKETS = Pattern.compile("\\[[^\\]]*\\]");
+	private static final Pattern SPECIAL_CHARS = Pattern.compile("[-!:,;.%?_']");
 	public static String cleanRomName(String rom, boolean hard)
 	{
 		String cleanRom = rom;
-		cleanRom = cleanRom.replaceAll("\\([^\\)]*\\)", "");
-		cleanRom = cleanRom.replaceAll("\\[[^\\]]*\\]", "");
+		cleanRom = BETWEEN_PARENTHESES.matcher(cleanRom).replaceAll("");
+		cleanRom = BETWEEN_BRACKETS.matcher(cleanRom).replaceAll("");
 		cleanRom = removeExtension(cleanRom);
-		
 		
 		if(hard)
 		{
-			cleanRom = cleanRom.replaceAll("[-!:,;.%?_']", " ");
+			cleanRom = SPECIAL_CHARS.matcher(cleanRom).replaceAll("");
 		}
 		
 		cleanRom = removeMultiSpaces(cleanRom);
@@ -87,10 +87,10 @@ public class RomCleaner
 		if(!StringUtils.isEmpty(cleanFilename))
 		{
 			if(cleanFilename.contains("(")) {
-				clean = clean.replaceAll("\\([^\\)]*\\)", "");
+				clean = BETWEEN_PARENTHESES.matcher(clean).replaceAll("");
 			}
 			if(cleanFilename.contains("[")) {
-				clean = clean.replaceAll("\\[[^\\]]*\\]", "");
+				clean = BETWEEN_BRACKETS.matcher(clean).replaceAll("");
 			}
 
 			clean = removeMultiSpaces(clean);

@@ -14,7 +14,7 @@ public class Console {
 	private static void stopProgress() {
 		if(isProgressing) {
 			isProgressing = false;
-			// TODO: test in a real console, doesn't work in Eclipse Juno
+			// doesn't work in Eclipse Juno, but ok in a Mac Terminal at least
 			for(int i=0; i<nbDots; i++)
 			{
 				System.out.print("\b");

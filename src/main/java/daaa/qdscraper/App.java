@@ -125,7 +125,12 @@ public class App
 	{
 		Args args = new Args(commands);
 		
-		GamelistXML gameList = new GamelistXML(args.romsDir + "gamelist.xml", args.appendToName, args.overwrite);
+		String pathGamelistXML = args.romsDir + "gamelist.xml";
+		if(args.overwrite)
+		{
+			Console.println("Overwriting file " + pathGamelistXML);
+		}
+		GamelistXML gameList = new GamelistXML(pathGamelistXML, args.appendToName, args.overwrite);
 		GamelistXML notFound = new GamelistXML(args.romsDir + "NOT_FOUND.xml", args.appendToName, true);
 		GamelistXML gameListDupes = null;
 		
