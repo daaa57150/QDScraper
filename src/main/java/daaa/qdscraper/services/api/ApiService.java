@@ -120,7 +120,7 @@ public abstract class ApiService
 	 * @param translatedName
 	 * @param apiTitle
 	 */
-	protected void setGameScores(Game game, String translatedName, String apiTitle)
+	public static void setGameScores(Game game, String translatedName, String apiTitle)
 	{
 		double score = scoreComparison(translatedName, apiTitle);
 		game.setScore(score);

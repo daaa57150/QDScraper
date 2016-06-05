@@ -195,6 +195,10 @@ public class App
 						for(ApiService service: apiServices)
 						{
 							GameCollection apiGames = service.search(rom, args);
+							/*for(Game apiGame: apiGames)
+							{
+								ApiService.setGameScores(apiGame, name, apiGame.getTitle());
+							}*/
 							if(!CollectionUtils.isEmpty(apiGames))
 							{
 								games.addAll(apiGames);

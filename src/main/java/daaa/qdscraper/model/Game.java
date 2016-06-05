@@ -385,8 +385,11 @@ public class Game implements Comparable<Game>
 	 * @return the score; always 1 if matched by md5 of filename
 	 */
 	public double getScore() {
-		if(matchingType == MatchingType.MD5) return 1.;
-		if(matchingType == MatchingType.FILENAME) return 1.; // not sure if we should do that? works well with mame roms at least
+		// nope, we'll try to prevent bad rom association at all costs
+		//if(matchingType == MatchingType.MD5) return 1.;
+
+		// nope, filename != perfect score (puzzle de pon)
+		//if(matchingType == MatchingType.FILENAME) return 1.; 
 		return score;
 	}
 	/**

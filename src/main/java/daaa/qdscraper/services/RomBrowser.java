@@ -30,6 +30,7 @@ import daaa.qdscraper.Args;
 import daaa.qdscraper.Props;
 import daaa.qdscraper.model.Rom;
 import daaa.qdscraper.utils.QDUtils;
+import daaa.qdscraper.utils.RomCleaner;
 
 
 /**
@@ -70,6 +71,12 @@ public class RomBrowser {
 		{
 			name = ScummVMRoms.getRomTitle(name);  // can be null here => checked by app later
 			rom.setIsTranslated(true);
+		}
+		
+		// normal rom
+		else
+		{
+			name = RomCleaner.removeExtension(name);
 		}
 		
 		rom.setTranslatedName(name);

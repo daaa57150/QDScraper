@@ -384,9 +384,11 @@ public class ScreenScraperApiService extends ApiService
 					{
 						try
 						{
+							// scorer sur le nom quand même, parce que Puzzle De Pon! R! n'est pas trouvé, c'est Puzzle De Pon! qui est renvoyé :(
 							Game game = toGame(rom.getFile(), rom.getTranslatedName(), xml, args);
 							game.setMatchingType(matchingType);
 							games.add(game);
+							setGameScores(game, rom.getTranslatedName(), game.getTitle());
 						}
 						catch(Exception e)
 						{
