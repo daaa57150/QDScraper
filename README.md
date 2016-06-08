@@ -53,9 +53,9 @@ Beware that game boy color won't look for game boy games
 - A [GiantBomb](giantbomb) API key if you want the program to also use this API
 - Internet, roms, Recalbox ;)  
 
-## Command:
+## Command
 ### Main
-The main command is this:
+The main command is this:  
 *java -jar path\to\QDScraper.jar &lt;options&gt;*  
 
 ### Options
