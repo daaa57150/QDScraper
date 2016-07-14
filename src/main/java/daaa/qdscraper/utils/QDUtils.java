@@ -1,5 +1,7 @@
 package daaa.qdscraper.utils;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,9 +57,13 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.googlecode.pngtastic.core.PngImage;
+import com.googlecode.pngtastic.core.PngOptimizer;
+
 import daaa.qdscraper.Args;
 import daaa.qdscraper.Props;
 import daaa.qdscraper.services.Console;
+
 
 /**
  * All-purposes utils that had no place anywhere else
@@ -156,6 +162,48 @@ public class QDUtils
 		finally
 		{
 			//if(srcImage != null) srcImage.flush();
+		}
+	}
+	
+	
+	private static final Boolean PNG_COMPRESSION_ENABLED = Boolean.valueOf(Props.get("png.optimizer.enable"));
+	private static final String PNG_COMPRESSOR = Props.get("png.optimizer.compressor");
+	private static final String PNG_LOG_LEVEL = Props.get("png.optimizer.log.level");
+	private static final Integer PNG_ITERATIONS = Integer.valueOf(Props.get("png.optimizer.iterations"));
+	private static final Boolean PNG_REMOVE_GAMMA = Boolean.valueOf(Props.get("png.optimizer.gamma.remove"));
+	private static final Integer PNG_COMPRESSION_LEVEL = Integer.valueOf(Props.get("png.optimizer.compression.level"));
+	
+	
+	/**
+	 * Reduces the file size of the image
+	 * @param path path to the image to optimize
+	 * @throws IOException
+	 */
+	public static void optimizeImage(String path) 
+	throws IOException
+	{
+		if(PNG_COMPRESSION_ENABLED)
+		{
+			PngOptimizer optimizer = new PngOptimizer(PNG_LOG_LEVEL);
+			optimizer.setCompressor(PNG_COMPRESSOR, PNG_ITERATIONS);
+			PngImage image = new PngImage(path, PNG_LOG_LEVEL);
+			String outputFileName = path + "-optimized";
+			optimizer.optimize(image, outputFileName, PNG_REMOVE_GAMMA, PNG_COMPRESSION_LEVEL);
+			File output = new File(outputFileName);
+			if(output.exists())
+			{
+				File input  = new File(path);
+				if(output.length() < input.length())
+				{
+					//Console.println("File size reduced: " + input.length() + " => " + output.length() + " " + path);
+					Files.move(Paths.get(outputFileName), Paths.get(path), REPLACE_EXISTING);
+				}
+				else
+				{
+					//Console.println("File size not reduced: " + input.length() + " => " + output.length() + " " + path);
+					output.delete();
+				}
+			}
 		}
 	}
 	
@@ -583,14 +631,25 @@ public class QDUtils
 		}
 		finally
 		{
-			if(entity1 != null) 	try { EntityUtils.consume(entity1); } finally{}
-	    	if(in != null) 			try { in.close(); 					} finally{}
+			try
+			{
+				if(entity1 != null) 	try { EntityUtils.consume(entity1); } finally{}
+		    	if(in != null) 			try { in.close(); 					} finally{}
+			}
+			catch(Exception e)
+			{
+				Console.printErr("Error closing resources for " + url);
+				Console.printErr("Should be harmless, but here is the error:");
+				Console.printErr(e);
+			}
+			
+			
 		}
 	}
 	
 	
 	/**
-	 * Downloads an image
+	 * Downloads an image in png format
 	 * @param imageUrl the image to download
 	 * @param savePathNoExt the path where to save it, without the extension
 	 * @param args app args
@@ -656,7 +715,7 @@ public class QDUtils
 					imageType="png";
 				}
 			}
-		    
+			
 		    in = entity1.getContent();
 		    image = QDUtils.resizeImage(in);
 		    
@@ -673,6 +732,12 @@ public class QDUtils
 			
 		    ImageIO.write(image, imageType, f);
 		    image.flush();
+		    
+		    // optimize it if png
+		    if("png".equals(imageType)) {
+		    	optimizeImage(f.getAbsolutePath());
+		    }
+		    
 		    return path;
 		}
 		catch(Exception e)
@@ -681,9 +746,18 @@ public class QDUtils
 			throw e;
 		}
 		finally {
-	    	if(entity1 != null) 	try { EntityUtils.consume(entity1); } finally{}
-	    	if(in != null) 			try { in.close(); 					} finally{}
-	    	if(image != null) 		try { image.flush(); 				} finally{}
+			try
+			{
+				if(entity1 != null) 	try { EntityUtils.consume(entity1); } finally{}
+				if(in != null) 			try { in.close(); 					} finally{}
+				if(image != null) 		try { image.flush(); 				} finally{}
+			}
+			catch(Exception e)
+			{
+				Console.printErr("Error closing resources for " + imageUrl);
+				Console.printErr("Should be harmless, but here is the error:");
+				Console.printErr(e);
+			}
 	    }
 	}
 	

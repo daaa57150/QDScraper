@@ -143,12 +143,15 @@ Should print something similar to this list
 **Note**: the giantBombApiKey here is not a real API key, use [you own](giantbomb-api).
 
 ## Issues
-### It's super slow
+### It's a bit slow
 - Maybe it's due to [TheGamesDB](thegamesdb), sometimes it's down or just slow
 - Maybe md5 hashing is slow on your machine, only files smaller than 45MB are processed but maybe that's already too much? 
 You can overwrite this with the **-properties** option 
 - Each rom needs many http requests (4 to 15+), downloads a few images and resizes them 
-- Maybe I made some mistakes ;)
+- All images are compressed 
+- Maybe I made some mistakes ;)  
+I'm using this on a somewhat recent MacBook Pro with SSD drive and it's really fast enough for me. 
+
 
 ### Some games are wrong
 Yes I know, it's performing searches mainly based on the rom name. There are a few things you can do to have better results:

@@ -137,13 +137,15 @@ public class App
 		// services to use, in that order, to look for a perfect match
 		List<ApiService> apiServices = new ArrayList<>();
 		apiServices.add(new TheGamesDBApiService());
-		apiServices.add(new ScreenScraperApiService());
-		
 		if(args.giantBombApiKey != null)
 		{
 			//Console.println("GiantBomb api key is present, we'll ask GiantBomb");
 			apiServices.add(new GiantBombApiService());
 		}
+		// screenscraper last because:
+		// - they mainly have png covers (big files)
+		// - regularly their english decription is truncated
+		apiServices.add(new ScreenScraperApiService());
 		
 		Console.println();
 		List<Rom> roms = findRoms(args);
