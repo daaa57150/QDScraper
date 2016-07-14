@@ -150,6 +150,7 @@ You can overwrite this with the **-properties** option
 - Each rom needs many http requests (4 to 15+), downloads a few images and resizes them 
 - All images are compressed 
 - Maybe I made some mistakes ;)  
+
 I'm using this on a somewhat recent MacBook Pro with SSD drive and it's really fast enough for me. 
 
 
