@@ -3,11 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>daaa</groupId>
-	<artifactId>QDScrapper</artifactId>
-	<version>0.1.0</version>
+	<artifactId>QDScraper</artifactId>
+	<version>0.2.0</version>
 	<packaging>jar</packaging>
 
-	<name>QDScrapper</name>
+	<name>QDScraper</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
