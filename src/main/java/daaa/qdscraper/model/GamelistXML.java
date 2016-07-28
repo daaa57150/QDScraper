@@ -306,7 +306,7 @@ public class GamelistXML
 	private String fillTemplate(String template, Game game, int nbTabulations)
 	{
 		// path to the rom in the recalbox
-		String romPath = ROM_PATH + game.getFile().replaceAll("[\\\\]", "/"); //in recalbox they must be slashes
+		String romPath = ROM_PATH + StringEscapeUtils.escapeXml10(game.getFile().replaceAll("[\\\\]", "/")); //in recalbox they must be slashes
 		
 		// format and escape everything
 		String name = StringEscapeUtils.escapeXml10(game.getName() + addToName);

@@ -11,3 +11,6 @@ Date: 2016-07-14
 - Apply score even on match by filename/md5 (prevents bad rom association on ScreenScraper)
 - Added png compression
 - Moved ScreenScraper to last (big png covers, truncated descriptions, game screenshot instead of boxart)
+
+## Unreleased
+- Bugfix with roms where the file contains a '&'
