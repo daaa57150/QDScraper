@@ -12,5 +12,11 @@ Date: 2016-07-14
 - Added png compression
 - Moved ScreenScraper to last (big png covers, truncated descriptions, game screenshot instead of boxart)
 
-## Unreleased
+## Version 0.3
 - Bugfix with roms where the file contains a '&'
+- TurboGrafx and PC Engine now also look for PC Engine CD games and vice versa
+- The rom text file is now also searched in the "." and "-dir" folders so it doesn't need to be an absolute path anymore
+
+## Unreleased
+
+

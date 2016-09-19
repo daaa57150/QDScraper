@@ -194,6 +194,10 @@ public class App
 					{
 						Console.println(rom.getFile() + " is the rom file name of " + name);
 					}
+//					else 
+//					{
+//						Console.println("Cleaned name used for search is: " + name);
+//					}
 					
 					// ask the services
 					GameCollection games = new GameCollection();

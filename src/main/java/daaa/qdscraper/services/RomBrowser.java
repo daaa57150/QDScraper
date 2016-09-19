@@ -340,6 +340,16 @@ public class RomBrowser {
 	}
 	
 	/**
+	 * Returns if a file exists based on its name
+	 * @param filename
+	 * @return
+	 */
+	private static boolean fileExists(String filename) {
+		File f=new File(filename);
+		return f.exists();
+	}
+	
+	/**
 	 * Lists roms given the args:
 	 * - if a rom file is given, list that
 	 * - if scummvm, find only .scummvm files in subdirectories 
@@ -356,7 +366,21 @@ public class RomBrowser {
 	{
 		if(!StringUtils.isEmpty(args.romFile))
 		{
-			return listRomsFromFile(args.romFile, args);
+			if(fileExists(args.romFile))
+			{
+				return listRomsFromFile(args.romFile, args);
+			}
+			else if(!StringUtils.isEmpty(args.romsDir)) 
+			{
+				File f = new File(new File(args.romsDir), args.romFile);
+				String path = f.getAbsolutePath();
+				if(fileExists(path))
+				{
+					return listRomsFromFile(path, args);
+				}
+			}
+			
+			throw new IOException("File " + args.romFile + " not found");
 		}
 		
 		// else
