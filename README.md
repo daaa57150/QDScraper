@@ -131,7 +131,7 @@ Should print something similar to this list
 - Scan your EN patched snes games (notice the double quotes needed because of the space):  
 *java -jar QDScraper.jar -dir=C:\recalbox\roms\snes -platform=snes "-appendToName=(Patch EN)"*
 
-- Scan a list of wonderswan color roms you've put in a text file and use those names as the games titles:  
+- Scan a list of wonderswan color roms you've put in a text file and use those names as the game titles:  
 *java -jar QDScraper.jar -dir=C:\recalbox\roms\wswanc -platform=wswanc -romFile=C:\recalbox\wswanc_roms.txt -useFilename*
 
 - Scan megadrive/genesis games and also use GiantBomb:  
@@ -140,7 +140,7 @@ Should print something similar to this list
 - Scan fba_libretro games and use the name from the internal DB, also use GiantBomb:  
 *java -jar QDScraper.jar -dir=C:\recalbox\roms\fba_libretro -cleanFilename=([ -useFilename -arcade -giantBombApiKey=690acf6bd2dbe8ca8d11cce55f84c8e231f56a13*
 
-**Note**: the giantBombApiKey here is not a real API key, use [you own](giantbomb-api).
+**Note**: the giantBombApiKey here is not a real API key, use [your own](giantbomb-api).
 
 ## Issues
 ### It's a bit slow
