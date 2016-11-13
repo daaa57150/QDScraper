@@ -142,8 +142,7 @@ public class QDUtils
 	 * @return the resized image data
 	 * @throws IOException
 	 */
-	public static BufferedImage resizeImage(InputStream in) 
-	throws IOException
+	public static BufferedImage resizeImage(InputStream in)
 	{
 		BufferedImage srcImage = null;
 		try
@@ -158,6 +157,10 @@ public class QDUtils
 			
 			BufferedImage scaledImage = Scalr.resize(srcImage, Method.QUALITY, Mode.FIT_TO_WIDTH, MAX_WIDTH); // Scale image
 			return scaledImage;
+		}
+		catch(Exception e) {
+			Console.printErr("Can't resize image: " + e.getMessage());
+			return srcImage;
 		}
 		finally
 		{

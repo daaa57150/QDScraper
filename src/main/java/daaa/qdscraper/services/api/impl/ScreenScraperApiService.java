@@ -315,7 +315,12 @@ public class ScreenScraperApiService extends ApiService
 			game.setDeveloper(developer);
 			game.setGenres(genres);
 			game.setImage(image);
-			game.setRating(StringUtils.isEmpty(rating) ? 0 : Float.valueOf(rating) / 20.f);
+			try {
+				game.setRating(StringUtils.isEmpty(rating) ? 0 : Float.valueOf(rating) / 20.f);
+			}
+			catch(NumberFormatException nfe) {
+				game.setRating(0);
+			}
 			game.setReleasedate(StringUtils.isEmpty(releasedate) ? null : parseDate(releasedate));
 			game.setFile(rom);
 			game.setPlayers(players);

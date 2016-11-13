@@ -18,5 +18,6 @@ Date: 2016-07-14
 - The rom text file is now also searched in the "." and "-dir" folders so it doesn't need to be an absolute path anymore
 
 ## Unreleased
-
+- Don't stop if an image can't be resized, just print a message a use the base image
+- Bugfix for ScreenScraper who likes to put "N/A" on ratings making it unparseable
 
