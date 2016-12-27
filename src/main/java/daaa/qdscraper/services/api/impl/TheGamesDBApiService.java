@@ -335,6 +335,12 @@ public class TheGamesDBApiService extends ApiService
 		 
 		return games;
 	}
+
+	/** {@inheritDoc} */
+	@Override
+	public String getApiName() {
+		return "TheGamesDB";
+	}
 }
 
 

@@ -17,7 +17,8 @@ Date: 2016-07-14
 - TurboGrafx and PC Engine now also look for PC Engine CD games and vice versa
 - The rom text file is now also searched in the "." and "-dir" folders so it doesn't need to be an absolute path anymore
 
-## Unreleased
-- Don't stop if an image can't be resized, just print a message a use the base image
-- Bugfix for ScreenScraper who likes to put "N/A" on ratings making it unparseable
+## Version 0.4
+- Don't stop if an image can't be resized, just print a message and use the base image
+- Bugfix for ScreenScraper who likes to put "N/A" on ratings making it unparseable as a number
+- Better exception catching, now if something bad happens with an API it doesn't stop
 

@@ -416,6 +416,11 @@ public class ScreenScraperApiService extends ApiService
 		return games;
 	}
 
+	/** {@inheritDoc} */
+	@Override
+	public String getApiName() {
+		return "ScreenScraper";
+	}
 }
 
 

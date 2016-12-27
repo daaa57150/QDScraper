@@ -425,7 +425,13 @@ public class GiantBombApiService extends ApiService
 		}
 		return games;
 	}
-	
+
+
+	/** {@inheritDoc} */
+	@Override
+	public String getApiName() {
+		return "GiantBomb";
+	}
 	
 }
 

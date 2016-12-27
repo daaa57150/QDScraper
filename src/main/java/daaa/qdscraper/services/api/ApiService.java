@@ -23,7 +23,7 @@ public abstract class ApiService
 	 */
 	public abstract GameCollection search(Rom rom, Args args);
 	
-	
+	public abstract String getApiName();
 	
 	private static String normalize(String rom)
 	{

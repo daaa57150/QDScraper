@@ -57,6 +57,7 @@ public class Console {
 	 */
 	public static void printErr(Exception e) {
 		stopProgress();
+		//System.err.println(e.getClass().getSimpleName());
 		e.printStackTrace(System.err);
 	}
 	

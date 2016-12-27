@@ -103,4 +103,10 @@ public class IGDBApiService extends ApiService {
 		// test git 2?
 	}
 
+
+	/** {@inheritDoc} */
+	@Override
+	public String getApiName() {
+		return "IGDB";
+	}
 }

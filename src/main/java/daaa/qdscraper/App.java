@@ -201,15 +201,10 @@ public class App
 					
 					// ask the services
 					GameCollection games = new GameCollection();
-					try
+					for(ApiService service: apiServices)
 					{
-						for(ApiService service: apiServices)
-						{
+						try {
 							GameCollection apiGames = service.search(rom, args);
-							/*for(Game apiGame: apiGames)
-							{
-								ApiService.setGameScores(apiGame, name, apiGame.getTitle());
-							}*/
 							if(!CollectionUtils.isEmpty(apiGames))
 							{
 								games.addAll(apiGames);
@@ -220,11 +215,10 @@ public class App
 									break; 
 								}
 							}
+						} catch(Exception e) {
+							Console.printErr("Error querying " + service.getApiName() + " for game "+rom.getTranslatedName());
+							Console.printErr(e);
 						}
-					}
-					finally
-					{
-						//ApiService.stopProgress();
 					}
 					
 					
