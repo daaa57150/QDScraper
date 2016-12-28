@@ -470,8 +470,8 @@ public class QDUtils
 	{		
 		if(HTTP_CLIENT == null)
 		{
-			//TODO: add a configurable timeout
-			int timeout = 30000; //ms
+			int timeout = Integer.valueOf(Props.get("http.timeout"));
+			//Console.println("Http timeout set to " + timeout + "ms");
 			
 			PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
 			connManager.setMaxTotal(1);
