@@ -97,7 +97,7 @@ public class IGDBApiService extends ApiService {
 	 * @throws Exception
 	 */
 	@Override
-	public GameCollection search(Rom rom, Args args) 
+	public GameCollection search(Rom rom, Args args) throws Exception
 	{
 		return null; //TODO: implement IGDB
 		// test git 2?

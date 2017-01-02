@@ -359,7 +359,7 @@ public class GiantBombApiService extends ApiService
 	 * @return the first few matches
 	 */
 	@Override
-	public GameCollection search(Rom rom, Args args) 
+	public GameCollection search(Rom rom, Args args) throws Exception
 	{
 		if(args.giantBombApiKey == null)
 		{

@@ -23,4 +23,5 @@ Date: 2016-07-14
 - Better exception catching, now if something bad happens with an API it doesn't stop
 
 ## Unreleased
-- Increased http timeout to 60s
+- Increased http timeout to 90s
+- Better exception management when TheGamesDB is down

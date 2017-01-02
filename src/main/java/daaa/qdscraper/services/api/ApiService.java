@@ -20,8 +20,9 @@ public abstract class ApiService
 	 * @param rom name of the rom to look for (file name)
 	 * @param translatedName the name to use for searches, might be == rom or something else (arcade games)
 	 * @return the list of games found, first match should be the one
+	 * @throws Exception if something bad happens
 	 */
-	public abstract GameCollection search(Rom rom, Args args);
+	public abstract GameCollection search(Rom rom, Args args) throws Exception;
 	
 	public abstract String getApiName();
 	

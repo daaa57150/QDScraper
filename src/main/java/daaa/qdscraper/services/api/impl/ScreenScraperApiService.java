@@ -349,7 +349,7 @@ public class ScreenScraperApiService extends ApiService
 	 * @throws Exception
 	 */
 	@Override
-	public GameCollection search(Rom rom, Args args) 
+	public GameCollection search(Rom rom, Args args) throws Exception
 	{
 		//super.startProgress();
 		

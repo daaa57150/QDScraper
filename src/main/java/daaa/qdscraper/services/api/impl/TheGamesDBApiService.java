@@ -249,6 +249,11 @@ public class TheGamesDBApiService extends ApiService
 		return games;
 	}
 	
+	private void onApiDown() {
+		Console.println("TheGamesDB is down (happens regularly), waiting a minute...");
+		QDUtils.sleep(60000, "TheGamesDB is down (happens regularly)");
+	}
+	
 	/**
 	 * Searches TheGamesDB
 	 * @param rom name of the rom to look for (file name)
@@ -257,7 +262,7 @@ public class TheGamesDBApiService extends ApiService
 	 * @throws Exception
 	 */
 	@Override
-	public GameCollection search(Rom rom, Args args) 
+	public GameCollection search(Rom rom, Args args) throws Exception 
 	{	
 		// will contain our matches
 		GameCollection games = new GameCollection();
@@ -276,36 +281,38 @@ public class TheGamesDBApiService extends ApiService
 			// search
 			for(String wantedPlatform: wantedPlatforms)
 			{
-				try
+				// I got this once, add a 1 minute wait :
+				/*
+				 	<?xml version="1.0" encoding="UTF-8" ?>
+					Could not connect: Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (2)
+				*/
+				
+				int maxTries = 3;
+				for(int currentTry = 0; currentTry < maxTries; currentTry ++)
 				{
-					// I got this once, add a 1 minute wait :
-					/*
-					 	<?xml version="1.0" encoding="UTF-8" ?>
-						Could not connect: Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (2)
-					*/
-					
-					int maxTries = 3;
-					for(int currentTry = 0; currentTry < maxTries; currentTry ++)
-					{
+					try {
 						xml = searchXml(cleanName, wantedPlatform, args); 
 						
 						if(xml == null || xml.substring(0, Math.min(140, xml.length()-1)).contains("Could not connect")) {
-							Console.println("TheGamesDB is down (happens regularly), waiting a minute...");
-							QDUtils.sleep(60000, "TheGamesDB is down (happens regularly)");
+							onApiDown();
 						}
 						else
 						{
 							break; //we're good
 						}
+					} 
+					catch(IOException | URISyntaxException e)
+					{
+						if(currentTry == maxTries - 1) {
+							Console.printErr("TheGamesDB is down for good, try later?");
+							Console.printErr(e);
+							throw e;
+						} else {
+							onApiDown();
+						}
 					}
-					
 				}
-				catch(IOException | URISyntaxException e)
-				{
-					Console.printErr("This error should not happen...");
-					Console.printErr(e);
-					System.exit(11);
-				}
+				
 
 				try
 				{
