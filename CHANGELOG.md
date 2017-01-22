@@ -25,3 +25,6 @@ Date: 2016-07-14
 ## Unreleased
 - Increased http timeout to 90s
 - Better exception management when TheGamesDB is down
+- The games db changed the turbografx cd alias
+
+
