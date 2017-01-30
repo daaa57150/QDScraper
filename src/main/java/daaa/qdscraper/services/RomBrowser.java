@@ -111,7 +111,7 @@ public class RomBrowser {
 	   	// remove extensions we know are not roms and may be there
 	   	String[] extensions = {
 	   		// common files
-	   		"xml","txt","jpg","png","gif","htm","html","doc","docx","ini","xls","dat",
+	   		"xml","txt","jpg","png","gif","htm","html","doc","docx","ini","xls","dat","rar","7z","s7z","tar","gz",
 	   		// built by fba
 	   		"nv","fs"
 	   	};
