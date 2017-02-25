@@ -7,8 +7,6 @@ import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.icu.text.Normalizer2;
@@ -16,6 +14,7 @@ import com.ibm.icu.text.Normalizer2;
 import daaa.qdscraper.services.api.ApiService;
 import daaa.qdscraper.utils.CryptoUtils;
 import daaa.qdscraper.utils.RomCleaner;
+import junit.framework.TestCase;
 
 /**
  * Some random tests
@@ -115,6 +114,11 @@ public class MultiTest extends TestCase {
 		String decrypted = CryptoUtils.decrypt(crypted);
 		assertEquals(toEncrypt, decrypted);
 	}
+	
+//	public static void testSSL() {
+////		String url = "https://www.screenscraper.fr/api/jeuInfos.php?devid=daaa&devpassword=AScaredAnonZee&softname=QDScraper&output=xml&romtype=rom&systemeid=105&md5=220b172a4b2d029d352b16299210b369"
+////		QDUtils.httpGet(args, url)
+//	}
 }
 
 

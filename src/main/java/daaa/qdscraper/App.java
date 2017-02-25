@@ -23,7 +23,6 @@ import daaa.qdscraper.services.Console;
 import daaa.qdscraper.services.RomBrowser;
 import daaa.qdscraper.services.api.ApiService;
 import daaa.qdscraper.services.api.impl.GiantBombApiService;
-import daaa.qdscraper.services.api.impl.ScreenScraperApiService;
 import daaa.qdscraper.services.api.impl.TheGamesDBApiService;
 import daaa.qdscraper.utils.QDUtils;
 import daaa.qdscraper.utils.RomCleaner;
@@ -145,7 +144,8 @@ public class App
 		// screenscraper last because:
 		// - they mainly have png covers (big files)
 		// - regularly their english decription is truncated
-		apiServices.add(new ScreenScraperApiService());
+		//apiServices.add(new ScreenScraperApiService());
+		// TODO: reactivate once I my credentials are OK again
 		
 		Console.println();
 		List<Rom> roms = findRoms(args);

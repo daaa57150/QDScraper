@@ -12,11 +12,17 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 import javax.imageio.ImageIO;
+import javax.net.ssl.SSLContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -44,10 +50,13 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.config.SocketConfig;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContexts;
+import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.imgscalr.Scalr;
@@ -441,7 +450,7 @@ public class QDUtils
 			String message = "Need to sleep " + ms + "ms";
 			if(!StringUtils.isEmpty(cause))
 			{
-				message = ", cause: " + cause;
+				message = message+", cause: " + cause;
 			}
 			Console.println(message);
 			Thread.sleep(ms);
@@ -504,6 +513,26 @@ public class QDUtils
 				CredentialsProvider credsProvider = new BasicCredentialsProvider();
 				credsProvider.setCredentials(authScope, credentials);
 				builder.setDefaultCredentialsProvider(credsProvider);
+			}
+			
+			// ssl
+			try {
+				SSLContext sslcontext = SSLContexts.custom()
+						//.useTLS()
+				        .loadTrustMaterial(null, new TrustStrategy()
+				        {
+							@Override
+							public boolean isTrusted(X509Certificate[] chain, String authType)
+									throws CertificateException {
+								return true;
+							}
+				        })
+				        .build();
+				builder.setSSLContext(sslcontext);
+				builder.setSSLHostnameVerifier(new NoopHostnameVerifier());
+			} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
+				Console.printErr("Error configuring SSL: "+e.getMessage());
+				Console.printErr(e);
 			}
 			
 			// giantbomb wants a user agent absolutely

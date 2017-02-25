@@ -34,13 +34,15 @@ public class RomCleaner
 	 */
 	private static final Pattern BETWEEN_PARENTHESES = Pattern.compile("\\([^\\)]*\\)");
 	private static final Pattern BETWEEN_BRACKETS = Pattern.compile("\\[[^\\]]*\\]");
-	private static final Pattern SPECIAL_CHARS = Pattern.compile("[-!:,;.%?_']");
+	private static final Pattern SPECIAL_CHARS = Pattern.compile("[-!:,;.%?']");
 	public static String cleanRomName(String rom, boolean hard)
 	{
 		String cleanRom = rom;
 		cleanRom = BETWEEN_PARENTHESES.matcher(cleanRom).replaceAll("");
 		cleanRom = BETWEEN_BRACKETS.matcher(cleanRom).replaceAll("");
 		cleanRom = removeExtension(cleanRom);
+		cleanRom = cleanRom.replaceAll("_", " ");
+		cleanRom = cleanRom.replaceAll("\\s+", " ");
 		
 		if(hard)
 		{
