@@ -29,4 +29,12 @@ Date: 2016-07-14
 - Enabled SSL for ScreenScraper (and got back my account)
 - Better rom name cleaning
 
+## TODO:
+- Add user/password for screenscraper
+http://www.screenzone.fr/forum/viewtopic.php?f=434&t=709&p=8418#p8418
+URL: ssid=xxx&sspassword=yyy
+
+
+
+
 
