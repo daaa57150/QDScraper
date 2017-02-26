@@ -22,7 +22,7 @@ Date: 2016-07-14
 - Bugfix for ScreenScraper who likes to put "N/A" on ratings making it unparseable as a number
 - Better exception catching, now if something bad happens with an API it doesn't stop
 
-## Unreleased
+## Version 0.5
 - Increased http timeout to 90s
 - Better exception management when TheGamesDB is down
 - The games db changed the turbografx cd alias
