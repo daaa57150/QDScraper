@@ -12,17 +12,17 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 import javax.imageio.ImageIO;
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -49,14 +49,9 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.config.SocketConfig;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.ssl.SSLContexts;
-import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.imgscalr.Scalr;
@@ -479,26 +474,15 @@ public class QDUtils
 	{		
 		if(HTTP_CLIENT == null)
 		{
-			int timeout = Integer.valueOf(Props.get("http.timeout"));
-			//Console.println("Http timeout set to " + timeout + "ms");
+			HttpClientBuilder builder = HttpClients.custom();
 			
-			PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
-			connManager.setMaxTotal(1);
-			connManager.setDefaultMaxPerRoute(1);
-			SocketConfig sc = SocketConfig.custom()
-				    .setSoTimeout(timeout)
-				    .build();
-
-			connManager.setDefaultSocketConfig(sc);
+			int timeout = Integer.valueOf(Props.get("http.timeout"));
 
 			// configure the timeouts (socket and connection) for the request
 			RequestConfig.Builder config = RequestConfig.copy(RequestConfig.DEFAULT);
 			config.setConnectionRequestTimeout(timeout);
 			config.setSocketTimeout(timeout);
-			
-			HttpClientBuilder builder = HttpClients.custom()
-					.setConnectionManager(connManager)
-		            .setConnectionManagerShared(false);
+			builder.setDefaultRequestConfig(config.build());
 			
 			if(!StringUtils.isEmpty(args.proxyHost))
 			{
@@ -517,34 +501,54 @@ public class QDUtils
 			
 			// ssl
 			try {
-				SSLContext sslcontext = SSLContexts.custom()
-						//.useTLS()
-				        .loadTrustMaterial(null, new TrustStrategy()
-				        {
-							@Override
-							public boolean isTrusted(X509Certificate[] chain, String authType)
-									throws CertificateException {
-								return true;
-							}
-				        })
-				        .build();
-				builder.setSSLContext(sslcontext);
-				builder.setSSLHostnameVerifier(new NoopHostnameVerifier());
-			} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
+				/*
+			     *  fix for
+			     *    Exception in thread "main" javax.net.ssl.SSLHandshakeException:
+			     *       sun.security.validator.ValidatorException:
+			     *           PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException:
+			     *               unable to find valid certification path to requested target
+			     */
+			    TrustManager[] trustAllCerts = new TrustManager[] {
+			       new X509TrustManager() {
+			          public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+			            return null;
+			          }
+
+			          public void checkClientTrusted(X509Certificate[] certs, String authType) {  }
+
+			          public void checkServerTrusted(X509Certificate[] certs, String authType) {  }
+
+			       }
+			    };
+
+			    SSLContext sslc = SSLContext.getInstance("SSL");
+			    sslc.init(null, trustAllCerts, new java.security.SecureRandom());
+			    //HttpsURLConnection.setDefaultSSLSocketFactory(sslc.getSocketFactory());
+
+			    // Create all-trusting host name verifier
+			    HostnameVerifier allHostsValid = new HostnameVerifier() {
+			        public boolean verify(String hostname, SSLSession session) {
+			          return true;
+			        }
+			    };
+			    // Install the all-trusting host verifier
+			    //HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+			    /*
+			     * end of the fix
+			     */
+
+
+			    builder.setSSLContext(sslc);
+				builder.setSSLHostnameVerifier(allHostsValid);
+			    
+				
+			} catch (Exception e) {
 				Console.printErr("Error configuring SSL: "+e.getMessage());
 				Console.printErr(e);
-			}
+			} 
 			
 			// giantbomb wants a user agent absolutely
 			builder.setUserAgent(Props.get("http.user-agent")); // "https://github.com/daaa57150/QDScraper"
-			
-//			RequestConfig config = RequestConfig.custom()
-//				    .setSocketTimeout(30 * 1000)
-//				    .setConnectTimeout(30 * 1000)
-//				    .build();
-//			builder.setDefaultRequestConfig(config);
-			
-			
 			
 			HTTP_CLIENT = builder.build();
 			

@@ -2,17 +2,23 @@ package daaa.QDScraper.services;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.ClientProtocolException;
 
 import com.ibm.icu.text.Normalizer2;
 
+import daaa.qdscraper.Args;
 import daaa.qdscraper.services.api.ApiService;
 import daaa.qdscraper.utils.CryptoUtils;
+import daaa.qdscraper.utils.QDUtils;
+import daaa.qdscraper.utils.QDUtils.HttpAnswer;
 import daaa.qdscraper.utils.RomCleaner;
 import junit.framework.TestCase;
 
@@ -115,10 +121,59 @@ public class MultiTest extends TestCase {
 		assertEquals(toEncrypt, decrypted);
 	}
 	
-//	public static void testSSL() {
-////		String url = "https://www.screenscraper.fr/api/jeuInfos.php?devid=daaa&devpassword=AScaredAnonZee&softname=QDScraper&output=xml&romtype=rom&systemeid=105&md5=220b172a4b2d029d352b16299210b369"
-////		QDUtils.httpGet(args, url)
-//	}
+	public static void testSSL() throws ClientProtocolException, IOException, NoSuchAlgorithmException, KeyManagementException {
+		String ss = "https://www.screenscraper.fr/api/jeuInfos.php?devid=daaa&devpassword=AScaredAnonZee&softname=QDScraper&output=xml&romtype=rom&systemeid=105&md5=220b172a4b2d029d352b16299210b369";
+		Args args = new Args(new String[]{"-dir=plop", "-platform=snes"});
+		HttpAnswer answer = QDUtils.httpGet(args, ss);
+		System.out.println(answer);
+		
+//		/*
+//	     *  fix for
+//	     *    Exception in thread "main" javax.net.ssl.SSLHandshakeException:
+//	     *       sun.security.validator.ValidatorException:
+//	     *           PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException:
+//	     *               unable to find valid certification path to requested target
+//	     */
+//	    TrustManager[] trustAllCerts = new TrustManager[] {
+//	       new X509TrustManager() {
+//	          public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+//	            return null;
+//	          }
+//
+//	          public void checkClientTrusted(X509Certificate[] certs, String authType) {  }
+//
+//	          public void checkServerTrusted(X509Certificate[] certs, String authType) {  }
+//
+//	       }
+//	    };
+//
+//	    SSLContext sc = SSLContext.getInstance("SSL");
+//	    sc.init(null, trustAllCerts, new java.security.SecureRandom());
+//	    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+//
+//	    // Create all-trusting host name verifier
+//	    HostnameVerifier allHostsValid = new HostnameVerifier() {
+//	        public boolean verify(String hostname, SSLSession session) {
+//	          return true;
+//	        }
+//	    };
+//	    // Install the all-trusting host verifier
+//	    HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+//	    /*
+//	     * end of the fix
+//	     */
+//	    
+//	    URL url = new URL(ss);
+//	    URLConnection con = url.openConnection();
+//	    Reader reader = new InputStreamReader(con.getInputStream());
+//	    while (true) {
+//	      int ch = reader.read();
+//	      if (ch==-1) {
+//	        break;
+//	      }
+//	      System.out.print((char)ch);
+//	    }
+	}
 }
 
 
