@@ -349,15 +349,9 @@ public class QDUtils
 		InputSource source = new InputSource(new StringReader(xml));
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db;
-		//try {
-			db = dbf.newDocumentBuilder();
-			Document document = db.parse(source);
-			return document;
-		/*} catch (ParserConfigurationException | SAXException | IOException e) {
-			Console.printErr(e);
-			System.exit(10);
-		}*/
-		//return null;
+		db = dbf.newDocumentBuilder();
+		Document document = db.parse(source);
+		return document;
 	}
 	
 	
